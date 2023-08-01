@@ -180,8 +180,8 @@ class Nucleotide(Sequence):
         Generate a random nucleotide sequence.
         :param name: Name of random nucleotide sequence. {type: str}
         :param length: Length of random nucleotide sequence. {type: int, list, or tuple; default: (100, 1000)}
-        :param bias: Base preference. {type: float, list, or tuple; default: 1}
-        :return: Nucleotide class.
+        :param bias: Base preference. {type: float, 4-list, or 4-tuple; default: 1}
+        :return: Nucleotide class instance.
         """
         import random
         if name is None:
@@ -226,6 +226,7 @@ class Nucleotide(Sequence):
             return A, G, C, T, summary
 
     def translation(self, complete: bool = True):
+        """Translate nucleotide sequence to peptide chain."""
         peptide_chain = []
         append = peptide_chain.append
         for i in range(0, len(self), 3):

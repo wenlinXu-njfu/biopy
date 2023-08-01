@@ -18,5 +18,5 @@ pfamscan for batch perform pfamscan.
 ## Getting started
 git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git
 python biopy_v1.1.0/configure.py
-export PYTHONPATH=$PATH:/home/user/software/biopy_v1.0.0
-export PATH=$PATH:/home/user/software/biopy_v1.0.0/bin
+export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0
+export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin
