@@ -1,6 +1,5 @@
 from os import system, listdir, remove
 from os.path import abspath, isfile
-from shutil import rmtree
 
 path = abspath(__file__).replace(__file__, '')
 system(command=f"sed -i 's/\r//' {path}/bin/*")
