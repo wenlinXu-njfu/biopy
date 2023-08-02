@@ -35,7 +35,7 @@ def main(in_file, char_num, out_file):
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA file.')
 @click.option('-n', '--char_num', 'char_num', type=int, default=60,
-              help='Specify how many character show in per line, 0 presents one line show per sequence. {default=60}')
+              help='Specify how many character show in per line, 0 presents one line show per sequence. {default: 60}')
 @click.option('-o', '--output_file', 'outfile',
               help='[optional] Output file, if not specified, print results to terminal as stdout.')
 def run(fasta_file, char_num, outfile):
