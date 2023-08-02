@@ -1,7 +1,7 @@
 from os import system, listdir, remove
-from os.path import abspath, isfile
+from os.path import dirname, isfile
 
-path = abspath(__file__).replace(__file__, '')
+path = dirname(__file__)
 system(command=f"sed -i 's/\r//' {path}/bin/*")
 system(command=f"chmod u+x {path}/bin/*")
 system(command=f"python {path}/bin/batch_rename.py -d {path}/bin -old .py")
