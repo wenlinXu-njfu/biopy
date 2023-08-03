@@ -11,8 +11,12 @@ from Biolib.gff import Gff
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def judge_distance_location(lncRNA_start: int, lncRNA_end: int, lncRNA_strand: str,
-                            gene_start: int, gene_end: int, gene_strand: str) -> tuple:
+def judge_distance_location(lncRNA_start: int,
+                            lncRNA_end: int,
+                            lncRNA_strand: str,
+                            gene_start: int,
+                            gene_end: int,
+                            gene_strand: str) -> tuple:
     """
     According to the position relationship between lncRNA and target gene, the type of lncRNA was determined.
     :param lncRNA_start: lncRNA start site on chromosome (type=int)
@@ -64,7 +68,11 @@ def judge_distance_location(lncRNA_start: int, lncRNA_end: int, lncRNA_strand: s
             return gene_end - gene_start, 'overlap', 'antisense'
 
 
-def lncRNA_target_gene_prediction(gtf_file, gff_file, feature, target_range: int, out_file=None):
+def lncRNA_target_gene_prediction(gtf_file: str,
+                                  gff_file: str,
+                                  feature: str,
+                                  target_range: int,
+                                  out_file: str = None):
     """
     LncRNA target genes were predicted according to lncRNA annotation files (GTF) and gene annotation files (GFF).
     :param gtf_file: lncRNA annotation files(GTF)
