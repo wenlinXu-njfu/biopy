@@ -5,7 +5,7 @@ Date: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, List, Dict
+from typing import Union, List, Dict, Tuple
 from re import findall
 from click import echo, Choice
 from numpy import NaN
@@ -15,8 +15,12 @@ from Biolib.sequence import Nucleotide
 
 
 class Gff:
-    def __init__(self, path: str):
+    def __init__(self, path: str, name: str = None):
         self.path = path
+        if name is None:
+            self.name = path.split('/')[-1]
+        else:
+            self.name = name
         self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
 
 # Basic method==========================================================================================================
@@ -48,15 +52,23 @@ class Gff:
                 index += 1
         return df
 
+    def check_feature(self, feature: str) -> Tuple[bool, str]:
+        """Check whether specified feature is included in GFF file."""
+        features = set(line[2] for line in self.parse())
+        if feature in features:
+            return True, f'"{feature}" is included in {self.name}.'
+        else:
+            return False, f'"{feature}" is not included in {self.name}.'
+
     def get_gff_dict(self, feature_type: str = None) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         """Save the feature information in the GFF file into the dictionary."""
         # gff_dict = {
         #             Chr_num: [{id: str, start: int, end: int, strand: str}, {}, ...],
         #             Chr_num: [{}, {}, ...], ...
         #             }
-        feature_set = set(line[2] for line in self.parse())
-        if feature_type not in feature_set:
-            echo(f'\033[31mError: {feature_type} is not included in {self.path}.\033[0m', err=True)
+        is_in_gff, msg = self.check_feature(feature_type)
+        if not is_in_gff:
+            echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
         gff_dict = {}
         for line in self.parse():
@@ -151,9 +163,13 @@ class Gff:
 
 # Sequence extraction method============================================================================================
     def gff_extract_seq(self, fasta_file: str,
-                        feature_type: Choice(['gene', 'mRNA', 'exon', 'five_prime_UTR', 'CDS', 'three_prime_UTR']) = 'gene',
+                        feature_type: str = 'gene',
                         feature_id_list: list = None) -> Nucleotide:
         """Extract sequences of specified feature type from GFF file."""
+        is_in_gff, msg = self.check_feature(feature_type)
+        if not is_in_gff:
+            echo(f'\033[31mError: {msg}\033[0m', err=True)
+            exit()
         gff_dict = self.get_gff_dict(feature_type)
         for nucl_obj in Fasta(fasta_file).parse():
             try:
@@ -267,11 +283,11 @@ class Gff:
                 if line[8]['Parent'] == transcript_id:
                     line[3] = str(int(line[3]) - transcript_start)
                     line[4] = (int(line[4]) - transcript_start)
-                    content.append(f"{transcript_id}\t{line[3]}\t{line[4]}\t{line[2]}\t{line[7]}")
+                    content.append(f"{transcript_id}\t{line[3]}\t{line[4]}\t{line[2]}\t{line[7]}\n")
                 else:
                     echo(f'\033[33mWarning: The order of GFF file is wrong, '
                                f'this will cause some information to be lost.\033[0m', err=True)
-        content = '\n'.join(content) + '\n'
+        content = ''.join(content)
         return content
 
 # Feature density count=================================================================================================
@@ -280,7 +296,11 @@ class Gff:
                             feature_type: str = 'gene',
                             span: int = 100000) -> str:
         """Get feature density."""
-        if min(list(chr_len_dict.values())) / span < 1:
+        is_in_gff, msg = self.check_feature(feature_type)
+        if not is_in_gff:
+            echo(f'\033[31mError: {msg}\033[0m', err=True)
+            exit()
+        elif min(list(chr_len_dict.values())) / span < 1:
             echo('\033[33mError: Density statistical interval is too large.\033[0m', err=True)
             exit()
         skip_rows = sum(1 for line in open(self.path) if line.startswith('#'))
