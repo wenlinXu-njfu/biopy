@@ -54,6 +54,10 @@ class Gff:
         #             Chr_num: [{id: str, start: int, end: int, strand: str}, {}, ...],
         #             Chr_num: [{}, {}, ...], ...
         #             }
+        feature_set = set(line[2] for line in self.parse())
+        if feature_type not in feature_set:
+            echo(f'\033[31mError: {feature_type} is not included in {self.path}.\033[0m', err=True)
+            exit()
         gff_dict = {}
         for line in self.parse():
             if line[2] == feature_type or feature_type is None:
@@ -271,7 +275,11 @@ class Gff:
         return content
 
 # Feature density count=================================================================================================
-    def get_feature_density(self, chr_len_dict: Dict[str, int], feature_type: str = 'gene', span: int = 100000) -> str:
+    def get_feature_density(self,
+                            chr_len_dict: Dict[str, int],
+                            feature_type: str = 'gene',
+                            span: int = 100000) -> str:
+        """Get feature density."""
         if min(list(chr_len_dict.values())) / span < 1:
             echo('\033[33mError: Density statistical interval is too large.\033[0m', err=True)
             exit()
