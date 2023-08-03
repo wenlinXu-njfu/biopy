@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.gff import Gff
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def judge_distance_location(lncRNA_start: int,
@@ -122,7 +121,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
             o.write(''.join(content))
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-g', '--gtf_file', 'gtf', help='LncRNA annotation file (format: GTF)')
 @click.option('-a', '--gff_file', 'gff', help='Reference annotation file (format: GFF)')
 @click.option('-f', '--feature_type', 'feature_type', default='mRNA', help='Feature type. {default: mRNA}')

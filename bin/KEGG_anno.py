@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
 import click
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(keg_file, out_file):
@@ -50,10 +49,10 @@ def main(keg_file, out_file):
             o.write(content)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('-i', '--htext_file', 'htext_file', help='Input kegg file. (format=htext)')
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('-i', '--htext_file', 'htext_file', help='Input kegg file. (format: htext)')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file (eg. pop7465650\tK18835\tWRKY transcription factor 2\tko04626\tPlant-pathogen interaction), '
+              help='Output file (eg. pop7465650\tK18835\tWRKY transcription factor 2\tko04626\tPlant-pathogen interaction), '
                    'if not specified, print results to terminal as stdout.')
 def run(htext_file, outfile):
     """Preprocess xxx00001.keg file"""

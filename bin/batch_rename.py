@@ -9,7 +9,6 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import listdir, rename
 from re import sub
 import click
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(in_dir, old, new):
@@ -22,7 +21,7 @@ def main(in_dir, old, new):
         rename(f'{in_dir}/{file}', f'{in_dir}/{s}')
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-d', '--input_dir_path', 'input_dir', help='The directory where the file to be renamed resides.')
 @click.option('-old', '--old_name', 'old', help='The string to be replaced, it supports for regular expressions')
 @click.option('-new', '--new_name', 'new', help='Replacement string, it supports for regular expressions')

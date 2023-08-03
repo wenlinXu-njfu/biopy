@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.fasta import Fasta
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(fasta_file, motif, log_file, out_file):
@@ -28,13 +27,12 @@ def main(fasta_file, motif, log_file, out_file):
         print(content)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA file.')
 @click.option('-m', '--motif', 'motif', help='Specify motif sequence, support for regular expressions.')
-@click.option('-l', '--log_file', 'log_file', help='[optional] Output log file, '
-                                                   'if not specified, print log to terminal as stderr.')
+@click.option('-l', '--log_file', 'log_file', help='Output log file, if not specified, print log to terminal as stderr.')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file (seq_id\\tstart\\tend\\tmotif), '
+              help='Output file (Seq_id\\tStart\\tEnd\\tMotif), '
                    'if not specified, print results to terminal as stdout.')
 def run(fasta_file, motif, log_file, outfile):
     """Find the motif in the sequence."""

@@ -13,10 +13,9 @@ from plot_lib.plot_heatmap import run as run3
 from plot_lib.plot_cluster_heatmap import run as run4
 from plot_lib.plot_gene_structure import run as run5
 from plot_lib.plot_circos import run as run6
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def plot():
     """
     Program: Plot tools\n

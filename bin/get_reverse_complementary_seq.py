@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.fasta import Fasta
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(in_file, out_file):
@@ -24,10 +23,10 @@ def main(in_file, out_file):
             o.write(content)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA sequence file.')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, if not specified, print results to terminal as stdout.')
 def run(fasta_file, outfile):
     """Get reverse complementary sequence."""
     main(fasta_file, outfile)

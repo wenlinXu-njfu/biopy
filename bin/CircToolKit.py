@@ -15,10 +15,9 @@ from circ_tool_kit_lib.repeat_seq_analysis import run as run5
 from circ_tool_kit_lib.alternative_cyclization_analysis import run as run6
 from circ_tool_kit_lib.circular_translation import run as run7
 from circ_tool_kit_lib.ceRNA_identification import run as run8
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def CircToolKit():
     """
     Program: CircRNAs analysis tools\n

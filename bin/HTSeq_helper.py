@@ -9,10 +9,9 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from software_tool_lib.HTseq.get_FPKM import run as run1
 from software_tool_lib.HTseq.get_TPM import run as run2
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def HTSeq_helper():
     """Standardize gene expression with FPKM or TPM based on HTSeq results."""
     pass

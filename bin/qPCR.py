@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f_oneway
 import matplotlib.pyplot as plt
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: str, figsize: Tuple[float, float]):
@@ -152,13 +151,13 @@ def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: s
     plt.savefig(f'{out_file}.pdf', bbox_inches='tight')
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--input_file', 'input_file', help='Input qPCR result excel file.')
 @click.option('-r', '--ref_name', 'ref_name',
               help='Specify reference gene name. Multiple reference genes are separated by commas. (eg. 18s,ef1)')
 @click.option('-c', '--control_name', 'control_name', help='Specify name of control sample.')
-@click.option('-f', '--figure_size', 'figure_size', default='10x10',
-              help='[optional] Specify figure size. {default=10x10}')
+@click.option('-f', '--figure_size', 'figure_size', default='10x10', show_default=True,
+              help='[optional] Specify figure size.')
 @click.option('-o', '--output_file_prefix', 'out_prefix', help='Prefix of output file.')
 def run(input_file, ref_name, control_name, figure_size, out_prefix):
     """Calculate relative expression based on qPCR results."""

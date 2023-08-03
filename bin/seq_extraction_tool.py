@@ -14,10 +14,9 @@ from seq_extraction_lib.gff_extract_seq import run as run4
 from seq_extraction_lib.extract_miRNA import run as run5
 from circ_tool_kit_lib.extract_circRNA import run as run6
 from seq_extraction_lib.KEGG import run as run7
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def seq_extraction_tool():
     """
     Program: Sequence extraction tool\n

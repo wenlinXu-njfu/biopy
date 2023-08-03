@@ -13,10 +13,9 @@ from file_format_conversion_lib.gff2bed import run as run3
 from file_format_conversion_lib.gtf2bed import run as run4
 from file_format_conversion_lib.fasta_conversion import run as run5
 from file_format_conversion_lib.fq2fa import run as run6
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def file_format_conversion():
     """
     Program: File format conversion tool\n

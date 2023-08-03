@@ -8,12 +8,9 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.fasta import Fasta
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def main(fa_file, parse_seqids: click.Choice(['yes', 'no']), out_file):
-    d = {'yes': True, 'no': False}
-    parse_seqids = d[parse_seqids]
+def main(fa_file, parse_seqids: bool, out_file):
     content = ''
     for nucl_obj in Fasta(fa_file).parse(parse_seqids):
         if out_file:
@@ -25,12 +22,11 @@ def main(fa_file, parse_seqids: click.Choice(['yes', 'no']), out_file):
             o.write(content)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA file.')
-@click.option('-p', '--parse_seqids', 'parse_seqids', type=click.Choice(['yes', 'no']), default='yes',
-              help='[optional] Specify whether parse sequence IDs. {default: yes}')
+@click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id.')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file(seq_id\\tseq_len\\n), if not specified, print results to terminal as stdout.')
+              help='Output file(seq_id\\tseq_len\\n), if not specified, print results to terminal as stdout.')
 def run(fasta_file, parse_seqids, outfile):
     """Get each sequence length of FASTA file"""
     main(fasta_file, parse_seqids, outfile)

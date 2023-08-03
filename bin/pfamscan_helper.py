@@ -8,10 +8,9 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from software_tool_lib.PfamScan.batch_pfamscan import run as run1
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def pfamscan_helper():
     """PfamScan helper."""
     pass

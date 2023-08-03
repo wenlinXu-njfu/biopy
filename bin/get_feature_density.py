@@ -8,10 +8,9 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.gff import Gff
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
-def main(chr_len_file, gff_file, feature, span, out_file):
+def main(chr_len_file, gff_file, feature, span: int, out_file):
     chr_len_dict = {line.split('\t')[0]: int(line.strip().split('\t')[1]) for line in open(chr_len_file)}
     content = Gff(gff_file).get_feature_density(chr_len_dict, feature, span)
     if out_file:
@@ -21,14 +20,13 @@ def main(chr_len_file, gff_file, feature, span, out_file):
         print(content)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-l', '--chr_len_file', 'chr_len_file', help='Input chromosome length file. (Chr_num\\tLength\\n)')
-@click.option('-a', '--annotation_file', 'anno', help='Input GFF or GTF file.')
+@click.option('-a', '--anno_file', 'anno', help='Input GFF or GTF file.')
 @click.option('-f', '--feature_type', 'feature_type', help='Specify feature type. (eg. exon)')
-@click.option('-s', '--span', 'span', type=int, default=100000,
-              help='[optional] Specify density statistical span. {default: 100000}')
+@click.option('-s', '--span', 'span', type=int, default=100000, show_default=True, help='Density statistical span.')
 @click.option('-o', '--output_file', 'out',
-              help='[optional] Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, if not specified, print results to terminal as stdout.')
 def run(chr_len_file, anno, feature_type, span, out):
     """Get feature density from GFF file."""
     main(chr_len_file, anno, feature_type, span, out)

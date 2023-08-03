@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from scipy.stats import pearsonr
 from Biolib.statistics import *
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(exp_matrix_file, out_prefix):
@@ -41,16 +40,16 @@ def main(exp_matrix_file, out_prefix):
         df.columns.name = None
         df = df.corr()
         if out_prefix:
-            df.to_excel(f'./{out_prefix}.xlsx')
+            df.to_csv(f'./{out_prefix}.csv')
         else:
             print(df)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--input_file', 'input_file',
               help='Input gene expression matrix file (including header). Supported formats: txt, xls, xlsx, csv')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file prefix, if not specified, print results to terminal as stdout.')
+              help='Output file prefix, if not specified, print results to terminal as stdout.')
 def run(input_file, outfile):
     """Calculation of Pearson correlation coefficient from gene expression."""
     main(input_file, outfile)

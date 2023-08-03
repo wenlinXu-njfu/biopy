@@ -8,7 +8,6 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib.statistics import read_in_gene_expression_as_dataframe
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(exp_file, out_file_prefix):
@@ -26,7 +25,7 @@ def main(exp_file, out_file_prefix):
     gene_exp_matrix.to_csv(f'./{out_file_prefix}.csv')
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--expression_file', 'expression_file',
               help='Input gene expression profile file. (support format: txt, xls, xlsx, csv)')
 @click.option('-o', '--output_file', 'outfile', help='Output file prefix.')

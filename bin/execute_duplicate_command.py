@@ -9,19 +9,19 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import system
 from datetime import datetime
 import click
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def main(file):
-    for line in open(file):
+    for line in file:
         if not line.strip():
             continue
         click.echo(f"\033[1m[{datetime.now().replace(microsecond=0)}]\033[0m {line.strip()}", err=True)
         system(command=line.strip())
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('-f', '--command_file', 'f', help='Input file including command (one command per line).')
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('-f', '--command_file', 'f', type=click.File('r'),
+              help='Input file including command (one command per line).')
 def run(f):
     """Execute commands in a file line by line."""
     main(f)

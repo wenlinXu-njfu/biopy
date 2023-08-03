@@ -11,7 +11,11 @@ from os.path import exists
 import click
 
 
-def file_split(in_file: str, sub_file_line_num: int, out_dir: str, header: bool = True, header_line_num: int = 1):
+def file_split(in_file: str,
+               sub_file_line_num: int,
+               out_dir: str,
+               header: bool = True,
+               header_line_num: int = 1):
     if not exists(out_dir):
         mkdir(out_dir)
     line_num = sum(1 for _ in open(in_file))
