@@ -9,7 +9,6 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import mkdir
 from os.path import exists
 import click
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 
 def file_split(in_file: str, sub_file_line_num: int, out_dir: str, header: bool = True, header_line_num: int = 1):
@@ -53,18 +52,18 @@ def file_split(in_file: str, sub_file_line_num: int, out_dir: str, header: bool 
                 subfile_num += 1
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('-i', '--input_file', 'i', help='Input file.')
-@click.option('-n', '--line_num', 'n', type=int, help='The line num of each sub file, not including header.')
-@click.option('-header/-no_header', default=True,
-              help='[optional] If header, each sub file contains a header. {default: header}')
-@click.option('-N', '--header_num', 'N', type=int, default=1,
-              help='[optional] If header specified, specify the number of header line. {default: 1}')
-@click.option('-o', '--output_dir', 'o',
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('-i', '--input_file', 'input_file', help='Input file.')
+@click.option('-n', '--line_num', 'line_num', type=int, help='The line num of each sub file, not including header.')
+@click.option('-H', '--header', is_flag=True, flag_value=True,
+              help='If specified header, each sub file will contain header content.')
+@click.option('-N', '--header_num', 'header_num', type=int, default=1, show_default=True,
+              help='If header specified, specify the number of header line.')
+@click.option('-o', '--output_dir', 'output_dir',
               help='Output directory, if not exists, it will be created automatically.')
-def run(i, n, header, N, o):
+def run(input_file, line_num, header, header_num, output_dir):
     """Divide a large file into several smaller files."""
-    file_split(i, n, o, header, N)
+    file_split(input_file, line_num, output_dir, header, header_num)
 
 
 if __name__ == '__main__':
