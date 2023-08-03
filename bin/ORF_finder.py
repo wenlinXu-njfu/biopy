@@ -52,14 +52,14 @@ def main(fa_file, parse_seqids: click.Choice(['yes', 'no']), min_len, complete,
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('-i', '--fasta_file', 'fasta_file', help='Input nucleotide sequence file. (format=FASTA)')
-@click.option('-p', '-parse_seqids', 'parse_seqids', type=click.Choice(['yes', 'no']), default='yes',
-              help='[optional] Specify whether parse sequences IDs. {default=yes}')
-@click.option('-L', '--min_len', 'min_len', type=int, default=30, help='[optional] Minimal ORF length. {default=30nt}')
+@click.option('-i', '--nucl_file', 'fasta_file', help='Input nucleotide sequence file. (format: FASTA)')
+@click.option('-P', '-parse_seqids', 'parse_seqids', type=click.Choice(['yes', 'no']), default='yes',
+              help='[optional] Specify whether parse sequences IDs. {default: yes}')
+@click.option('-L', '--min_len', 'min_len', type=int, default=30, help='[optional] Minimal ORF length. {default: 30nt}')
 @click.option('-complete/-incomplete', default=True,
-              help='[optional] Whether ORF integrity is considered. {default=complete}')
-@click.option('-P', '-only_plus', 'only_plus', type=click.Choice(['yes', 'no']), default='no',
-              help='[optional] Whether only consider plus chain. {default=no}')
+              help='[optional] Whether ORF integrity is considered. {default: complete}')
+@click.option('-p', '-only_plus', 'only_plus', type=click.Choice(['yes', 'no']), default='no',
+              help='[optional] Whether only consider plus chain. {default: no}')
 @click.option('-l', '--log_file', 'log_file',
               help='[optional] Output log file, if not specified, the log will print to terminal as stderr.')
 @click.option('-o', '--output_file', 'outfile',
