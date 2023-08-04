@@ -22,7 +22,7 @@ class Fasta:
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
         """A FASTA file generator that returns one Nucleotide object at one time."""
         # Parse FASTA format from a file.
-        if isinstance(self.path, str):
+        if not isinstance(self.path, KeepOpenFile):
             # Parse uncompressed FASTA file (xx.fa).
             try:
                 fa_generator = (ret[1] for ret in groupby(open(self.path), lambda line: line.startswith('>')))

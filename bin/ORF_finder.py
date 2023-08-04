@@ -26,16 +26,16 @@ def main(fasta_files: Union[IO, KeepOpenFile, str],
         click.echo(f'\033[31mError: Missing FASTA file.\033[0m', err=True)
         exit()
     content = []
-    if isinstance(fasta_files, str):
+    if isinstance(fasta_files, tuple):
         for fasta_file in fasta_files:
-            out_prefix = '.'.join(fasta_file.split('/')[-1].split('.')[:-1]).replace('.fa', '')
+            out_prefix = '.'.join(fasta_file.name.split('/')[-1].split('.')[:-1]).replace('.fa', '')
             if to_file and log_file:
                 try:
-                    seq_num = sum(1 for _ in open(fasta_file) if _.startswith('>'))
+                    seq_num = sum(1 for _ in open(fasta_file.name) if _.startswith('>'))
                 except UnicodeDecodeError:
-                    seq_num = sum(1 for _ in GzipFile(fasta_file) if str(_, 'utf8').startswith('>'))
+                    seq_num = sum(1 for _ in GzipFile(fasta_file.name) if str(_, 'utf8').startswith('>'))
                 with tqdm(total=seq_num, unit=' sequence') as process_bar:
-                    for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
+                    for nucl_obj in Fasta(fasta_file.name).parse(parse_seqids):
                         ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
                         if isinstance(ORF, str):
                             click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \
@@ -47,7 +47,7 @@ def main(fasta_files: Union[IO, KeepOpenFile, str],
                                 print(ORF)
                         process_bar.update(1)
             else:
-                for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
+                for nucl_obj in Fasta(fasta_file.name).parse(parse_seqids):
                     ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
                     if isinstance(ORF, str):
                         click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \

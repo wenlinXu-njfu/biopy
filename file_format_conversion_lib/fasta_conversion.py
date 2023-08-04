@@ -6,6 +6,7 @@ Date: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import IO
 import click
 from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
@@ -33,7 +34,7 @@ def main(in_file, char_num: int, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA file.')
+@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA file.')
 @click.option('-n', '--char_num', 'char_num', type=int, default=60, show_default=True,
               help='Specify how many character show in per line, 0 presents one line show per sequence.')
 @click.option('-o', '--output_file', 'outfile',
