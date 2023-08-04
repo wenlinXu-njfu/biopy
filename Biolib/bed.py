@@ -5,12 +5,13 @@ Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union, IO
 from Biolib.sequence import Nucleotide
 from Biolib.fasta import Fasta
 
 
 class Bed:
-    def __init__(self, path: str):
+    def __init__(self, path: Union[IO, str]):
         self.path = path
 
 # Basic method==========================================================================================================
@@ -49,7 +50,7 @@ class Bed:
                 return start, end
 
     def bed_extract_seq(self,
-                        fasta_file,
+                        fasta_file: Union[IO, str],
                         use_id: bool = True,
                         up: int = 0,
                         down: int = 0,

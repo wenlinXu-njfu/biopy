@@ -130,7 +130,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
               help='Genes within a certain range of upstream and downstream of lncRNA were selected as target genes. '
                    '{default: 100 unit: kb}')
 @click.option('-o', '--output_file', 'outfile',
-              help='[optional] Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 def run(gtf, gff, feature_type, distance, outfile):

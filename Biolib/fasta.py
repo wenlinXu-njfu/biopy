@@ -5,41 +5,60 @@ Date: 2021/11/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-import re
-from typing import Dict
+from re import findall
+from typing import Dict, Union, IO
 from gzip import GzipFile
-import click
+from click import echo
+from click.utils import KeepOpenFile
 from itertools import groupby
 from Biolib.sequence import Nucleotide, Protein
 
 
 class Fasta:
-    def __init__(self, path: str):
+    def __init__(self, path: Union[IO, KeepOpenFile, str]):
         self.path = path
 
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
-        """
-        A FASTA file generator that returns one Nucleotide object at a time.
-        """
-        try:
-            fa_generator = (ret[1] for ret in groupby(open(self.path), lambda line: line.startswith('>')))
-            for g in fa_generator:
-                seq_id = g.__next__().strip()
-                seq = ''.join(line.strip() for line in fa_generator.__next__())
-                if parse_id:
-                    if '|' in seq_id:
-                        seq_id = seq_id.split('|')[0]
+        """A FASTA file generator that returns one Nucleotide object at one time."""
+        # Parse FASTA format from a file.
+        if isinstance(self.path, str):
+            # Parse uncompressed FASTA file (xx.fa).
+            try:
+                fa_generator = (ret[1] for ret in groupby(open(self.path), lambda line: line.startswith('>')))
+                for g in fa_generator:
+                    seq_id = g.__next__().strip()
+                    seq = ''.join(line.strip() for line in fa_generator.__next__())
+                    if parse_id:
+                        if '|' in seq_id:
+                            seq_id = seq_id.split('|')[0]
+                        else:
+                            seq_id = seq_id.split(' ')[0]
+                    if 'M' not in seq and '*' not in seq:
+                        yield Nucleotide(seq_id, seq)
                     else:
-                        seq_id = seq_id.split(' ')[0]
-                if 'M' not in seq and '*' not in seq:
-                    yield Nucleotide(seq_id, seq)
-                else:
-                    yield Protein(seq_id, seq)
-        except UnicodeDecodeError:
-            l = []
-            for line in GzipFile(self.path):
-                l.append(str(line, 'utf8'))
+                        yield Protein(seq_id, seq)
+            # Parse compressed FASTA file (xx.fa.gz).
+            except UnicodeDecodeError:
+                l = []
+                for line in GzipFile(self.path):
+                    l.append(str(line, 'utf8'))
+                fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
+                for g in fa_generator:
+                    seq_id = g.__next__().strip()
+                    seq = ''.join(line.strip() for line in fa_generator.__next__())
+                    if parse_id:
+                        if '|' in seq_id:
+                            seq_id = seq_id.split('|')[0]
+                        else:
+                            seq_id = seq_id.split(' ')[0]
+                    if 'M' not in seq and '*' not in seq:
+                        yield Nucleotide(seq_id, seq)
+                    else:
+                        yield Protein(seq_id, seq)
+        # Parse FASTA format from stdin.
+        else:
+            l = self.path.readlines()
             fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
             for g in fa_generator:
                 seq_id = g.__next__().strip()
@@ -55,13 +74,13 @@ class Fasta:
                     yield Protein(seq_id, seq)
 
     def get_seq_dict(self, parse_id: bool = False) -> dict:
-        """Get sequence dict from FASTA file"""
+        """Get sequence dict from FASTA file."""
         seq_dict = {}
         for nucl_obj in self.parse(parse_id):
             if nucl_obj.id not in seq_dict:
                 seq_dict[nucl_obj.id] = nucl_obj.seq
             else:
-                click.echo(f'\033[31mError: FASTA file has repeat id {nucl_obj.id}.', err=True)
+                echo(f'\033[31mError: FASTA file has repeat id {nucl_obj.id}.', err=True)
                 exit()
         return seq_dict
 
@@ -95,7 +114,7 @@ class Fasta:
             for nucl_obj in fa_generator:
                 yield f">{nucl_obj.id}\n{nucl_obj.seq}\n"
         else:
-            click.echo('\033[33mThe input FASTA file does not need to be formatted.\033[0m', err=True)
+            echo('\033[33mThe input FASTA file does not need to be formatted.\033[0m', err=True)
             exit()
 
     def split_sequence(self, char_num: int) -> str:  # return str generator
@@ -114,7 +133,7 @@ class Fasta:
         if inplace_id:
             for seq_obj in self.parse():
                 all_seq_dict[seq_obj.id] = seq_obj.seq
-                gene_id = re.findall(regular_exp, seq_obj.id)[0]
+                gene_id = findall(regular_exp, seq_obj.id)[0]
                 if gene_id not in id_map_dict:
                     id_map_dict[gene_id] = seq_obj.id
                 else:
@@ -125,7 +144,7 @@ class Fasta:
         else:
             for seq_obj in self.parse(False):
                 all_seq_dict[seq_obj.id] = seq_obj.seq
-                gene_id = re.findall(regular_exp, seq_obj.id)[0]
+                gene_id = findall(regular_exp, seq_obj.id)[0]
                 if gene_id not in id_map_dict:
                     id_map_dict[gene_id] = seq_obj.id
                 else:
@@ -140,4 +159,4 @@ class Fasta:
             if nucl_obj.seq.count('n') < max_num or nucl_obj.seq.count('N') < max_num:
                 yield nucl_obj
             else:
-                click.echo(f'{nucl_obj.id} has been filtered out.', err=True)
+                echo(f'{nucl_obj.id} has been filtered out.', err=True)

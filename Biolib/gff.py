@@ -5,9 +5,9 @@ Date: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, IO
 from re import findall
-from click import echo, Choice
+from click import echo
 from numpy import NaN
 from pandas import read_table, DataFrame
 from Biolib.fasta import Fasta
@@ -15,7 +15,7 @@ from Biolib.sequence import Nucleotide
 
 
 class Gff:
-    def __init__(self, path: str, name: str = None):
+    def __init__(self, path: Union[IO, str], name: str = None):
         self.path = path
         if name is None:
             self.name = path.split('/')[-1]

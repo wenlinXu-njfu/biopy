@@ -7,60 +7,78 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from tqdm import tqdm
+from typing import Union, IO
 import click
+from click.utils import KeepOpenFile
 from gzip import GzipFile
 from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
 
 
-def main(fasta_files: str,
+def main(fasta_files: Union[IO, KeepOpenFile, str],
          parse_seqids: click.Choice(['yes', 'no']),
          min_len: int,
          complete: bool,
          only_plus: click.Choice(['yes', 'no']),
-         log_file: str,
-         out_file: bool = None):
+         log_file: Union[IO, str],
+         to_file: bool = None):
     if not fasta_files:
         click.echo(f'\033[31mError: Missing FASTA file.\033[0m', err=True)
         exit()
-    for fasta_file in fasta_files:
-        out_prefix = '.'.join(fasta_file.split('/')[-1].split('.')[:-1]).replace('.fa', '')
-        content = []
-        if out_file and log_file:
-            try:
-                seq_num = sum(1 for _ in open(fasta_file) if _.startswith('>'))
-            except UnicodeDecodeError:
-                seq_num = sum(1 for _ in GzipFile(fasta_file) if str(_, 'utf8').startswith('>'))
-            with tqdm(total=seq_num, unit=' sequence') as process_bar:
+    content = []
+    if isinstance(fasta_files, str):
+        for fasta_file in fasta_files:
+            out_prefix = '.'.join(fasta_file.split('/')[-1].split('.')[:-1]).replace('.fa', '')
+            if to_file and log_file:
+                try:
+                    seq_num = sum(1 for _ in open(fasta_file) if _.startswith('>'))
+                except UnicodeDecodeError:
+                    seq_num = sum(1 for _ in GzipFile(fasta_file) if str(_, 'utf8').startswith('>'))
+                with tqdm(total=seq_num, unit=' sequence') as process_bar:
+                    for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
+                        ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
+                        if isinstance(ORF, str):
+                            click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \
+                                click.echo(f"\033[33m{ORF}\033[0m", err=True)
+                        else:
+                            if to_file:
+                                content.append(f">{ORF.id}\n{ORF.seq}\n")
+                            else:
+                                print(ORF)
+                        process_bar.update(1)
+            else:
                 for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
                     ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
                     if isinstance(ORF, str):
                         click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \
                             click.echo(f"\033[33m{ORF}\033[0m", err=True)
                     else:
-                        if out_file:
+                        if to_file:
                             content.append(f">{ORF.id}\n{ORF.seq}\n")
                         else:
                             print(ORF)
-                    process_bar.update(1)
-        else:
-            for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
-                ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
-                if isinstance(ORF, str):
-                    click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \
-                        click.echo(f"\033[33m{ORF}\033[0m", err=True)
+            if to_file and content:
+                with open(f'./{out_prefix}_pep.fa', 'w') as o:
+                    o.write(''.join(content))
+    else:
+        fasta_file = click.open_file('-')
+        for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
+            ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
+            if isinstance(ORF, str):
+                click.echo(ORF, err=True, file=open(log_file, 'a')) if log_file else \
+                    click.echo(f"\033[33m{ORF}\033[0m", err=True)
+            else:
+                if to_file:
+                    content.append(f">{ORF.id}\n{ORF.seq}\n")
                 else:
-                    if out_file:
-                        content.append(f">{ORF.id}\n{ORF.seq}\n")
-                    else:
-                        print(ORF)
-        if out_file and content:
-            with open(f'./{out_prefix}_pep.fa', 'w') as o:
+                    print(ORF)
+        if to_file and content:
+            with open(f'./pep.fa', 'w') as o:
                 o.write(''.join(content))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1)
+@click.argument('fasta_files', nargs=-1, type=click.File('r'))
 @click.option('-l', '--min_len', 'min_len', type=int, default=30, show_default=True, help='Minimal ORF length.')
 @click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id.')
 @click.option('-c', '--completed', 'completed', is_flag=True, flag_value=True, help='Remain completed ORF.')

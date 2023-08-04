@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: fasta_conversion.py
-Description: Make each sequence to be displayed on a single line or in multiple lines
+Description: Make each sequence to be displayed on a single line or in multiple lines.
 Date: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com

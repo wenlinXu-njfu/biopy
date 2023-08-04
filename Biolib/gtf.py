@@ -5,14 +5,14 @@ Date: 2021/12/1
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Dict, List, Union
+from typing import Dict, List, Union, IO
 import click
 from Biolib.fasta import Fasta
 from Biolib.sequence import Nucleotide
 
 
 class Gtf:
-    def __init__(self, path: str):
+    def __init__(self, path: Union[IO, str]):
         self.path = path
 
 # Basic method==========================================================================================================

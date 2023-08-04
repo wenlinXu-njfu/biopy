@@ -5,11 +5,11 @@ Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Tuple
+from typing import Union, IO, Tuple
 
 
 class Blast:
-    def __init__(self, path: str):
+    def __init__(self, path: Union[IO, str]):
         self.path = path
         self.line_num = sum(1 for _ in open(self.path))
 
