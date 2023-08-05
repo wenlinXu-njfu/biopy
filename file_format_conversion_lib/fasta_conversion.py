@@ -6,24 +6,26 @@ Date: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import IO
+from typing import Union
 import click
+from click._compat import _NonClosingTextIOWrapper
+from click.utils import KeepOpenFile
 from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
 
 
-def main(in_file, char_num: int, out_file):
-    fa_file_obj = Fasta(in_file)
+def main(fasta_file: Union[str, KeepOpenFile],
+         char_num: int,
+         out_file: str):
     content = []
     if char_num == 0:
-        for seq in fa_file_obj.merge_sequence():
+        for seq in Fasta(fasta_file).merge_sequence():
             if not out_file:
                 print(seq.strip())
             else:
                 content.append(seq)
     else:
-        generator = fa_file_obj.split_sequence(char_num)
-        for line in generator:
+        for line in Fasta(fasta_file).split_sequence(char_num):
             if out_file:
                 content.append(line)
             else:
@@ -43,6 +45,8 @@ def main(in_file, char_num: int, out_file):
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 def run(fasta_file, char_num, outfile):
     """Make each sequence to be displayed on a single line or in multiple lines."""
+    if isinstance(fasta_file, _NonClosingTextIOWrapper):
+        fasta_file = click.open_file('-')
     main(fasta_file, char_num, outfile)
 
 

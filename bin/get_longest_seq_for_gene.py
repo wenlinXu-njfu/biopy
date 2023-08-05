@@ -6,12 +6,16 @@ Date: 2022/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from _io import TextIOWrapper
 import click
 from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
 
 
-def main(fasta_file, regula_exp, inplace_id: bool, out_file):
+def main(fasta_file: TextIOWrapper,
+         regula_exp: str,
+         inplace_id: bool,
+         out_file: str):
     seq_dict = Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id)
     content = []
     for seq_id, seq in seq_dict.items():
@@ -25,7 +29,7 @@ def main(fasta_file, regula_exp, inplace_id: bool, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fasta_file', 'fasta_file', help='Input FASTA file.')
+@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA file.')
 @click.option('-r', '--regular_expression', 'regular_expression',
               help='The name of a gene locus represented by a regular expression.')
 @click.option('-I', '--inplace_id', 'inplace_id', is_flag=True, flag_value=True,

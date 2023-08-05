@@ -1,27 +1,27 @@
 """
 File: fasta.py
-Description: Instantiate a FASTA file object
+Description: Instantiate a FASTA file object.
 Date: 2021/11/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
-from typing import Dict, Union, IO
+from _io import TextIOWrapper
+from typing import Dict, Union
 from gzip import GzipFile
 from click import echo
-from click.utils import KeepOpenFile
 from itertools import groupby
 from Biolib.sequence import Nucleotide, Protein
 
 
 class Fasta:
-    def __init__(self, path: Union[IO, KeepOpenFile, str]):
+    def __init__(self, path: Union[str, TextIOWrapper]):
         self.path = path
 
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
-        """A FASTA file generator that returns one Nucleotide object at one time."""
-        # Parse FASTA format from a file.
+        """A FASTA file generator that returns one Nucleotide or Protein object at one time."""
+        # Parse FASTA file from non-command line.
         if isinstance(self.path, str):
             # Parse uncompressed FASTA file (xx.fa).
             try:
@@ -56,22 +56,41 @@ class Fasta:
                         yield Nucleotide(seq_id, seq)
                     else:
                         yield Protein(seq_id, seq)
-        # Parse FASTA format from stdin.
+        # Parse FASTA file from command line.
         else:
-            l = self.path.readlines()
-            fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
-            for g in fa_generator:
-                seq_id = g.__next__().strip()
-                seq = ''.join(line.strip() for line in fa_generator.__next__())
-                if parse_id:
-                    if '|' in seq_id:
-                        seq_id = seq_id.split('|')[0]
+            # Parse uncompressed FASTA file (xx.fa).
+            try:
+                fa_generator = (ret[1] for ret in groupby(self.path, lambda line: line.startswith('>')))
+                for g in fa_generator:
+                    seq_id = g.__next__().strip()
+                    seq = ''.join(line.strip() for line in fa_generator.__next__())
+                    if parse_id:
+                        if '|' in seq_id:
+                            seq_id = seq_id.split('|')[0]
+                        else:
+                            seq_id = seq_id.split(' ')[0]
+                    if 'M' not in seq and '*' not in seq:
+                        yield Nucleotide(seq_id, seq)
                     else:
-                        seq_id = seq_id.split(' ')[0]
-                if 'M' not in seq and '*' not in seq:
-                    yield Nucleotide(seq_id, seq)
-                else:
-                    yield Protein(seq_id, seq)
+                        yield Protein(seq_id, seq)
+            # Parse compressed FASTA file (xx.fa.gz).
+            except UnicodeDecodeError:
+                l = []
+                for line in GzipFile(self.path.name):
+                    l.append(str(line, 'utf8'))
+                fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
+                for g in fa_generator:
+                    seq_id = g.__next__().strip()
+                    seq = ''.join(line.strip() for line in fa_generator.__next__())
+                    if parse_id:
+                        if '|' in seq_id:
+                            seq_id = seq_id.split('|')[0]
+                        else:
+                            seq_id = seq_id.split(' ')[0]
+                    if 'M' not in seq and '*' not in seq:
+                        yield Nucleotide(seq_id, seq)
+                    else:
+                        yield Protein(seq_id, seq)
 
     def get_seq_dict(self, parse_id: bool = False) -> dict:
         """Get sequence dict from FASTA file."""
@@ -87,24 +106,32 @@ class Fasta:
 # File format conversion method=========================================================================================
     def check_FASTA(self) -> bool:
         """Check whether a file is formal FASTA format."""
-        try:
-            with open(self.path) as f:
-                f.readline()
-                f.readline()
-                line = f.readline()
-                if line.startswith('>'):
-                    return True
-                else:
-                    return False
-        except UnicodeDecodeError:
-            with GzipFile(self.path) as f:
-                f.readline()
-                f.readline()
-                line = str(f.readline(), 'utf8')
-                if line.startswith('>'):
-                    return True
-                else:
-                    return False
+        if isinstance(self.path, str):
+            try:
+                with open(self.path) as f:
+                    f.readline()
+                    f.readline()
+                    line = f.readline()
+                    return True if line.startswith('>') else False
+            except UnicodeDecodeError:
+                with GzipFile(self.path) as f:
+                    f.readline()
+                    f.readline()
+                    line = str(f.readline(), 'utf8')
+                    return True if line.startswith('>') else False
+        else:
+            try:
+                with self.path as f:
+                    f.readline()
+                    f.readline()
+                    line = f.readline()
+                    return True if line.startswith('>') else False
+            except UnicodeDecodeError:
+                with GzipFile(self.path.name) as f:
+                    f.readline()
+                    f.readline()
+                    line = str(f.readline(), 'utf8')
+                    return True if line.startswith('>') else False
 
     def merge_sequence(self) -> str:  # return str generator
         """Make each sequence to be displayed on a single line."""
