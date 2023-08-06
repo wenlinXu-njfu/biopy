@@ -5,8 +5,8 @@ Date: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-import os
 from os.path import exists
+from os import remove
 from _io import TextIOWrapper
 from typing import Union, List, Dict, Tuple
 from re import findall
@@ -65,7 +65,7 @@ class Gff:
                 index += 1
         # Remove tmp.gff file if exists.
         if exists('./tmp.gff'):
-            os.remove('./tmp.gff')
+            remove('./tmp.gff')
         return df
 
     def check_feature(self, feature: str) -> Tuple[bool, str]:
@@ -350,5 +350,5 @@ class Gff:
                 content.append(f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}')
         content = '\n'.join(content)
         if exists('./tmp.gff'):
-            os.remove('./tmp.gff')
+            remove('./tmp.gff')
         return content
