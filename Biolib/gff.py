@@ -1,13 +1,16 @@
 """
 File: gff.py
-Description: Instantiate a GFF file object
+Description: Instantiate a GFF file object.
 Date: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, List, Dict, Tuple, IO
+import os
+from os.path import exists
+from _io import TextIOWrapper
+from typing import Union, List, Dict, Tuple
 from re import findall
-from click import echo
+from click import echo, open_file
 from numpy import NaN
 from pandas import read_table, DataFrame
 from Biolib.fasta import Fasta
@@ -15,18 +18,23 @@ from Biolib.sequence import Nucleotide
 
 
 class Gff:
-    def __init__(self, path: Union[IO, str], name: str = None):
-        self.path = path
-        if name is None:
-            self.name = path.split('/')[-1]
+    def __init__(self, path: Union[str, TextIOWrapper]):
+        if isinstance(path, str):
+            self.path = path
+            self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
         else:
-            self.name = name
-        self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
+            if path.name == '<stdin>':
+                self.path = open_file('-').readlines()
+                self.line_num = sum(1 for line in self.path if not line.startswith('#'))
+            else:
+                self.path = path.name
+                self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
 
 # Basic method==========================================================================================================
-    def parse(self) -> tuple:
+    def parse(self) -> Tuple[Union[str, Dict[str, str]]]:
         """Parse information of each column of GFF file line by line."""
-        for line in open(self.path):
+        open_gff = open(self.path) if isinstance(self.path, str) else self.path
+        for line in open_gff:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -36,11 +44,16 @@ class Gff:
                 yield chr_num, source, feature, start, end, score, strand, frame, attr_dict
 
     def read_as_df(self, parse_attr: bool = False) -> DataFrame:
-        # read gff file as dataframe
-        df = read_table(self.path,
-                        skiprows=sum(1 for line in open(self.path) if line.startswith('#')),
-                        names=['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute'])
-        # parse attribute
+        # Read gff file as dataframe.
+        if isinstance(self.path, str):
+            df = read_table(self.path, skiprows=sum(1 for line in open(self.path) if line.startswith('#')),
+                            names=['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute'])
+        else:
+            with open('./tmp.gff', 'w') as o:
+                o.write(''.join(self.path))
+            df = read_table('./tmp.gff', skiprows=sum(1 for line in open('./tmp.gff') if line.startswith('#')),
+                            names=['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute'])
+        # Parse attribute.
         if parse_attr:
             index = 0
             for line in self.parse():
@@ -50,15 +63,18 @@ class Gff:
                         df[k] = NaN
                     df.loc[index, k] = v
                 index += 1
+        # Remove tmp.gff file if exists.
+        if exists('./tmp.gff'):
+            os.remove('./tmp.gff')
         return df
 
     def check_feature(self, feature: str) -> Tuple[bool, str]:
         """Check whether specified feature is included in GFF file."""
         features = set(line[2] for line in self.parse())
         if feature in features:
-            return True, f'"{feature}" is included in {self.name}.'
+            return True, f'"{feature}" have found.'
         else:
-            return False, f'"{feature}" is not included in {self.name}.'
+            return False, f'"{feature}" not found.'
 
     def get_gff_dict(self, feature_type: str = None) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         """Save the feature information in the GFF file into the dictionary."""
@@ -115,8 +131,7 @@ class Gff:
         """A peek at the genome."""
         df = self.read_as_df()
         df['Length'] = df['End'] - df['Start'] + 1
-        content = [f"## Summary of {self.path.split('/')[-1]}",
-                   '# Feature\tTotal\tMin_len\tMax_len\tMedian_len\tMean_len']
+        content = [f'# Feature\tTotal\tMin_len\tMax_len\tMedian_len\tMean_len']
         features = df['Feature'].drop_duplicates().values
         for feature in features:
             total = len(df.loc[df['Feature'] == feature])
@@ -156,15 +171,20 @@ class Gff:
 
     def gff_sort(self) -> str:
         """Sort the GFF file by sequence ID."""
-        with open(self.path) as f:
-            l = f.readlines()
+        if isinstance(self.path, str):
+            with open(self.path) as f:
+                l = f.readlines()
+                l.sort(key=lambda line: self._gff_sort(line))
+        else:
+            l = self.path
             l.sort(key=lambda line: self._gff_sort(line))
         return ''.join(l)
 
 # Sequence extraction method============================================================================================
-    def gff_extract_seq(self, fasta_file: str,
+    def gff_extract_seq(self,
+                        fasta_file: Union[str, TextIOWrapper],
                         feature_type: str = 'gene',
-                        feature_id_list: list = None) -> Nucleotide:
+                        feature_id_set: set = None) -> Nucleotide:
         """Extract sequences of specified feature type from GFF file."""
         is_in_gff, msg = self.check_feature(feature_type)
         if not is_in_gff:
@@ -178,11 +198,11 @@ class Gff:
                 pass  # Some sequences (eg. scaffold, contig) may not have annotation
             else:
                 for feature in features:  # feature = {id: str, start: int, end: int, strand: str}
-                    if feature_id_list and feature['id'] in feature_id_list:
+                    if feature_id_set and feature['id'] in feature_id_set:
                         sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
                         sub_seq_obj.id = feature['id']
                         yield sub_seq_obj
-                    elif not feature_id_list:
+                    elif not feature_id_set:
                         sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
                         sub_seq_obj.id = feature['id']
                         yield sub_seq_obj
@@ -202,7 +222,10 @@ class Gff:
         """Convert the file format from GFF to GTF."""
         last_line = None
         gene_id = transcript_id = None
-        content = ["## gff_to_gtf", f"## Convert from {self.path.split('/')[-1]}"]
+        if isinstance(self.path, str):
+            content = ["## gff_to_gtf", f"## Convert from {self.path.split('/')[-1]}"]
+        else:
+            content = []
         append = content.append
         i = 0
         for line in self.parse():
@@ -300,11 +323,17 @@ class Gff:
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
-        elif min(list(chr_len_dict.values())) / span < 1:
+        if min(list(chr_len_dict.values())) / span < 1:
             echo('\033[33mError: Density statistical interval is too large.\033[0m', err=True)
             exit()
-        skip_rows = sum(1 for line in open(self.path) if line.startswith('#'))
-        gff_dataframe = read_table(self.path, skiprows=skip_rows, header=None)
+        if isinstance(self.path, str):
+            skip_rows = sum(1 for line in open(self.path) if line.startswith('#'))
+            gff_dataframe = read_table(self.path, skiprows=skip_rows, header=None)
+        else:
+            skip_rows = sum(1 for line in self.path if line.startswith('#'))
+            with open('./tmp.gff', 'w') as o:
+                o.write(''.join(self.path))
+            gff_dataframe = read_table('./tmp.gff', skiprows=skip_rows, header=None)
         new_cols = ['Chr', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
         d = {i: new_cols[i] for i in range(9)}
         gff_dataframe.rename(columns=d, inplace=True)
@@ -320,4 +349,6 @@ class Gff:
                 count = len(sites[(sites <= length) & (sites >= length // span * span + 1)])
                 content.append(f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}')
         content = '\n'.join(content)
+        if exists('./tmp.gff'):
+            os.remove('./tmp.gff')
         return content

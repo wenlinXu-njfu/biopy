@@ -5,19 +5,24 @@ Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, IO
+from typing import Union
+from _io import TextIOWrapper
 from Biolib.sequence import Nucleotide
 from Biolib.fasta import Fasta
 
 
 class Bed:
-    def __init__(self, path: Union[IO, str]):
+    def __init__(self, path: Union[str, TextIOWrapper]):
         self.path = path
 
 # Basic method==========================================================================================================
     def get_bed_dict(self) -> dict:
         bed_dict = {}  # {Chr1: [{start: int, end: int, id: str, frame: str, strand: str}, ...], ...}
-        for line in open(self.path):
+        try:
+            open_bed = open(self.path)
+        except TypeError:
+            open_bed = self.path
+        for line in open_bed:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 item = {'start': int(split[1]), 'end': int(split[2]), 'id': split[3],
@@ -50,7 +55,7 @@ class Bed:
                 return start, end
 
     def bed_extract_seq(self,
-                        fasta_file: Union[IO, str],
+                        fasta_file: Union[str, TextIOWrapper],
                         use_id: bool = True,
                         up: int = 0,
                         down: int = 0,

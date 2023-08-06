@@ -15,15 +15,15 @@ def main(gff_file, gtf_file=None):
     gff_file_obj = Gff(gff_file)
     content = gff_file_obj.gff_to_gtf()
     if gtf_file:
-        with open(gtf_file, 'w') as o:
+        with gtf_file as o:
             o.write(content)
     else:
         print(content)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gff_file', 'gff_file', help='Input GFF file.')
-@click.option('-o', '--gtf_file', 'gtf_file',
+@click.option('-i', '--gff_file', 'gff_file', type=click.File('r'), help='Input GFF file.')
+@click.option('-o', '--gtf_file', 'gtf_file', type=click.File('w'),
               help='Output GTF file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
