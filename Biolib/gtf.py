@@ -5,20 +5,31 @@ Date: 2021/12/1
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Dict, List, Union, IO
+from _io import TextIOWrapper
+from typing import Dict, List, Union
 import click
 from Biolib.fasta import Fasta
 from Biolib.sequence import Nucleotide
 
 
 class Gtf:
-    def __init__(self, path: Union[IO, str]):
-        self.path = path
+    def __init__(self, path: Union[str, TextIOWrapper]):
+        if isinstance(path, str):
+            self.path = path
+            self.line_num = sum(1 for line in open(path) if not line.startswith('#'))
+        else:
+            if path.name == '<stdin>':
+                self.path = click.open_file('-').readlines()
+                self.line_num = sum(1 for line in self.path if not line.startswith('#'))
+            else:
+                self.path = path.name
+                self.line_num = sum(1 for line in open(path.name) if not line.startswith('#'))
 
 # Basic method==========================================================================================================
     def parse(self):
         """Parse information of each column of GTF file line by line."""
-        for line in open(self.path):
+        open_gtf = open(self.path) if isinstance(self.path, str) else self.path
+        for line in open_gtf:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -53,7 +64,6 @@ class Gtf:
         non_redundant_exon_dict = {}
         gene_id = ''
         raw_exon_list = []
-        line_num = sum(1 for _ in open(self.path) if not _.startswith('#'))
         line_count = 0
         for line in self.parse():
             line_count += 1
@@ -85,7 +95,7 @@ class Gtf:
                 else:
                     gene_id = line[8]['gene_id']
                     raw_exon_list.append(item)
-                if line_count == line_num:
+                if line_count == self.line_num:
                     i = 0
                     while i + 1 < len(raw_exon_list):
                         raw_exon_list.sort(key=lambda d: (d['start'], d['end']))
@@ -164,7 +174,7 @@ class Gtf:
         return gene_dict
 
 # Sequence extraction method============================================================================================
-    def get_cDNA(self, fasta_file: str) -> Nucleotide:  # return Nucleotide objet generator
+    def get_cDNA(self, fasta_file: Union[str, TextIOWrapper]) -> Nucleotide:  # return Nucleotide objet generator
         """Extract cDNA sequence from GTF file according large reference sequence."""
         exon_dict = self.get_exon_dict()  # {chr_num: [{tid: str, start: int, end: int, strand: str}, {}, ...], ...}
         for nucl_obj in Fasta(fasta_file).parse():
@@ -216,15 +226,11 @@ class Gtf:
 # File format conversion method=========================================================================================
     def gtf_to_bed(self, feature_type: str = 'exon') -> str:
         """Convert the file format from GTF to BED."""
-        content = []
-        append = content.append
         for line in self.parse():
             if line[2] == feature_type != 'gene':
-                append(f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['transcript_id']}\t{line[7]}\t{line[6]}")
+                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['transcript_id']}\t{line[7]}\t{line[6]}\n"
             elif line[2] == feature_type == 'gene':
-                append(f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}")
-        content = '\n'.join(content) + '\n'
-        return content
+                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}\n"
 
     def gtf_to_gsds(self, feature_type: click.Choice(['gene', 'transcript']) = 'transcript') -> str:
         """Convert the file format from GTF to GSDS."""

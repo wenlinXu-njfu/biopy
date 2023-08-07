@@ -6,14 +6,15 @@ Date: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from _io import TextIOWrapper
 import click
 from Biolib.gtf import Gtf
 from Biolib.show_info import Displayer
 
 
-def main(gtf_file, fasta_file, out_file):
+def main(gtf_file: TextIOWrapper, fasta_file: TextIOWrapper, out_file: TextIOWrapper):
     if out_file:
-        with open(out_file, 'a') as o:
+        with out_file as o:
             for cDNA_nucl_obj in Gtf(gtf_file).get_cDNA(fasta_file):
                 o.write(f">{cDNA_nucl_obj.id}\n{cDNA_nucl_obj.seq}\n")
     else:
@@ -22,9 +23,9 @@ def main(gtf_file, fasta_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gtf_file', 'gtf_file', help='Input GTF file.')
-@click.option('-f', '--ref_fasta', 'ref_fasta_file', help='Input reference sequence FASTA file.')
-@click.option('-o', '--output_file', 'output_file',
+@click.option('-g', '--gtf_file', 'gtf_file', type=click.File('r'), help='Input GTF file.')
+@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), help='Input reference sequence FASTA file.')
+@click.option('-o', '--output_file', 'output_file', type=click.File('a'),
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
