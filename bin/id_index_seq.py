@@ -17,8 +17,8 @@ def main(fasta_files: Tuple[TextIOWrapper],
          parse_seqids: bool,
          id_file: TextIOWrapper,
          match: bool,
-         log: str,
-         out_file: str):
+         log_file: TextIOWrapper,
+         output_file: TextIOWrapper):
     content = []
     raw_id_set = set(line.strip() for line in id_file)
     have_found_id_set = set()
@@ -28,7 +28,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
         for seq_obj in Fasta(fasta_file).parse(parse_seqids):
             if match and seq_obj.id in raw_id_set:
                 have_found_id_set.add(seq_obj.id)
-                if out_file:
+                if output_file:
                     content.append(f">{seq_obj.id} from={file_name}\n{seq_obj.seq}\n")
                 else:
                     seq_obj.id = f'{seq_obj.id} from={file_name}'
@@ -37,32 +37,32 @@ def main(fasta_files: Tuple[TextIOWrapper],
                 for _id in raw_id_set:
                     if seq_obj.id in _id or _id in seq_obj.id:
                         have_found_id_set.add(_id)
-                        if out_file:
+                        if output_file:
                             content.append(f">{seq_obj.id} from={file_name}\n{seq_obj.seq}\n")
                         else:
                             seq_obj.id = f'{seq_obj.id} from={file_name}'
                             print(seq_obj)
     if content:
-        with open(out_file, 'w') as o:
+        with output_file as o:
             o.write(''.join(content))
     # report sequence that not found.
     not_found_id = list(raw_id_set - have_found_id_set)
     not_found_id.sort()
     if not_found_id:
         msg = ' not found\n'.join(not_found_id) + ' not found\n'
-        click.echo(f'\033[33m{msg}\033[0m', err=True, file=open(log, 'a')) if log else \
+        click.echo(f'\033[33m{msg}\033[0m', err=True, file=log_file) if log_file else \
             click.echo(f'\033[33m{msg}\033[0m', err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('fasta_files', nargs=-1)
 @click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id in FASTA file.')
-@click.option('-I', '--id_file', 'id_file', type=click.File('r'), help='Input id TEXT file (one id per line).')
+@click.option('-id', '--id_file', 'id_file', type=click.File('r'), help='Input id TEXT file (one id per line).')
 @click.option('--match/--contain', default=True, show_default=True,
               help='Whether the id supplied should exactly match the ID of the sequence.')
-@click.option('-l', '--log_file', 'log_file',
+@click.option('-log', '--log_file', 'log_file', type=click.File('a'),
               help='Output log file, if not specified, the log will print to terminal as stderr.')
-@click.option('-o', '--output_file', 'outfile',
+@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

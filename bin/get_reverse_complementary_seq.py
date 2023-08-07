@@ -12,7 +12,7 @@ from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
 
 
-def main(fasta_file: TextIOWrapper, out_file: str):
+def main(fasta_file: TextIOWrapper, out_file: TextIOWrapper):
     content = ''
     for nucl_obj in Fasta(fasta_file).parse(False):
         rev_com_seq = -nucl_obj
@@ -21,13 +21,13 @@ def main(fasta_file: TextIOWrapper, out_file: str):
         else:
             print(rev_com_seq)
     if out_file:
-        with open(out_file, 'w') as o:
+        with out_file as o:
             o.write(content)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA sequence file.')
-@click.option('-o', '--output_file', 'outfile',
+@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

@@ -78,7 +78,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
 @click.option('-q', '--quiet', 'quiet', is_flag=True, flag_value=True,
               help='Do not report nucleotide sequence that not found ORF. '
                    'This conflicts with the "-L --log_file" option and takes precedence over the "-L --log_file" option.')
-@click.option('-L', '--log_file', 'log_file',
+@click.option('-log', '--log_file', 'log_file',
               help='Write the sequence that not found ORF to logfile. '
                    'This conflicts with the "-q --quiet" option and has a lower priority than the "-q --quiet" option.')
 @click.option('-o', '--to_file', 'to_file', is_flag=True, flag_value=True, show_default=True,

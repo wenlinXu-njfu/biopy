@@ -12,7 +12,7 @@ from Biolib.fasta import Fasta
 from Biolib.show_info import Displayer
 
 
-def main(fasta_file: TextIOWrapper, parse_seqids: bool, out_file: str):
+def main(fasta_file: TextIOWrapper, parse_seqids: bool, out_file: TextIOWrapper):
     content = ''
     for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
         if out_file:
@@ -20,14 +20,14 @@ def main(fasta_file: TextIOWrapper, parse_seqids: bool, out_file: str):
         else:
             print(nucl_obj.get_seq_len_info())
     if out_file:
-        with open(out_file, 'w') as o:
+        with out_file as o:
             o.write(content)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA file.')
 @click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id.')
-@click.option('-o', '--output_file', 'outfile',
+@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file(seq_id\\tseq_len\\n), if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

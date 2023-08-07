@@ -15,14 +15,14 @@ from Biolib.show_info import Displayer
 def main(fasta_file: TextIOWrapper,
          regula_exp: str,
          inplace_id: bool,
-         out_file: str):
+         out_file: TextIOWrapper):
     seq_dict = Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id)
     content = []
     for seq_id, seq in seq_dict.items():
         content.append(f">{seq_id}\n{seq}\n")
     content = ''.join(content)
     if out_file:
-        with open(out_file, 'w') as o:
+        with out_file as o:
             o.write(content)
     else:
         print(content)
@@ -34,7 +34,7 @@ def main(fasta_file: TextIOWrapper,
               help='The name of a gene locus represented by a regular expression.')
 @click.option('-I', '--inplace_id', 'inplace_id', is_flag=True, flag_value=True,
               help='[optional] Replace the longest sequence ID with unique ID.')
-@click.option('-o', '--output_file', 'outfile',
+@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

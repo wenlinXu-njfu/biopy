@@ -24,7 +24,7 @@ from Biolib.show_info import Displayer
 def CircToolKit():
     """
     Program: CircRNAs analysis tools\n
-    Version: 1.0.0\n
+    Version: 1.1.0\n
     Contact: WenlinXu \033[1m(wenlinxu.njfu@outlook.com)\033[0m
     """
     pass
