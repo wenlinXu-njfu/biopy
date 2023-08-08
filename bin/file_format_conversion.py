@@ -11,7 +11,7 @@ from file_format_conversion_lib.gff_sort import run as run1
 from file_format_conversion_lib.gff2gtf import run as run2
 from file_format_conversion_lib.gff2bed import run as run3
 from file_format_conversion_lib.gtf2bed import run as run4
-from file_format_conversion_lib.fasta_conversion import run as run5
+from file_format_conversion_lib.format_fasta import run as run5
 from file_format_conversion_lib.fq2fa import run as run6
 from Biolib.show_info import Displayer
 

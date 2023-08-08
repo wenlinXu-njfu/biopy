@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: get_longest_seq_for_gene.py
-Description: Get the longest transcript of each gene
+Description: Get the longest transcript of each gene locus.
 Date: 2022/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -15,11 +15,10 @@ from Biolib.show_info import Displayer
 def main(fasta_file: TextIOWrapper,
          regula_exp: str,
          inplace_id: bool,
-         out_file: TextIOWrapper):
-    seq_dict = Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id)
+         out_file: TextIOWrapper = None):
     content = []
-    for seq_id, seq in seq_dict.items():
-        content.append(f">{seq_id}\n{seq}\n")
+    for seq_obj in Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id):
+        content.append(f">{seq_obj.id}\n{seq_obj.seq}\n")
     content = ''.join(content)
     if out_file:
         with out_file as o:
@@ -39,7 +38,7 @@ def main(fasta_file: TextIOWrapper,
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 def run(fasta_file, regular_expression, inplace_id, outfile):
-    """Get the longest transcript of each gene."""
+    """Get the longest transcript of each gene locus."""
     main(fasta_file, regular_expression, inplace_id, outfile)
 
 

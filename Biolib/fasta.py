@@ -9,14 +9,20 @@ from re import findall
 from _io import TextIOWrapper
 from typing import Dict, Union
 from gzip import GzipFile
-from click import echo
+from click import echo, open_file
 from itertools import groupby
 from Biolib.sequence import Nucleotide, Protein
 
 
 class Fasta:
     def __init__(self, path: Union[str, TextIOWrapper]):
-        self.path = path
+        if isinstance(path, str):
+            self.path = path
+        else:
+            if path.name == '<stdin>':
+                self.path = open_file('-').readlines()
+            else:
+                self.path = path.name
 
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
@@ -133,33 +139,30 @@ class Fasta:
                     line = str(f.readline(), 'utf8')
                     return True if line.startswith('>') else False
 
-    def merge_sequence(self) -> str:  # return str generator
+    def merge_sequence(self) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed on a single line."""
         is_fa = self.check_FASTA()
         if not is_fa:
-            fa_generator = self.parse(False)
-            for nucl_obj in fa_generator:
-                yield f">{nucl_obj.id}\n{nucl_obj.seq}\n"
+            for seq_obj in self.parse(False):
+                yield seq_obj
         else:
             echo('\033[33mThe input FASTA file does not need to be formatted.\033[0m', err=True)
             exit()
 
-    def split_sequence(self, char_num: int) -> str:  # return str generator
+    def split_sequence(self, char_num: int) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed in multiple lines."""
-        fa_generator = self.parse(False)
-        for nucl_obj in fa_generator:
-            nucl_obj = nucl_obj.display_set(char_num)
-            yield f">{nucl_obj.id}\n{nucl_obj.seq}"
+        for seq_obj in self.parse(False):
+            seq_obj = seq_obj.display_set(char_num)
+            yield seq_obj
 
 # Other method==========================================================================================================
-    def get_longest_seq(self, regular_exp: str = r'\w+.\w+', inplace_id: bool = False) -> Dict[str, str]:
-        """Get the longest transcript of each gene."""
-        all_seq_dict = {}  # {seq_id: seq}
-        longest_seq_dict = {}
+    def get_longest_seq(self, regular_exp: str = r'\w+.\w+', inplace_id: bool = False) -> Union[Nucleotide, Protein]:
+        """Get the longest transcript of each gene locus."""
+        all_seq_dict = {seq_obj.id: seq_obj.seq for seq_obj in self.parse(False)}  # {seq_id: seq}
+        longest_seq_dict = {}  # {locus_id: seq}
         id_map_dict = {}  # {'Potri.001G000100': 'Potri.001G000100.3', 'Potri.001G000200': 'Potri.001G000200.1', ...}
         if inplace_id:
-            for seq_obj in self.parse():
-                all_seq_dict[seq_obj.id] = seq_obj.seq
+            for seq_obj in self.parse(False):
                 gene_id = findall(regular_exp, seq_obj.id)[0]
                 if gene_id not in id_map_dict:
                     id_map_dict[gene_id] = seq_obj.id
@@ -170,18 +173,18 @@ class Fasta:
                 longest_seq_dict[locus] = all_seq_dict[longest_seq_id]
         else:
             for seq_obj in self.parse(False):
-                all_seq_dict[seq_obj.id] = seq_obj.seq
                 gene_id = findall(regular_exp, seq_obj.id)[0]
                 if gene_id not in id_map_dict:
                     id_map_dict[gene_id] = seq_obj.id
                 else:
-                    if seq_obj.len >= len(all_seq_dict[seq_obj.id]):
+                    if seq_obj.len >= len(all_seq_dict[id_map_dict[gene_id]]):
                         id_map_dict[gene_id] = seq_obj.id
             for locus, longest_seq_id in id_map_dict.items():
                 longest_seq_dict[longest_seq_id] = all_seq_dict[longest_seq_id]
-        return longest_seq_dict
+        for seq_id, seq in longest_seq_dict.items():
+            yield Nucleotide(seq_id, seq) if 'M' not in seq and '*' not in seq else Protein(seq_id, seq)
 
-    def filter_n(self, max_num=1) -> Nucleotide:  # return Nucleotide object generator
+    def filter_n(self, max_num=1) -> Nucleotide:
         for nucl_obj in self.parse():
             if nucl_obj.seq.count('n') < max_num or nucl_obj.seq.count('N') < max_num:
                 yield nucl_obj
