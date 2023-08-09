@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: qPCR.py
-Description: Calculate relative expression based on qPCR results
+Description: Calculate relative expression based on qPCR results.
 Date: 2022/5/7
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -16,7 +16,11 @@ import matplotlib.pyplot as plt
 from Biolib.show_info import Displayer
 
 
-def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: str, figsize: Tuple[float, float]):
+def main(in_file: str,
+         ref_gene_name: str,
+         control_sample_name: str,
+         out_file: str,
+         figsize: Tuple[float, float]):
     # step1: Read in qPCR results file.
     df = pd.read_excel(in_file, 'Results', header=39, usecols=['Sample Name', 'Target Name', 'CT'])
     df = df[df['Sample Name'].notnull()]
@@ -34,11 +38,12 @@ def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: s
     for sample_name in all_sample_name:
         ct_mean_product = 1
         for ref_gene in ref_gene_list:
-            ref_gene_df = df[(df['Target Name'] == ref_gene) & (df['Sample Name'] == sample_name) &
+            ref_gene_df = df[(df['Target Name'] == ref_gene) &
+                             (df['Sample Name'] == sample_name) &
                              (df['CT'] != 'Undetermined')]
             if ref_gene_df.empty:
-                click.echo(f'''\033[31mError: Reference gene "{ref_gene}" lacks sample "{sample_name}".\033[0m''',
-                           err=True)
+                err_msg = f'Error: Reference gene "{ref_gene}" lacks sample "{sample_name}".'
+                click.echo(f'\033[31m{err_msg}\033[0m', err=True)
                 exit()
             ct_mean = ref_gene_df['CT'].mean(0)
             ct_mean_product *= ct_mean
@@ -56,11 +61,11 @@ def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: s
             target_gene_df = df[(df['Target Name'] == target_gene) & (df['Sample Name'] == sample_name)]
             if target_gene_df.empty:
                 if sample_name == control_sample_name:
-                    click.echo(f'''\033[31mError: Gene "{target_gene}" lacks control sample "{sample_name}".\033[0m''',
-                               err=True)
+                    err_msg = f'Error: Gene "{target_gene}" lacks control sample "{sample_name}".'
+                    click.echo(f'\033[31m{err_msg}\033[0m', err=True)
                 else:
-                    click.echo(f'''\033[33mWarning: Gene "{target_gene}" lacks sample "{sample_name}".\033[0m''',
-                               err=True)
+                    warning_msg = f'Warning: Gene "{target_gene}" lacks sample "{sample_name}".'
+                    click.echo(f'\033[33m{warning_msg}\033[0m', err=True)
             else:
                 target_gene_df.loc[target_gene_df['CT'] == 'Undetermined', 'CT'] = np.inf
                 ref_gene_ct_mean = float(ref_gene_df.loc[ref_gene_df['Sample Name'] == sample_name, 'Ct Mean'])
@@ -99,7 +104,8 @@ def main(in_file: str, ref_gene_name: str, control_sample_name: str, out_file: s
     target_gene_df.to_csv(f'{out_file}.csv', float_format="%.3f", index=False, encoding='gbk')
 
     # step6: Draw bar graph and save figure.
-    target_gene_df = target_gene_df.loc[:, ['Sample Name', 'Target Name', 'PR(>F)', '2^(-ΔΔCt) Mean', 'Std']].drop_duplicates()
+    target_gene_df = target_gene_df.loc[:,
+                     ['Sample Name', 'Target Name', 'PR(>F)', '2^(-ΔΔCt) Mean', 'Std']].drop_duplicates()
     if len(all_target_gene_name) % 3 == 0:
         nrows = int(len(all_target_gene_name) / 3)
     else:
