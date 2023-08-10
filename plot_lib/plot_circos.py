@@ -6,7 +6,6 @@ Date: 2022/10/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from datetime import datetime
 import click
 import matplotlib.pyplot as plt
 from plot_lib.circos.draw_gene_density import draw_chr, draw_gene_density, draw_outer_bar, draw_bezier_curve
@@ -66,11 +65,7 @@ def main(chr_len_file, gene_density_file, stat_file, link_file, out_file):
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 def run(chr_len_file, gene_density_file, feature_stat, link_file, outfile):
     """Draw the circos graph."""
-    start_time = datetime.now().replace(microsecond=0)
-    click.echo(f'[{start_time}] Start running.')
     main(chr_len_file, gene_density_file, feature_stat, link_file, outfile)
-    end_time = datetime.now().replace(microsecond=0)
-    click.echo(f'[{end_time}] Run finish in {end_time - start_time}.', err=True)
 
 
 if __name__ == '__main__':
