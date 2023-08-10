@@ -14,8 +14,8 @@ tqdm >= 4.62.3<br />
 venn >= 0.1.3<br />
 
 ## Dependency of other software
-blast+ for circRNA flanking sequence analyse.
-pfamscan for batch perform pfamscan.
+blast+ for circRNA flanking sequence analyse.<br />
+pfamscan for batch perform pfamscan.<br />
 
 ## Getting started
 git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git
