@@ -22,3 +22,4 @@ git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git
 python biopy_v1.1.0/configure.py
 export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0
 export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin
+![image](https://github.com/wenlinXu-njfu/biopy_v1.1.0/blob/master/circos.png)
