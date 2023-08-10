@@ -1,4 +1,4 @@
-### A tiny bioinformatics and visual tool.
+# A tiny bioinformatics and visual tool.
 
 ## Dependency of python packages
 python >= 3.8.5<br />
