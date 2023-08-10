@@ -1,3 +1,5 @@
+## A tiny bioinformatics and visual tool.
+
 ## Dependency of python packages
 python >= 3.8.5
 click >= 8.1.2
