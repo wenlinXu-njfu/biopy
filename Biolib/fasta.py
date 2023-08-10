@@ -7,7 +7,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
 from _io import TextIOWrapper
-from typing import Dict, Union
+from typing import Union
 from gzip import GzipFile
 from click import echo, open_file
 from itertools import groupby
