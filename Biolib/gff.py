@@ -45,14 +45,17 @@ class Gff:
 
     def read_as_df(self, parse_attr: bool = False) -> DataFrame:
         # Read gff file as dataframe.
+        names = ['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
         if isinstance(self.path, str):
-            df = read_table(self.path, skiprows=sum(1 for line in open(self.path) if line.startswith('#')),
-                            names=['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute'])
+            df = read_table(self.path,
+                            skiprows=sum(1 for line in open(self.path) if line.startswith('#')),
+                            names=names)
         else:
             with open('./tmp.gff', 'w') as o:
                 o.write(''.join(self.path))
-            df = read_table('./tmp.gff', skiprows=sum(1 for line in open('./tmp.gff') if line.startswith('#')),
-                            names=['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute'])
+            df = read_table('./tmp.gff',
+                            skiprows=sum(1 for line in open('./tmp.gff') if line.startswith('#')),
+                            names=names)
         # Parse attribute.
         if parse_attr:
             index = 0
