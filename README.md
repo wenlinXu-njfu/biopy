@@ -18,9 +18,9 @@ blast+ for circRNA flanking sequence analyse.<br />
 pfamscan for batch perform pfamscan.<br />
 
 ## Getting started
-git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git
-python biopy_v1.1.0/configure.py
-export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0
-export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin
+git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git <br />
+python biopy_v1.1.0/configure.py<br />
+export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0<br />
+export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin<br />
 
-![image](https://github.com/wenlinXu-njfu/biopy_v1.1.0/blob/master/circos.png)
+![image](circos.png)
