@@ -23,4 +23,4 @@ python biopy_v1.1.0/configure.py<br />
 export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0<br />
 export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin<br />
 
-![image](circos.png)
+![image](plot_lib/circos/test_data/circos.png)
