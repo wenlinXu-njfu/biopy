@@ -24,5 +24,5 @@ export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0<br />
 export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin<br />
 
 ## example
-### plot circos <br /> -c biopy/plot_lib/circos/test_data/chr_len.txt \ <br /> -d biopy/plot_lib/circos/test_data/gene_density.txt \ <br /> -s biopy/plot_lib/circos/test_data/stat.txt \ <br /> -l biopy/plot_lib/circos/test_data/link.txt \ <br /> -o circos.png
+### plot circos \ <br /> -c biopy/plot_lib/circos/test_data/chr_len.txt \ <br /> -d biopy/plot_lib/circos/test_data/gene_density.txt \ <br /> -s biopy/plot_lib/circos/test_data/stat.txt \ <br /> -l biopy/plot_lib/circos/test_data/link.txt \ <br /> -o circos.png
 ![image](plot_lib/circos/test_data/circos.png)
