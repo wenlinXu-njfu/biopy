@@ -17,7 +17,7 @@ class Timer:
         def wrapper(*args, **kwargs):
             start_time = datetime.now().replace(microsecond=0)
             if self.message:
-                click.echo(f"[{datetime.now().replace(microsecond=0)}] {self.message}.", err=True)
+                click.echo(f"[{datetime.now().replace(microsecond=0)}] {self.message}", err=True)
             else:
                 msg = function.__name__.replace('_', ' ')
                 click.echo(f"[{datetime.now().replace(microsecond=0)}] Start run {msg}.", err=True)
