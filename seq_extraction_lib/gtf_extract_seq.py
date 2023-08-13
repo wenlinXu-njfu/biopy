@@ -23,8 +23,9 @@ def main(gtf_file: TextIOWrapper, fasta_file: TextIOWrapper, out_file: TextIOWra
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gtf_file', 'gtf_file', type=click.File('r'), help='Input GTF file.')
-@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), help='Input reference sequence FASTA file.')
+@click.option('-g', '--gtf_file', 'gtf_file', type=click.File('r'), required=True, help='Input GTF file.')
+@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), required=True,
+              help='Input reference sequence FASTA file.')
 @click.option('-o', '--output_file', 'output_file', type=click.File('a'),
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

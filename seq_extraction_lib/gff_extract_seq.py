@@ -37,11 +37,12 @@ def main(gff_file: TextIOWrapper,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gff_file', 'gff_file', type=click.File('r'), help='Input GFF file.')
-@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), help='Input reference sequence FASTA file.')
-@click.option('-t', '--feature_type', 'feature_type', help='Specify feature type. (eg: gene, mRNA, etc)')
+@click.option('-g', '--gff_file', 'gff_file', type=click.File('r'), required=True, help='Input GFF file.')
+@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), required=True,
+              help='Input reference sequence FASTA file.')
+@click.option('-t', '--feature_type', 'feature_type', required=True, help='Specify feature type. (eg: gene, mRNA, etc)')
 @click.option('-d', '--id_file', 'id_file', type=click.File('r'),
-              help='[optional] Provides an ID file (one id per line) that extracts sequences from the GFF file that '
+              help='Provides an ID file (one id per line) that extracts sequences from the GFF file that '
                    '\033[1mmatch\033[0m the IDs in the ID file.')
 @click.option('-o', '--output_file', 'output_file', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')

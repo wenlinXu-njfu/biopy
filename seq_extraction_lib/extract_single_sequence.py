@@ -33,11 +33,12 @@ def main(fasta_file: TextIOWrapper,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), help='Input reference sequence file. (format: FASTA)')
-@click.option('-c', '--chr_name', 'chr_name', help='Chromosome name. (eg:Chr01)')
-@click.option('-s', '--start_site', 'start_site', type=int, help='Start site on chromosome. (based on 1)')
-@click.option('-e', '--end_site', 'end_site', type=int, help='End site on chromosome. (based on 1)')
-@click.option('-S', '--strand', 'strand', type=click.Choice(['+', '-']), help='Direction of the chain.')
+@click.option('-r', '--ref_fasta', 'ref_fasta_file', type=click.File('r'), required=True,
+              help='Input reference sequenceFASTA file.')
+@click.option('-c', '--chr_name', 'chr_name', required=True, help='Chromosome name. (eg:Chr01)')
+@click.option('-s', '--start_site', 'start_site', type=int, required=True, help='Start site on chromosome. (based on 1)')
+@click.option('-e', '--end_site', 'end_site', type=int, required=True, help='End site on chromosome. (based on 1)')
+@click.option('-S', '--strand', 'strand', type=click.Choice(['+', '-']), required=True, help='Direction of the chain.')
 @click.option('-o', '--output_file', 'output_file', type=click.File('w'),
               help='Output file, if not specified, print result to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
