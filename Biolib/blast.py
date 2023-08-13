@@ -5,25 +5,34 @@ Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, IO, Tuple
+from _io import TextIOWrapper
+from typing import Union, Tuple
+from click import open_file
 
 
 class Blast:
-    def __init__(self, path: Union[IO, str]):
-        self.path = path
-        self.line_num = sum(1 for _ in open(self.path))
+    def __init__(self, path: Union[str, TextIOWrapper]):
+        if isinstance(path, str):
+            self.path = path
+        else:
+            if path.name == '<stdin>':
+                self.path = open_file('-').readlines()
+            else:
+                self.path = path.name
 
 # Basic method==========================================================================================================
     def parse_BLAST(self) -> Tuple[str]:
         """Parse information of each column of BLAST6 file line by line."""
-        for line in open(self.path):
+        open_blast = open(self.path) if isinstance(self.path, str) else self.path
+        for line in open_blast:
             split = line.strip().split('\t')
             querry_id, sbject_id, align_rate = split[0], split[1], split[2]
             align_len, mismatch, gap = split[3], split[4], split[5]
             querry_start, querry_end = split[6], split[7]
             sbject_start, sbject_end = split[8], split[9]
             e_value, score = split[10], split[11]
-            yield querry_id, sbject_id, align_rate, align_len, querry_start, querry_end, sbject_start, sbject_end, e_value, score
+            yield querry_id, sbject_id, align_rate, align_len, \
+                querry_start, querry_end, sbject_start, sbject_end, e_value, score
 
     def get_pair_dict(self, top: int = 3):
         pair_dict = {}  # {query1: {sbject1: [], sbject2: [], ...}, query2: {}, ...}
