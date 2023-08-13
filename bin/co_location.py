@@ -6,6 +6,7 @@ Date: 2023/4/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from _io import TextIOWrapper
 import click
 from Biolib.gff import Gff
 from Biolib.show_info import Displayer
@@ -72,14 +73,14 @@ def lncRNA_target_gene_prediction(gtf_file: str,
                                   gff_file: str,
                                   feature: str,
                                   target_range: int,
-                                  out_file: str = None):
+                                  out_file: TextIOWrapper = None):
     """
     LncRNA target genes were predicted according to lncRNA annotation files (GTF) and gene annotation files (GFF).
     :param gtf_file: lncRNA annotation files(GTF)
     :param gff_file: gene annotation files(GFF)
     :param out_file: output file
     :param feature: feature type (type=str)
-    :param target_range: the farthest distance between lncRNA and target gene (type=int, unit=1000)
+    :param target_range: the farthest distance between lncRNA and target gene (type=int)
     :return: None
     """
     gff_dict = Gff(gff_file).get_gff_dict(feature)
@@ -93,8 +94,8 @@ def lncRNA_target_gene_prediction(gtf_file: str,
             split = line.strip().split('\t')
             if split[2] == 'transcript':
                 chr_num = split[0]
-                start = int(split[3]) - target_range * 1000
-                end = int(split[4]) + target_range * 1000
+                start = int(split[3]) - target_range
+                end = int(split[4]) + target_range
                 strand = split[-3]
                 attr_list = split[-1].split(' ')
                 id_index = attr_list.index('transcript_id')
@@ -118,18 +119,17 @@ def lncRNA_target_gene_prediction(gtf_file: str,
                             else:
                                 print(f"{chr_num}\t{transcript_id}\t{gene['id']}\t{dis}\t{loc}\t{strand}")
     if out_file:
-        with open(out_file, 'w') as o:
+        with out_file as o:
             o.write(''.join(content))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gtf_file', 'gtf', help='LncRNA annotation file (format: GTF)')
-@click.option('-a', '--gff_file', 'gff', help='Reference annotation file (format: GFF)')
-@click.option('-f', '--feature_type', 'feature_type', default='mRNA', help='Feature type. {default: mRNA}')
-@click.option('-d', '--distance', 'distance', type=int, default=100,
-              help='Genes within a certain range of upstream and downstream of lncRNA were selected as target genes. '
-                   '{default: 100 unit: kb}')
-@click.option('-o', '--output_file', 'outfile',
+@click.option('-g', '--gtf_file', 'gtf', required=True, help='Gtf annotation file of lncRNA.')
+@click.option('-a', '--gff_file', 'gff', required=True, help='Gff annotation file of mRNA.')
+@click.option('-f', '--feature_type', 'feature_type', default='mRNA',  show_default=True, help='Feature type.')
+@click.option('-d', '--distance', 'distance', type=int, default=100000, show_default=True,
+              help='Genes within a certain range of upstream and downstream of lncRNA were selected as target genes.')
+@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

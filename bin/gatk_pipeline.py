@@ -140,10 +140,11 @@ def main(genome_fasta_file: str,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-r', '--genome_fasta_file', 'genome_fasta_file', type=click.File('r'), help='Input file.')
-@click.option('-snp', '--snp_filter_expression', 'snp_filter_expression', help='SNP filter expression.')
-@click.option('-indel', '--indel_filter_expression', 'indel_filter_expression', help='INDEL filter expression.')
-@click.option('-o', '--output_prefix', 'output_prefix', help='Output file prefix.')
+@click.option('-r', '--ref_genome_file', 'genome_fasta_file', type=click.File('r'), required=True,
+              help='Reference sequence file.')
+@click.option('-snp', '--snp_filter', 'snp_filter_expression', help='SNP filter expression.')
+@click.option('-indel', '--indel_filter', 'indel_filter_expression', help='INDEL filter expression.')
+@click.option('-o', '--output_prefix', 'output_prefix', required=True, help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 @click.argument('sorted_bam_files', nargs=-1, type=click.File('r'), required=True)

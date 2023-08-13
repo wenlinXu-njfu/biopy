@@ -55,9 +55,11 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1)
-@click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id in FASTA file.')
-@click.option('-id', '--id_file', 'id_file', type=click.File('r'), help='Input id TEXT file (one id per line).')
+@click.argument('fasta_files', nargs=-1, required=True)
+@click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True,
+              help='Parse sequence id in FASTA file.')
+@click.option('-id', '--id_file', 'id_file', type=click.File('r'), required=True,
+              help='Input id file (one id per line).')
 @click.option('--match/--contain', default=True, show_default=True,
               help='Whether the id supplied should exactly match the ID of the sequence.')
 @click.option('-log', '--log_file', 'log_file', type=click.File('a'),

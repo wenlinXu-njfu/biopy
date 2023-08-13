@@ -33,7 +33,7 @@ def main(in_file, file_format, feature_type, out_file: TextIOWrapper):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--anno_file', 'anno_file', type=click.File('r'), help='Input GFF or GTF file.')
+@click.option('-i', '--anno_file', 'anno_file', type=click.File('r'), required=True, help='Input GFF or GTF file.')
 @click.option('-f', '--format', 'file_format', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
               help='Specify input annotation file format.')
 @click.option('-t', '--feature_type', 'feature_type',

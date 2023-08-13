@@ -27,14 +27,14 @@ def main(exp_file, out_file_prefix):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--expression_file', 'expression_file',
-              help='Input gene expression profile file. (support format: txt, xls, xlsx, csv)')
-@click.option('-o', '--output_file', 'outfile', help='Output file prefix.')
+@click.option('-i', '--expression_file', 'expression_file', required=True,
+              help='Input gene expression profile file. (support format: txt, xls, xlsx, and csv)')
+@click.option('-o', '--output_prefix', 'output_prefix', default='Tau_index', show_default=True, help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
-def run(expression_file, outfile):
+def run(expression_file, output_prefix):
     """Calculate gene expression tissue-specificity based on Tau index."""
-    main(expression_file, outfile)
+    main(expression_file, output_prefix)
 
 
 if __name__ == '__main__':

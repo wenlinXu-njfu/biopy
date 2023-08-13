@@ -26,7 +26,7 @@ def main(fasta_file: TextIOWrapper, out_file: TextIOWrapper):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA sequence file.')
+@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), required=True, help='Input FASTA file.')
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

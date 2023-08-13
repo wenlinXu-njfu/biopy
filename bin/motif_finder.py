@@ -36,8 +36,8 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, type=click.File('r'))
-@click.option('-m', '--motif', 'motif', help='Specify motif sequence, support for regular expressions.')
+@click.argument('fasta_files', nargs=-1, type=click.File('r'), required=True)
+@click.option('-m', '--motif', 'motif', required=True, help='Specify motif sequence, support for regular expressions.')
 @click.option('-q', '--quiet', 'quiet', is_flag=True, flag_value=True,
               help='Do not report sequence that not found motif. This conflicts with the "-l --log_file" option and '
                    'takes precedence over the "-l --log_file" option.')

@@ -23,7 +23,7 @@ def main(in_dir, old, new):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-d', '--input_dir_path', 'input_dir', help='The directory where the file to be renamed resides.')
+@click.option('-d', '--input_dir_path', 'input_dir', required=True, help='The directory where the file to be renamed resides.')
 @click.option('-old', '--old_name', 'old', help='The string to be replaced, it supports for regular expressions')
 @click.option('-new', '--new_name', 'new', help='Replacement string, it supports for regular expressions')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

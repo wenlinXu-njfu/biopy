@@ -47,7 +47,7 @@ def main(exp_matrix_file, out_prefix):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file',
+@click.option('-i', '--input_file', 'input_file', required=True,
               help='Input gene expression matrix file (including header). Supported formats: txt, xls, xlsx, csv')
 @click.option('-o', '--output_file', 'outfile',
               help='Output file prefix, if not specified, print results to terminal as stdout.')

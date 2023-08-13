@@ -54,7 +54,7 @@ def main(go_basic_obo_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--obo_file', 'obo_file', help='Input GO annotation file (go-basic.obo).')
+@click.option('-i', '--obo_file', 'obo_file', required=True, help='Input GO annotation file (go-basic.obo).')
 @click.option('-o', '--output_file', 'outfile',
               help='Output file (ID\\tChild_id\\tName\\tNamespace\\tDefinition), '
                    'if not specified, print results to terminal as stdout.')
