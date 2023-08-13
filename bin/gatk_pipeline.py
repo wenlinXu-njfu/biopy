@@ -49,8 +49,8 @@ def MarkDuplicates(sorted_bam_file: str):
 
 @Timer('Variation detection.')
 def HaplottypeCaller(genome_fasta_file: str,
-                     sample_name: str,
-                     bam_file: str):
+                     bam_file: str,
+                     sample_name: str):
     command = f'gatk HaplotypeCaller ' \
               f'--emit-ref-confidence GVCF ' \
               f'-R {genome_fasta_file} ' \
