@@ -27,7 +27,7 @@ def main(gff_file: TextIOWrapper,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gff_file', 'gff_file', type=click.File('r'), help='Input GFF file.')
+@click.option('-g', '--gff_file', 'gff_file', type=click.File('r'), required=True, help='Input GFF file.')
 @click.option('-t', '--feature_type', 'feature_type',
               help='Specify the type of feature to convert to BED format, multiple types are separated by commas. [default: all]')
 @click.option('-o', '--output_bed_file', 'output_bed_file', type=click.File('w'),

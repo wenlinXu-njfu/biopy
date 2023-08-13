@@ -40,14 +40,14 @@ def main(fasta_file: Union[str, TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), help='Input FASTA file.')
+@click.option('-i', '--fasta_file', 'fasta_file', type=click.File('r'), required=True, help='Input FASTA file.')
 @click.option('-n', '--char_num', 'char_num', type=int, default=60, show_default=True,
               help='Specify how many character show in per line, 0 presents one line show per sequence.')
 @click.option('-L', '--sort_by_len', 'sort_by_len', is_flag=True, flag_value=True,
-              help='[optional] Sort sequence by length. If both "-L --sort_by_len" and "-I --sort_by_id" are specified, '
+              help='Sort sequence by length. If both "-L, --sort_by_len" and "-I, --sort_by_id" options are specified, '
                    'sort by length first then id by default.')
 @click.option('-I', '--sort_by_id', 'sort_by_id', is_flag=True, flag_value=True,
-              help='[optional] Sort sequence by id. If both "-L --sort_by_len" and "-I --sort_by_id" are specified, '
+              help='Sort sequence by id. If both "-L, --sort_by_len" and "-I, --sort_by_id" options are specified, '
                    'sort by length first then id by default.')
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')

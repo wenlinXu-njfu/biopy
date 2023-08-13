@@ -22,7 +22,7 @@ def main(gff_file, gtf_file=None):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gff_file', 'gff_file', type=click.File('r'), help='Input GFF file.')
+@click.option('-i', '--gff_file', 'gff_file', type=click.File('r'), required=True, help='Input GFF file.')
 @click.option('-o', '--gtf_file', 'gtf_file', type=click.File('w'),
               help='Output GTF file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
