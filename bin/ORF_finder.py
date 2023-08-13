@@ -23,9 +23,6 @@ def main(fasta_files: Tuple[TextIOWrapper],
          quiet: bool = False,
          log_file: str = None,
          to_file: bool = None):
-    if not fasta_files:
-        click.echo(f'\033[31mError: Missing FASTA file.\033[0m', err=True)
-        exit()
     for fasta_file in fasta_files:
         content = []
         if fasta_file.name != '<stdin>':
@@ -70,7 +67,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, type=click.File('r'))
+@click.argument('fasta_files', nargs=-1, type=click.File('r'), required=True)
 @click.option('-l', '--min_len', 'min_len', type=int, default=30, show_default=True, help='Minimal ORF length.')
 @click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id.')
 @click.option('-c', '--completed', 'completed', is_flag=True, flag_value=True, help='Remain completed ORF.')
