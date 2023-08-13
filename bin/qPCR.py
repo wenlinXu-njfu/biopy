@@ -159,12 +159,11 @@ def main(in_file: str,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', help='Input qPCR result excel file.')
-@click.option('-r', '--ref_name', 'ref_name',
+@click.option('-i', '--input_file', 'input_file', required=True, help='Input qPCR result excel file.')
+@click.option('-r', '--ref_name', 'ref_name', required=True,
               help='Specify reference gene name. Multiple reference genes are separated by commas. (eg. 18s,ef1)')
-@click.option('-c', '--control_name', 'control_name', help='Specify name of control sample.')
-@click.option('-f', '--figure_size', 'figure_size', default='10x10', show_default=True,
-              help='[optional] Specify figure size.')
+@click.option('-c', '--control_name', 'control_name', required=True, help='Specify name of control sample.')
+@click.option('-f', '--figure_size', 'figure_size', default='10x10', show_default=True, help='Figure size.')
 @click.option('-o', '--output_file_prefix', 'out_prefix', help='Prefix of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
