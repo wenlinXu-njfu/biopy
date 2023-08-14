@@ -7,8 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import StringIO, TextIOWrapper
-import click
-from Biolib.statistics import pd, get_TPM
+from Biolib.statistics import click, pd, get_TPM
 from Biolib.show_info import Displayer
 file_content = """
 # featureCounts command\n
