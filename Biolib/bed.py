@@ -7,21 +7,25 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
 from _io import TextIOWrapper
+from click import open_file
 from Biolib.sequence import Nucleotide
 from Biolib.fasta import Fasta
 
 
 class Bed:
     def __init__(self, path: Union[str, TextIOWrapper]):
-        self.path = path
+        if isinstance(path, str):
+            self.path = path
+        else:
+            if path.name == '<stdin>':
+                self.path = open_file('-').readlines()
+            else:
+                self.path = path.name
 
 # Basic method==========================================================================================================
     def get_bed_dict(self) -> dict:
         bed_dict = {}  # {Chr1: [{start: int, end: int, id: str, frame: str, strand: str}, ...], ...}
-        try:
-            open_bed = open(self.path)
-        except TypeError:
-            open_bed = self.path
+        open_bed = open(self.path) if isinstance(self.path, str) else self.path
         for line in open_bed:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
