@@ -27,7 +27,7 @@ class Fasta:
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
         """A FASTA file generator that returns one Nucleotide or Protein object at one time."""
-        # Parse FASTA file from non-command line.
+        # Parse FASTA format from a file.
         if isinstance(self.path, str):
             # Parse uncompressed FASTA file (xx.fa).
             try:
@@ -64,7 +64,7 @@ class Fasta:
                         yield Nucleotide(seq_id, seq)
                     else:
                         yield Protein(seq_id, seq)
-        # Parse FASTA file from command line.
+        # Parse FASTA format from command line stdin.
         else:
             # Parse uncompressed FASTA file (xx.fa).
             try:
