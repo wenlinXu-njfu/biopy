@@ -6,6 +6,7 @@ Date: 2023/8/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from os import system
 from click import echo
 
 
@@ -19,6 +20,11 @@ class Displayer:
         self.author = author
         self.contact = contact
         self.version = version
+
+    @staticmethod
+    def echo_and_execute_command(command: str):
+        echo(f'\033[36m{command}\033[0m')
+        system(command)
 
     def version_info(self, ctx, param, value):
         if not value or ctx.resilient_parsing:
