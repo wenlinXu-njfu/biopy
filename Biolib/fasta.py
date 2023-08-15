@@ -36,7 +36,9 @@ class Fasta:
                     seq_id = g.__next__().strip()
                     seq = ''.join(line.strip() for line in fa_generator.__next__())
                     if parse_id:
-                        if '|' in seq_id:
+                        if '\t' in seq_id:
+                            seq_id = seq_id.split('\t')[0]
+                        elif '|' in seq_id:
                             seq_id = seq_id.split('|')[0]
                         else:
                             seq_id = seq_id.split(' ')[0]
