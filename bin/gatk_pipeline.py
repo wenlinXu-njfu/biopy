@@ -6,29 +6,26 @@ Date: 2023/8/13
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from os import system
 from typing import List
 import click
 from Biolib.timer import Timer
 from Biolib.show_info import Displayer
+displayer = Displayer(__file__.split('/')[-1])
 
 
 @Timer('Build genome index.')
 def build_genome_index(genome_fasta_file: str):
     command = f'samtools faidx {genome_fasta_file}'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     command = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
 
 
 @Timer('Merge bam files.')
 def merge_bam_files(sorted_bam_files: list, output_file_prefix: str):
     bam_files = ' '.join(sorted_bam_files)
     command = f'samtools merge {output_file_prefix}.merge.bam {bam_files}'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{output_file_prefix}.merge.bam'
 
 
@@ -39,11 +36,9 @@ def MarkDuplicates(sorted_bam_file: str):
               f'-I {sorted_bam_file} ' \
               f'-M {sorted_bam_file}.metrics ' \
               f'-O {markdup_bam_file}'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     command = f'samtools index {markdup_bam_file}'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return markdup_bam_file
 
 
@@ -57,11 +52,9 @@ def HaplottypeCaller(genome_fasta_file: str,
               f'-I {bam_file} ' \
               f'--sample-name {sample_name} ' \
               f'-O {sample_name}.HC.gvcf.gz'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     command = f'gatk IndexFeatureFile -F {sample_name}.HC.gvcf.gz'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{sample_name}.HC.gvcf.gz'
 
 
@@ -74,8 +67,7 @@ def SNP_calling(genome_fasta_file: str,
               f'--select-type-to-include SNP ' \
               f'-V {vcf_file} ' \
               f'-O {sample_name}.HC.snp.vcf.gz'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{sample_name}.HC.snp.vcf.gz'
 
 
@@ -86,8 +78,7 @@ def SNP_filter(snp_vcf_file: str, filter_expression: str, sample_name: str):
               f'-O {sample_name}.HC.snp.filter.vcf.gz ' \
               f'--filter-expression {filter_expression} ' \
               f'--filter-name PASS'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{sample_name}.HC.snp.filter.vcf.gz'
 
 
@@ -100,8 +91,7 @@ def INDEL_calling(genome_fasta_file: str,
               f'--select-type-to-include INDEL ' \
               f'-V {vcf_file} ' \
               f'-O {sample_name}.HC.indel.vcf.gz'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{sample_name}.HC.indel.vcf.gz'
 
 
@@ -112,8 +102,7 @@ def INDEL_filter(indel_vcf_file: str, filter_expression: str, sample_name: str):
               f'-O {sample_name}.HC.indel.filter.vcf.gz ' \
               f'--filter-expression {filter_expression} ' \
               f'--filter-name PASS'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
     return f'{sample_name}.HC.indel.filter.vcf.gz'
 
 
@@ -121,8 +110,7 @@ def merge_variant(snp_vcf_file: str,
                   indel_vcf_file: str,
                   sample_name: str):
     command = f'gatk mergeVcfs -I {snp_vcf_file} -I {indel_vcf_file} -O {sample_name}.HC.filter.vcf.gz'
-    click.echo(f'\033[36m{command}\033[0m', err=True)
-    system(command)
+    displayer.echo_and_execute_command(command)
 
 
 def main(genome_fasta_file: str,
@@ -153,7 +141,7 @@ def main(genome_fasta_file: str,
 @click.option('-indel', '--indel_filter', 'indel_filter_expression', help='INDEL filter expression.')
 @click.option('-o', '--output_prefix', 'output_prefix', required=True, help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @click.argument('sorted_bam_files', nargs=-1, type=click.File('r'), required=True)
 def run(genome_fasta_file, sample_list, snp_filter_expression, indel_filter_expression, output_prefix, sorted_bam_files):
     """Variation analysis pipeline of GATK."""
