@@ -23,7 +23,7 @@ class Displayer:
 
     @staticmethod
     def echo_and_execute_command(command: str):
-        echo(f'\033[36m{command}\033[0m')
+        echo(f'\033[36m{command}\033[0m', err=True)
         system(command)
 
     def version_info(self, ctx, param, value):
