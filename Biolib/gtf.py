@@ -1,6 +1,6 @@
 """
 File: gtf.py
-Description: Instantiate a GTF file object
+Description: Instantiate a GTF file object.
 Date: 2021/12/1
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com

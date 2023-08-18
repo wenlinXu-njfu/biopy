@@ -1,6 +1,6 @@
 """
 File: statistics.py
-Description: 
+Description: Common functions to handle dataframe.
 Date: 2022/1/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -99,11 +99,6 @@ def get_TPM(read_count_DataFrame: pd.DataFrame,
     read_count_DataFrame = read_count_DataFrame * 10 ** 6
     TPM = read_count_DataFrame.iloc[:-1, 1:]
     raw_gene_num = len(TPM.index.tolist())
-
-    # FPKM = get_FPKM(read_count_DataFrame)
-    # FPKM.loc['sum'] = FPKM.sum(axis=0)
-    # TPM = FPKM.div(FPKM.iloc[-1], axis=1).iloc[:-1] * 10 ** 6
-    # raw_gene_num = len(TPM.index.tolist())
 
     if min_value:
         TPM = filter_by_min_value(TPM, min_value=min_value)

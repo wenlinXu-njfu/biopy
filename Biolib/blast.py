@@ -1,6 +1,6 @@
 """
 File: blast.py
-Description: Instantiate a blast result file object
+Description: Instantiate a blast result file object.
 Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
