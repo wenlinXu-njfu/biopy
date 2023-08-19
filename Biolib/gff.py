@@ -71,7 +71,7 @@ class Gff:
             remove('./tmp.gff')
         return df
 
-    def check_feature(self, feature: str) -> Tuple[bool, str]:
+    def __check_feature(self, feature: str) -> Tuple[bool, str]:
         """Check whether specified feature is included in GFF file."""
         features = set(line[2] for line in self.parse())
         if feature in features:
@@ -85,7 +85,7 @@ class Gff:
         #             Chr_num: [{id: str, start: int, end: int, strand: str}, {}, ...],
         #             Chr_num: [{}, {}, ...], ...
         #             }
-        is_in_gff, msg = self.check_feature(feature_type)
+        is_in_gff, msg = self.__check_feature(feature_type)
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
@@ -148,7 +148,7 @@ class Gff:
 
 # GFF file sorted by id method==========================================================================================
     @staticmethod
-    def _gff_sort(line: str) -> tuple:
+    def __gff_sort(line: str) -> tuple:
         if not line.startswith('#') and line.strip():
             split = line.strip().split('\t')
             alpha = findall(r'[a-zA-Z]+', split[0])[0]
@@ -177,10 +177,10 @@ class Gff:
         if isinstance(self.path, str):
             with open(self.path) as f:
                 l = f.readlines()
-                l.sort(key=lambda line: self._gff_sort(line))
+                l.sort(key=lambda line: self.__gff_sort(line))
         else:
             l = self.path
-            l.sort(key=lambda line: self._gff_sort(line))
+            l.sort(key=lambda line: self.__gff_sort(line))
         return ''.join(l)
 
 # Sequence extraction method============================================================================================
@@ -189,7 +189,7 @@ class Gff:
                         feature_type: str = 'gene',
                         feature_id_set: set = None) -> Nucleotide:
         """Extract sequences of specified feature type from GFF file."""
-        is_in_gff, msg = self.check_feature(feature_type)
+        is_in_gff, msg = self.__check_feature(feature_type)
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
@@ -322,7 +322,7 @@ class Gff:
                             feature_type: str = 'gene',
                             span: int = 100000) -> str:
         """Get feature density."""
-        is_in_gff, msg = self.check_feature(feature_type)
+        is_in_gff, msg = self.__check_feature(feature_type)
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()

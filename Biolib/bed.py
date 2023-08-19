@@ -39,7 +39,7 @@ class Bed:
 
 # Sequence extraction method============================================================================================
     @staticmethod
-    def judge_range(start: int, end: int, strand: str, up: int = 0, down: int = 0, both: int = 0) -> tuple:
+    def __judge_range(start: int, end: int, strand: str, up: int = 0, down: int = 0, both: int = 0) -> tuple:
         if both:
             start -= both
             end += both
@@ -82,7 +82,7 @@ class Bed:
             if nucl_obj.id in bed_dict:
                 seqs: list = bed_dict[nucl_obj.id]  # [{start: int, end: int, id: str, frame: str, strand: str}]
                 for d in seqs:
-                    new_start, new_end = self.judge_range(d['start'], d['end'], d['strand'], up, down, both)
+                    new_start, new_end = self.__judge_range(d['start'], d['end'], d['strand'], up, down, both)
                     if extension:
                         sub_seq_obj = nucl_obj[new_start:new_end]
                         if d['strand'] == '-':
