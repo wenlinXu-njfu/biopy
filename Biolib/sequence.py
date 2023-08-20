@@ -252,7 +252,7 @@ class Nucleotide(Sequence):
         :param min_len: minimal ORF length (type=int) {default=1}
         :param complete: whether consider ORF integrity (type=bool) {default=True}
         :param only_plus: whether only consider plus chain (type=bool) {default=False}
-        :return: longest ORF (type=Protein)
+        :return: the longest ORF (type=Protein)
         """
         plus1 = self.translation(complete)
         plus2 = self[1:].translation(complete)
