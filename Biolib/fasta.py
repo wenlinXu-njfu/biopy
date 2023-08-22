@@ -6,7 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from typing import Union
 from gzip import GzipFile
 from click import echo, open_file
@@ -20,7 +20,7 @@ class Fasta:
             self.path = path
         else:
             if path.name == '<stdin>':
-                self.path = open_file('-').readlines()
+                self.path = open_file('-')
             else:
                 self.path = path.name
 
@@ -84,7 +84,7 @@ class Fasta:
             # Parse compressed FASTA file (xx.fa.gz).
             except UnicodeDecodeError:
                 l = []
-                for line in GzipFile(self.path.name):
+                for line in GzipFile(self.path):
                     l.append(str(line, 'utf8'))
                 fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
                 for g in fa_generator:
@@ -135,7 +135,7 @@ class Fasta:
                     line = f.readline()
                     return True if line.startswith('>') else False
             except UnicodeDecodeError:
-                with GzipFile(self.path.name) as f:
+                with GzipFile(self.path) as f:
                     f.readline()
                     f.readline()
                     line = str(f.readline(), 'utf8')

@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from tqdm import tqdm
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from typing import Tuple
 import click
 from gzip import GzipFile
@@ -30,13 +30,13 @@ def main(fasta_files: Tuple[TextIOWrapper],
         else:
             out_prefix = ''
         # Show the progress bar on the command line.
-        if (to_file and log_file) or (to_file and quiet):
+        if (to_file and log_file) or (to_file and quiet) and fasta_file.name != '<stdin>':
             try:
-                seq_num = sum(1 for _ in open(fasta_file.name) if _.startswith('>'))
+                seq_num = sum(1 for _ in fasta_file if _.startswith('>'))
             except UnicodeDecodeError:
                 seq_num = sum(1 for _ in GzipFile(fasta_file.name) if str(_, 'utf8').startswith('>'))
-            with tqdm(total=seq_num, unit=' sequence') as process_bar:
-                for nucl_obj in Fasta(fasta_file.name).parse(parse_seqids):
+            with tqdm(total=seq_num, desc=f'\033[36m[Processing {fasta_file.name}]\033[0m', unit=' sequence') as process_bar:
+                for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
                     ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
                     if isinstance(ORF, str):
                         if not quiet:
