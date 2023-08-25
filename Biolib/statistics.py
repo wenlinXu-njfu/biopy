@@ -5,6 +5,7 @@ Date: 2022/1/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from io import TextIOWrapper, StringIO
 import click
 import pandas as pd
 from typing import Union
@@ -19,9 +20,14 @@ def display_set(decimal: int = 2) -> None:
     # pd.set_option('display.max_rows', None)
 
 
+def read_file_as_dataframe_from_stdin(sep: str = '\t', skip_rows: int = 0):
+    df = pd.read_table(StringIO(''.join(click.open_file('-').readlines())), index_col=0, sep=sep, skiprows=skip_rows)
+    return df
+
+
 def read_in_gene_expression_as_dataframe(gene_exp_file: str) -> Union[str, pd.DataFrame]:
+    function_dict = {'txt': pd.read_table, 'xlsx': pd.read_excel, 'xls': pd.read_excel, 'csv': pd.read_csv}
     try:
-        function_dict = {'txt': pd.read_table, 'xlsx': pd.read_excel, 'xls': pd.read_excel, 'csv': pd.read_csv}
         df = function_dict[gene_exp_file.split('.')[-1]](gene_exp_file, index_col=0)
     except KeyError:
         return '\033[31mError: Unrecognised file formats. Only txt, xls, xlsx, and csv formats are supported.\033[0m'
