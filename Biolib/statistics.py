@@ -5,7 +5,7 @@ Date: 2022/1/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from io import TextIOWrapper, StringIO
+from io import StringIO
 import click
 import pandas as pd
 from typing import Union
