@@ -157,7 +157,7 @@ def main(genome_fasta_file: str,
 @click.option('-indel', '--indel_filter', 'indel_filter_expression', help='INDEL filter expression.')
 @click.option('-o', '--output_prefix', 'output_prefix', required=True, help='Output file prefix.')
 @click.option('-O', '--record_command', 'record_command', type=click.File('a'),
-              help='Record all commands used by the pipeline to the specified file')
+              help='Record all commands used by the pipeline into the specified file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @click.argument('sorted_bam_files', nargs=-1, type=click.File('r'), required=True)
