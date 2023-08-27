@@ -6,6 +6,8 @@ Date: 2023/8/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from io import TextIOWrapper
+from typing import Union
 from os import system
 from click import echo
 
@@ -22,8 +24,13 @@ class Displayer:
         self.version = version
 
     @staticmethod
-    def echo_and_execute_command(command: str):
-        echo(f'\033[36m{command}\033[0m', err=True)
+    def echo_and_execute_command(command: str, file: Union[str, TextIOWrapper] = None):
+        if isinstance(file, str):
+            echo(f'\033[36m[command] {command}\033[0m', err=True, file=open(file, 'a'))
+        elif isinstance(file, TextIOWrapper):
+            echo(f'\033[36m[command] {command}\033[0m', err=True, file=file)
+        else:
+            echo(f'\033[36m[command] {command}\033[0m', err=True)
         system(command)
 
     def version_info(self, ctx, param, value):
