@@ -9,6 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union
 from os import system
+from datetime import datetime
 from click import echo
 
 
@@ -25,12 +26,13 @@ class Displayer:
 
     @staticmethod
     def echo_and_execute_command(command: str, file: Union[str, TextIOWrapper] = None):
+        command_prompt = f'[{datetime.now().replace(microsecond=0)}]$ '
         if isinstance(file, str):
-            echo(f'\033[36m[command] {command}\033[0m', err=True, file=open(file, 'a'))
+            echo(f'\033[33m{command_prompt}\033[0m\033[36m{command}\033[0m', err=True, file=open(file, 'a'))
         elif isinstance(file, TextIOWrapper):
-            echo(f'\033[36m[command] {command}\033[0m', err=True, file=file)
+            echo(f'\033[33m{command_prompt}\033[0m\033[36m{command}\033[0m', err=True, file=file)
         else:
-            echo(f'\033[36m[command] {command}\033[0m', err=True)
+            echo(f'\033[33m{command_prompt}\033[0m\033[36m{command}\033[0m', err=True)
         system(command)
 
     def version_info(self, ctx, param, value):
