@@ -20,8 +20,9 @@ def display_set(decimal: int = 2) -> None:
     # pd.set_option('display.max_rows', None)
 
 
-def read_file_as_dataframe_from_stdin(sep: str = '\t', skip_rows: int = 0):
-    df = pd.read_table(StringIO(''.join(click.open_file('-').readlines())), index_col=0, sep=sep, skiprows=skip_rows)
+def read_file_as_dataframe_from_stdin(sep: str = '\t', skip_rows: int = 0, index_col: int = 0):
+    df = pd.read_table(StringIO(''.join(click.open_file('-').readlines())),
+                       index_col=index_col, sep=sep, skiprows=skip_rows)
     return df
 
 
