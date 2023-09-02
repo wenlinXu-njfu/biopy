@@ -152,7 +152,7 @@ def main(genome_fasta_file: str,
 @click.option('-r', '--ref_genome_file', 'genome_fasta_file', type=click.File('r'), required=True,
               help='Reference sequence file.')
 @click.option('-samples', '--sample_list', 'sample_list', type=click.File('r'), required=True,
-              help='Sample name list. (One sample name per line, eg. Control\\nThreat\\n)')
+              help='Sample name list. (One sample name per line, eg. Sample1\\nSample2\\n)')
 @click.option('-snp', '--snp_filter', 'snp_filter_expression', help='SNP filter expression.')
 @click.option('-indel', '--indel_filter', 'indel_filter_expression', help='INDEL filter expression.')
 @click.option('-o', '--output_prefix', 'output_prefix', required=True, help='Output file prefix.')
