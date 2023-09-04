@@ -19,7 +19,8 @@ def main(fasta_file: Union[str, TextIOWrapper],
          sort_by_len: bool,
          sort_by_id: bool,
          out_file: TextIOWrapper = None):
-    seq_obj_generator = Fasta(fasta_file).merge_sequence() if char_num == 0 else Fasta(fasta_file).split_sequence(char_num)
+    seq_obj_generator = Fasta(fasta_file).merge_sequence() if char_num == 0 else (
+        Fasta(fasta_file).split_sequence(char_num))
     seq_obj_list = [seq_obj for seq_obj in seq_obj_generator]
     if sort_by_len and not sort_by_id:
         seq_obj_list.sort(key=lambda i: i.len)
@@ -33,7 +34,7 @@ def main(fasta_file: Union[str, TextIOWrapper],
             seq_obj.seq = seq_obj.seq.strip()
             print(seq_obj)
         else:
-            content.append(f'>{seq_obj.id}\n{seq_obj.seq}\n')
+            content.append(f'>{seq_obj.id}\n{seq_obj.seq.strip()}\n')
     if out_file and content:
         with out_file as o:
             o.write(''.join(content))
