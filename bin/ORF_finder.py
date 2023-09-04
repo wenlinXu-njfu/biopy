@@ -74,10 +74,10 @@ def main(fasta_files: Tuple[TextIOWrapper],
 @click.option('-p', '--only_plus', 'only_plus', is_flag=True, flag_value=True, help='Only predict plus chain.')
 @click.option('-q', '--quiet', 'quiet', is_flag=True, flag_value=True,
               help='Do not report nucleotide sequence that not found ORF. '
-                   'This conflicts with the "-L --log_file" option and takes precedence over the "-L --log_file" option.')
+                   'This conflicts with the "-L, --log_file" option and takes precedence over the "-L, --log_file" option.')
 @click.option('-log', '--log_file', 'log_file',
               help='Write the sequence that not found ORF to logfile. '
-                   'This conflicts with the "-q --quiet" option and has a lower priority than the "-q --quiet" option.')
+                   'This conflicts with the "-q, --quiet" option and has a lower priority than the "-q, --quiet" option.')
 @click.option('-o', '--to_file', 'to_file', is_flag=True, flag_value=True, show_default=True,
               help='Write the results to file rather than print to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
