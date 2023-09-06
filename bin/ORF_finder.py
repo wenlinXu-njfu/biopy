@@ -17,8 +17,7 @@ from Biolib import Fasta, Nucleotide, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.1.0')
 
 
-def sub_processing(*args):
-    nucl_obj, min_len, complete, only_plus = args[0], args[1], args[2], args[3]
+def sub_processing(nucl_obj: Nucleotide, min_len: int, complete: bool, only_plus: bool):
     ORF = nucl_obj.ORF_prediction(min_len, complete, only_plus)
     return ORF
 
