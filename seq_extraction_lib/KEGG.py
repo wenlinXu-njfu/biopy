@@ -10,7 +10,8 @@ from os.path import exists
 import click
 import requests
 from tqdm import tqdm
-from Biolib.show_info import Displayer
+from Biolib import Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(in_file, seq_type: click.Choice(['aaseq', 'ntseq']), out_file):
@@ -37,7 +38,7 @@ def main(in_file, seq_type: click.Choice(['aaseq', 'ntseq']), out_file):
               help='Specified sequence type.')
 @click.option('-o', '--output_file', 'output_file', help='Output FASTA file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(id_file, seq_type, output_file):
     """Extract sequences from KEGG url."""
     main(id_file, seq_type, output_file)

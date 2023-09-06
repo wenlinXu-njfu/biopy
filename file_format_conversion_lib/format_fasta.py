@@ -10,8 +10,8 @@ from _io import TextIOWrapper
 from typing import Union
 from re import findall
 import click
-from Biolib.fasta import Fasta
-from Biolib.show_info import Displayer
+from Biolib import Fasta, Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(fasta_file: Union[str, TextIOWrapper],
@@ -53,7 +53,7 @@ def main(fasta_file: Union[str, TextIOWrapper],
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_file, char_num, sort_by_len, sort_by_id, outfile):
     """Make each sequence to be displayed in a single line or in multiple lines and sort sequence by length or ID."""
     main(fasta_file, char_num, sort_by_len, sort_by_id, outfile)

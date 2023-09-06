@@ -7,8 +7,8 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from file_format_conversion_lib import gff_sort, gff2gtf, gff2bed, gtf2bed, format_fasta, fq2fa, __version__
-from Biolib import Displayer
+from file_format_conversion_lib import gff_sort, gff2gtf, gff2bed, gtf2bed, format_fasta, fq2fa
+from Biolib import Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

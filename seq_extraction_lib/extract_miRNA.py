@@ -9,8 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import mkdir
 from os.path import exists
 import click
-from Biolib.gff import Gff
-from Biolib.show_info import Displayer
+from Biolib import Gff, Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(miRNA_gff_file, out_dir):
@@ -40,7 +40,7 @@ def main(miRNA_gff_file, out_dir):
 @click.option('-o', '--output_dir', 'output_dir', default='./', show_default=True,
               help='Output directory, if the output directory does not exist, it will be created automatically.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, output_dir):
     """Extract miRNA sequence from miRNA GFF file"""
     main(gff_file, output_dir)

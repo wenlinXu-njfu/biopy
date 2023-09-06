@@ -7,8 +7,8 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.gff import Gff
-from Biolib.show_info import Displayer
+from Biolib import Gff, Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gff_file, gtf_file=None):
@@ -26,7 +26,7 @@ def main(gff_file, gtf_file=None):
 @click.option('-o', '--gtf_file', 'gtf_file', type=click.File('w'),
               help='Output GTF file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, gtf_file):
     """Convert the file format from GFF to GTF."""
     main(gff_file, gtf_file)

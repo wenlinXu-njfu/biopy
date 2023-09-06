@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
 File: gtf2bed.py
-Description: Convert the file format from GTF to BED
+Description: Convert the file format from GTF to BED.
 Date: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 import click
-from Biolib.gtf import Gtf
-from Biolib.show_info import Displayer
+from Biolib import Gtf, Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gtf_file: TextIOWrapper, out_file: TextIOWrapper):
@@ -29,7 +29,7 @@ def main(gtf_file: TextIOWrapper, out_file: TextIOWrapper):
 @click.option('-o', '--output_bed_file', 'output_bed_file', type=click.File('w'),
               help='Output BED file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gtf_file, output_bed_file):
     """Convert the file format from GTF to BED."""
     main(gtf_file, output_bed_file)

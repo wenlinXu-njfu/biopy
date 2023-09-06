@@ -8,7 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from gzip import GzipFile
-from Biolib.show_info import Displayer
+from Biolib import Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(fq_file, out_file):
@@ -48,7 +49,7 @@ def main(fq_file, out_file):
 @click.option('-o', '--output_fasta', 'fasta_file',
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fastq_file, fasta_file):
     """Convert FASTQ to FASTA."""
     main(fastq_file, fasta_file)
