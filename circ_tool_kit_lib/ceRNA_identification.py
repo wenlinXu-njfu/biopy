@@ -14,8 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import click
 from Biolib import read_in_gene_expression_as_dataframe, Displayer
-from circ_tool_kit_lib import __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 
 def get_ceRNA_dict(ceRNA_file: str):

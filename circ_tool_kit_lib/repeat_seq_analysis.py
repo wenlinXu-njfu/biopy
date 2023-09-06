@@ -8,8 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib import Gff, Bed, Fasta, Displayer
-from circ_tool_kit_lib import __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 
 def main(circ_bed_file, repeat_seq_gff_file, genome_fasta_file, distance: int, out_file):

@@ -8,8 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from Biolib import Gtf, Bed, Fasta, Nucleotide, Displayer
-from circ_tool_kit_lib import __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 
 def main(genome_fasta_file, genome_gtf_file, circRNA_bed_file, out_file):

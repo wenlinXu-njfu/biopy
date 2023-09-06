@@ -9,8 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from re import findall
 import click
 from Biolib import Displayer
-from circ_tool_kit_lib import __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 
 def main(circ_bed_file: str, alt_cyc_min: int, out_file: str, circ_seq_fasta_file: str = None):
