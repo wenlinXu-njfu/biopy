@@ -12,7 +12,8 @@ from typing import Union
 from _io import TextIOWrapper
 import click
 from click._compat import _NonClosingTextIOWrapper
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(input_file: Union[TextIOWrapper, list],
@@ -76,7 +77,7 @@ def main(input_file: Union[TextIOWrapper, list],
 @click.option('-o', '--output_dir', 'output_dir', required=True,
               help='Output directory, if not exists, it will be created automatically.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, line_num, header, header_num, output_dir):
     """Divide a large file into several smaller files."""
     if isinstance(input_file, _NonClosingTextIOWrapper):

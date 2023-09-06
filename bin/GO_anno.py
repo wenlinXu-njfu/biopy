@@ -7,7 +7,8 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(go_basic_obo_file, out_file):
@@ -59,7 +60,7 @@ def main(go_basic_obo_file, out_file):
               help='Output file (ID\\tChild_id\\tName\\tNamespace\\tDefinition), '
                    'if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(obo_file, outfile):
     """Preprocess go-basic.obo file."""
     main(obo_file, outfile)

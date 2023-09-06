@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f_oneway
 import matplotlib.pyplot as plt
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(in_file: str,
@@ -166,7 +167,7 @@ def main(in_file: str,
 @click.option('-f', '--figure_size', 'figure_size', default='10x10', show_default=True, help='Figure size.')
 @click.option('-o', '--output_file_prefix', 'out_prefix', help='Prefix of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, ref_name, control_name, figure_size, out_prefix):
     """Calculate relative expression based on qPCR results."""
     filterwarnings("ignore")

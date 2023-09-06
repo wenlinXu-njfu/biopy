@@ -7,8 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from scipy.stats import pearsonr
-from Biolib.statistics import *
-from Biolib.show_info import Displayer
+import click
+from Biolib import read_in_gene_expression_as_dataframe, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(exp_matrix_file, out_prefix):
@@ -52,7 +53,7 @@ def main(exp_matrix_file, out_prefix):
 @click.option('-o', '--output_file', 'outfile',
               help='Output file prefix, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, outfile):
     """Calculation of Pearson correlation coefficient from gene expression."""
     main(input_file, outfile)

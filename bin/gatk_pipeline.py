@@ -9,9 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import List
 import click
-from Biolib.timer import Timer
-from Biolib.show_info import Displayer
-displayer = Displayer(__file__.split('/')[-1])
+from Biolib import Timer, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 @Timer('Build genome index.')

@@ -9,7 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import system
 from datetime import datetime
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(file):
@@ -24,7 +25,7 @@ def main(file):
 @click.option('-f', '--command_file', 'f', type=click.File('r'), required=True,
               help='Input file including command (one command per line).')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(f):
     """Execute commands in a file line by line."""
     main(f)

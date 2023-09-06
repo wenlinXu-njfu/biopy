@@ -1,43 +1,35 @@
 #!/usr/bin/env python
 """
 File: CircToolKit.py
-Description: CircRNAs analysis tools
+Description: CircRNAs analysis tools.
 Date: 2022/4/3
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from circ_tool_kit_lib.extract_circRNA import run as run1
-from circ_tool_kit_lib.get_circ_exp import run as run2
-from circ_tool_kit_lib.Tau_index import run as run3
-from circ_tool_kit_lib.reverse_complementary_analysis import run as run4
-from circ_tool_kit_lib.repeat_seq_analysis import run as run5
-from circ_tool_kit_lib.alternative_cyclization_analysis import run as run6
-from circ_tool_kit_lib.circular_translation import run as run7
-from circ_tool_kit_lib.ceRNA_identification import run as run8
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+from circ_tool_kit_lib import (extract_circrna, get_circ_exp, tau_index, reverse_complementary_analysis,
+                               repeat_seq_analysis, alternative_cyclization_analysis, circular_translation,
+                               cerna_identification, __version__)
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def CircToolKit():
-    """
-    Program: CircRNAs analysis tools\n
-    Version: 1.1.0\n
-    Contact: WenlinXu \033[1m(wenlinxu.njfu@outlook.com)\033[0m
-    """
+    """CircRNAs analysis tools."""
     pass
 
 
-CircToolKit.add_command(run1, 'get_circ_seq')
-CircToolKit.add_command(run2, 'get_circ_exp')
-CircToolKit.add_command(run3, 'Tau_index')
-CircToolKit.add_command(run4, 'rca')
-CircToolKit.add_command(run5, 'rsa')
-CircToolKit.add_command(run6, 'aca')
-CircToolKit.add_command(run7, 'translation')
-CircToolKit.add_command(run8, 'ceRNA_identification')
+CircToolKit.add_command(extract_circrna, 'get_circ_seq')
+CircToolKit.add_command(get_circ_exp, 'get_circ_exp')
+CircToolKit.add_command(tau_index, 'Tau_index')
+CircToolKit.add_command(reverse_complementary_analysis, 'rca')
+CircToolKit.add_command(repeat_seq_analysis, 'rsa')
+CircToolKit.add_command(alternative_cyclization_analysis, 'aca')
+CircToolKit.add_command(circular_translation, 'translation')
+CircToolKit.add_command(cerna_identification, 'ceRNA_identification')
 
 if __name__ == '__main__':
     CircToolKit()

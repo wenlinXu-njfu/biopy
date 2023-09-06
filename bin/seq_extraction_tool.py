@@ -1,41 +1,34 @@
 #!/usr/bin/env python
 """
 File: seq_extraction_tool.py
-Description: Sequence extraction tool (version=3.0)
+Description: Sequence extraction tool.
 Date: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from seq_extraction_lib.extract_single_sequence import run as run1
-from seq_extraction_lib.bed_extract_seq import run as run2
-from seq_extraction_lib.gtf_extract_seq import run as run3
-from seq_extraction_lib.gff_extract_seq import run as run4
-from seq_extraction_lib.extract_miRNA import run as run5
-from circ_tool_kit_lib.extract_circRNA import run as run6
-from seq_extraction_lib.KEGG import run as run7
+from circ_tool_kit_lib import extract_circrna
+from seq_extraction_lib import (extract_single_sequence, bed_extract_seq, gtf_extract_seq, gff_extract_seq,
+                                extract_mirna, kegg, __version__)
 from Biolib.show_info import Displayer
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def seq_extraction_tool():
-    """
-    Program: Sequence extraction tool\n
-    Version: 1.1.0\n
-    Contact: WenlinXu \033[1m(wenlinxu.njfu@outlook.com)\033[0m
-    """
+    """Sequence extraction tool."""
     pass
 
 
-seq_extraction_tool.add_command(run1, 'single')
-seq_extraction_tool.add_command(run2, 'bed')
-seq_extraction_tool.add_command(run3, 'gtf')
-seq_extraction_tool.add_command(run4, 'gff')
-seq_extraction_tool.add_command(run5, 'miRNA')
-seq_extraction_tool.add_command(run6, 'circRNA')
-seq_extraction_tool.add_command(run7, 'KEGG')
+seq_extraction_tool.add_command(extract_single_sequence, 'single')
+seq_extraction_tool.add_command(bed_extract_seq, 'bed')
+seq_extraction_tool.add_command(gtf_extract_seq, 'gtf')
+seq_extraction_tool.add_command(gff_extract_seq, 'gff')
+seq_extraction_tool.add_command(extract_mirna, 'miRNA')
+seq_extraction_tool.add_command(extract_circrna, 'circRNA')
+seq_extraction_tool.add_command(kegg, 'KEGG')
 
 if __name__ == '__main__':
     seq_extraction_tool()

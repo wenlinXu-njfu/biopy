@@ -9,7 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import listdir, rename
 from re import sub
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(in_dir, old, new):
@@ -27,7 +28,7 @@ def main(in_dir, old, new):
 @click.option('-old', '--old_name', 'old', help='The string to be replaced, it supports for regular expressions')
 @click.option('-new', '--new_name', 'new', help='Replacement string, it supports for regular expressions')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_dir, old, new):
     """Batch rename files."""
     main(input_dir, old, new)

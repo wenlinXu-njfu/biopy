@@ -8,8 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from _io import TextIOWrapper
 import click
-from Biolib.gff import Gff
-from Biolib.show_info import Displayer
+from Biolib import Gff, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def judge_distance_location(lncRNA_start: int,
@@ -132,7 +132,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gtf, gff, feature_type, distance, outfile):
     """
     Target genes were predicted according to the location relationship between lncRNA and genes.

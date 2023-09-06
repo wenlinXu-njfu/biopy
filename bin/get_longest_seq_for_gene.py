@@ -6,10 +6,10 @@ Date: 2022/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 import click
-from Biolib.fasta import Fasta
-from Biolib.show_info import Displayer
+from Biolib import Fasta, Displayer, __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(fasta_file: TextIOWrapper,
@@ -36,7 +36,7 @@ def main(fasta_file: TextIOWrapper,
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_file, regular_expression, inplace_id, outfile):
     """Get the longest transcript of each gene locus."""
     main(fasta_file, regular_expression, inplace_id, outfile)
