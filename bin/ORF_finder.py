@@ -22,6 +22,11 @@ def sub_processing(nucl_obj: Nucleotide, min_len: int, complete: bool, only_plus
     return ORF
 
 
+def write_pep_to_file(content: str, output_file: str):
+    with open(output_file, 'a') as o:
+        o.write(content)
+
+
 def show_process_bar(fasta_file: TextIOWrapper,
                      params: Iterable[Tuple[Nucleotide, int, bool, bool]],
                      log_file: TextIOWrapper,
@@ -43,8 +48,7 @@ def show_process_bar(fasta_file: TextIOWrapper,
     content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
     log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
     output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1]
-    with open(f'./{output_prefix}.orf', 'w') as o:
-        o.write(''.join(content))
+    write_pep_to_file(''.join(content), f'./{output_prefix}.orf')
     log_file.write(log)
 
 
@@ -73,11 +77,13 @@ def main(fasta_files: Tuple[TextIOWrapper],
             results = [i.get() for i in results]
             content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
             log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
-            output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1] if fasta_file.name != '<stdin>' else 'stdin'
             log_file.write(log) if log_file else click.echo(f'\033[33m{log}\033[0m', err=True)
+            output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1] if fasta_file.name != '<stdin>' else 'stdin'
             if to_file:
                 with open(f'./{output_prefix}.orf', 'w') as o:
                     o.write(''.join(content))
+            else:
+                click.echo(''.join(content))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
