@@ -11,7 +11,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Union
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(gene_exp_file: str, log2fc: float, padj: float, figure_size: Union[Tuple, List], out_prefix: str, fmt: str):
@@ -51,7 +52,7 @@ def main(gene_exp_file: str, log2fc: float, padj: float, figure_size: Union[Tupl
               type=click.Choice(['eps', 'jpeg', 'jpg', 'pdf', 'pgf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']),
               default='pdf', show_default=True, help='Specify the format of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gene_exp_file, log2fc, p_adjust, figure_size, output_prefix, output_format):
     """Plot the volcano of differentially expressed genes."""
     figure_size = [float(i) for i in figure_size.split(',')]

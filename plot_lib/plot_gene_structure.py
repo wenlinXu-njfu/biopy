@@ -9,7 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from plot_lib.gene_structure.gff import plot_mRNA_structure
 from plot_lib.gene_structure.gtf import plot_gene_structure
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(in_file: str, in_file_format: click.Choice(['gff', 'gtf']),
@@ -58,7 +59,7 @@ def main(in_file: str, in_file_format: click.Choice(['gff', 'gtf']),
               type=click.Choice(['eps', 'jpeg', 'jpg', 'pdf', 'pgf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']),
               help='Output file format.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, t, utr_color, utr_hatch, cds_color, cds_hatch, exon_color, exon_hatch, edge_color,
         figure_width, figure_height, output_path, output_format):
     """Plot gene structure based on annotation file."""

@@ -10,7 +10,8 @@ import click
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(gene_exp_file: str, color_map: str, out_file: str):
@@ -27,7 +28,7 @@ def main(gene_exp_file: str, color_map: str, out_file: str):
 @click.option('-o', '--output_file', 'outfile', default='cluster_heatmap.pdf', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gene_exp_file, color_map, outfile):
     """Plot gene expression cluster heatmap."""
     main(gene_exp_file, color_map, outfile)

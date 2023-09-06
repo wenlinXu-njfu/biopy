@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: plot_circos.py
-Description: Plot circos graphic
+Description: Plot circos graphic.
 Date: 2022/10/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -9,7 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 import matplotlib.pyplot as plt
 from plot_lib.circos.draw_gene_density import draw_chr, draw_gene_density, draw_outer_bar, draw_bezier_curve
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(chr_len_file, gene_density_file, stat_file, link_file, out_file):
@@ -62,7 +63,7 @@ def main(chr_len_file, gene_density_file, stat_file, link_file, out_file):
               help='Input associated site file.\n(Chr_num\\tStart\\tEnd\\tChr_num\\tStart\\tEnd\\tColor\\tDescription\\n)')
 @click.option('-o', '--output_file', 'outfile', default='circos.pdf', show_default=True, help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(chr_len_file, gene_density_file, feature_stat, link_file, outfile):
     """Draw the circos graph."""
     main(chr_len_file, gene_density_file, feature_stat, link_file, outfile)

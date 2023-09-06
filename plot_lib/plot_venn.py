@@ -10,7 +10,8 @@ from os import listdir
 from venn import venn
 import matplotlib.pyplot as plt
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(in_dir: str, figure_size: tuple, out_prefix: str, fmt: str):
@@ -32,7 +33,7 @@ def main(in_dir: str, figure_size: tuple, out_prefix: str, fmt: str):
               type=click.Choice(['eps', 'jpeg', 'jpg', 'pdf', 'pgf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']),
               default='pdf', show_default=True, help='The format of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_dir, figure_size, out, output_format):
     """Draw the venn plot."""
     figure_size = tuple(float(i) for i in figure_size.split('x'))
