@@ -1,0 +1,10 @@
+from circ_tool_kit_lib.alternative_cyclization_analysis import run as alternative_cyclization_analysis
+from circ_tool_kit_lib.ceRNA_identification import run as cerna_identification
+from circ_tool_kit_lib.circular_translation import run as circular_translation
+from circ_tool_kit_lib.extract_circRNA import run as extract_circrna
+from circ_tool_kit_lib.get_circ_exp import run as get_circ_exp
+from circ_tool_kit_lib.repeat_seq_analysis import run as repeat_seq_analysis
+from circ_tool_kit_lib.reverse_complementary_analysis import run as reverse_complementary_analysis
+from circ_tool_kit_lib.Tau_index import run as tau_index
+
+__version__ = '1.0.0'

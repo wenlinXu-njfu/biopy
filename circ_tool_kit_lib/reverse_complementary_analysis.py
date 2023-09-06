@@ -9,7 +9,9 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import system, mkdir
 from datetime import datetime
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(bed_file, ref_seq_file, flanking_seq_len: int, out_file):
@@ -45,7 +47,7 @@ def main(bed_file, ref_seq_file, flanking_seq_len: int, out_file):
               help='Length of flanking sequence.')
 @click.option('-o', '--output_file', 'outfile', help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_bed_file, ref_fasta_file, flank_seq_len, outfile):
     """Reverse complementary analysis of circRNAs flanking sequences."""
     main(circ_bed_file, ref_fasta_file, flank_seq_len, outfile)

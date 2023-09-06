@@ -8,7 +8,9 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(circ_bed_file: str, alt_cyc_min: int, out_file: str, circ_seq_fasta_file: str = None):
@@ -72,7 +74,7 @@ def main(circ_bed_file: str, alt_cyc_min: int, out_file: str, circ_seq_fasta_fil
 @click.option('-o', '--output_file', 'outfile',
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_bed_file, circ_fasta_file, alt_circ_num, outfile):
     """CircRNA alternative cyclization sites analysis."""
     main(circ_bed_file, alt_circ_num, outfile, circ_fasta_file)

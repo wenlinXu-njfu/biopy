@@ -10,10 +10,12 @@ from os import mkdir
 from os.path import exists
 from warnings import filterwarnings
 from scipy.stats import pearsonr
+import pandas as pd
 import matplotlib.pyplot as plt
 import click
-from Biolib.statistics import pd, read_in_gene_expression_as_dataframe
-from Biolib.show_info import Displayer
+from Biolib import read_in_gene_expression_as_dataframe, Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def get_ceRNA_dict(ceRNA_file: str):
@@ -117,7 +119,7 @@ def main(mRNA_exp_file: str,
 @click.option('-p2', '--miRNA_target_Pvalue', 'miRNA_target_Pvalue', type=float, default=1.0, show_default=True,
               help='The cutoff of p value between miRNA and target (miRNA/circRNA).')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(mrna, circ, cerna, mirna, out_path, ceRNA_PCC, ceRNA_Pvalue, miRNA_target_PCC, miRNA_target_Pvalue):
     """Identify the expression correlation between ceRNA (mRNA-circRNA) with Pearson coefficient."""
     main(mrna, circ, cerna, mirna, out_path, ceRNA_PCC, ceRNA_Pvalue, miRNA_target_PCC, miRNA_target_Pvalue)

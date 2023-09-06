@@ -7,11 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.gtf import Gtf
-from Biolib.bed import Bed
-from Biolib.fasta import Fasta
-from Biolib.sequence import Nucleotide
-from Biolib.show_info import Displayer
+from Biolib import Gtf, Bed, Fasta, Nucleotide, Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(genome_fasta_file, genome_gtf_file, circRNA_bed_file, out_file):
@@ -161,7 +159,7 @@ def main(genome_fasta_file, genome_gtf_file, circRNA_bed_file, out_file):
 @click.option('-o', '--output_file', 'outfile',
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(genome_fasta, gtf_file, circ_bed_file, outfile):
     """Extract circRNA sequence."""
     main(genome_fasta, gtf_file, circ_bed_file, outfile)

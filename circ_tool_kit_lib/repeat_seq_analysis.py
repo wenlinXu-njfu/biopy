@@ -7,10 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.gff import Gff
-from Biolib.bed import Bed
-from Biolib.fasta import Fasta
-from Biolib.show_info import Displayer
+from Biolib import Gff, Bed, Fasta, Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(circ_bed_file, repeat_seq_gff_file, genome_fasta_file, distance: int, out_file):
@@ -61,7 +60,7 @@ def main(circ_bed_file, repeat_seq_gff_file, genome_fasta_file, distance: int, o
 @click.option('-o', '--output_file', 'outfile',
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_bed_file, repeat_gff, genome_fasta, distance, outfile):
     """Repeat sequence analysis of circRNAs flanking sequences."""
     main(circ_bed_file, repeat_gff, genome_fasta, distance, outfile)

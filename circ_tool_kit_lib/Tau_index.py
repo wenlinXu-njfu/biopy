@@ -7,8 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.statistics import read_in_gene_expression_as_dataframe
-from Biolib.show_info import Displayer
+from Biolib import read_in_gene_expression_as_dataframe, Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(exp_file, out_file_prefix):
@@ -32,7 +33,7 @@ def main(exp_file, out_file_prefix):
 @click.option('-o', '--output_prefix', 'out_prefix', default='circ_Tau', show_default=True,
               help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_exp_file, out_prefix):
     """Tissue specific expression analysis of circRNAs (Tau index)."""
     main(circ_exp_file, out_prefix)

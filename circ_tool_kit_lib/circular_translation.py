@@ -7,9 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib.sequence import Nucleotide
-from Biolib.fasta import Fasta
-from Biolib.show_info import Displayer
+from Biolib import Nucleotide, Fasta, Displayer
+from circ_tool_kit_lib import __version__
+displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(fa_file, out_file_prefix, min_len: int = None):
@@ -87,7 +87,7 @@ def main(fa_file, out_file_prefix, min_len: int = None):
 @click.option('-o', '--output_prefix', 'out_prefix',
               help='Output file prefix, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_fasta, out_prefix, min_len):
     """Prediction of circRNAs translation."""
     main(circ_fasta, out_prefix, min_len)
