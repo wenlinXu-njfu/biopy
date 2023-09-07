@@ -5,14 +5,11 @@ Date: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from os.path import exists
-from os import remove
-from _io import TextIOWrapper
-from typing import Union, List, Dict, Tuple
+from io import TextIOWrapper
+from typing import Union, List, Dict, Tuple, Generator
 from re import findall
 from click import echo, open_file
-from numpy import NaN
-from pandas import read_table, DataFrame
+from pandas import DataFrame
 from Biolib.fasta import Fasta
 from Biolib.sequence import Nucleotide
 
@@ -20,21 +17,30 @@ from Biolib.sequence import Nucleotide
 class Gff:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.path = path
-            self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
+            self.name = path.split('/')[-1]
+            self.open = open(path)
+            self.line_num = sum(1 for line in self.open.readlines() if not line.startswith('#'))
+            self.open.seek(0)
+            self.anno_line_num = sum(1 for line in self.open.readlines() if line.startswith('#'))
+            self.open.seek(0)
         else:
             if path.name == '<stdin>':
-                self.path = open_file('-').readlines()
-                self.line_num = sum(1 for line in self.path if not line.startswith('#'))
+                self.name = 'stdin'
+                self.open = open_file('-').readlines()
+                self.line_num = sum(1 for line in self.open if not line.startswith('#'))
+                self.anno_line_num = sum(1 for line in self.open if line.startswith('#'))
             else:
-                self.path = path.name
-                self.line_num = sum(1 for line in open(self.path) if not line.startswith('#'))
+                self.name = path.name.split('/')[-1]
+                self.open = path
+                self.line_num = sum(1 for line in self.open.readlines() if not line.startswith('#'))
+                self.open.seek(0)
+                self.anno_line_num = sum(1 for line in self.open.readlines() if line.startswith('#'))
+                self.open.seek(0)
 
 # Basic method==========================================================================================================
-    def parse(self) -> Tuple[Union[str, Dict[str, str]]]:
+    def parse(self) -> Generator[Tuple[str, str, str, str, str, str, str, str, Dict[str, str]], None, None]:
         """Parse information of each column of GFF file line by line."""
-        open_gff = open(self.path) if isinstance(self.path, str) else self.path
-        for line in open_gff:
+        for line in self.open:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -42,33 +48,16 @@ class Gff:
                 attr_list = [attr for attr in split[8].split(';') if '=' in attr]
                 attr_dict: Dict[str, str] = {attr.split('=')[0]: attr.split('=')[1] for attr in attr_list if attr}
                 yield chr_num, source, feature, start, end, score, strand, frame, attr_dict
+        if not isinstance(self.open, list):
+            self.open.seek(0)
 
-    def read_as_df(self, parse_attr: bool = False) -> DataFrame:
-        # Read gff file as dataframe.
-        names = ['Chr_num', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
-        if isinstance(self.path, str):
-            df = read_table(self.path,
-                            skiprows=sum(1 for line in open(self.path) if line.startswith('#')),
-                            names=names)
-        else:
-            with open('./tmp.gff', 'w') as o:
-                o.write(''.join(self.path))
-            df = read_table('./tmp.gff',
-                            skiprows=sum(1 for line in open('./tmp.gff') if line.startswith('#')),
-                            names=names)
-        # Parse attribute.
-        if parse_attr:
-            index = 0
-            for line in self.parse():
-                attr_dict = line[8]
-                for k, v in attr_dict.items():
-                    if k not in df:
-                        df[k] = NaN
-                    df.loc[index, k] = v
-                index += 1
-        # Remove tmp.gff file if exists.
-        if exists('./tmp.gff'):
-            remove('./tmp.gff')
+    def parse_as_dataframe(self) -> DataFrame:
+        names = ['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
+        data = [line.strip().split('\t') for line in self.open if not line.startswith('#')]
+        df = DataFrame(data, columns=names, dtype=str)
+        df[['Start', 'End']] = df[['Start', 'End']].astype(int)
+        if not isinstance(self.open, list):
+            self.open.seek(0)
         return df
 
     def __check_feature(self, feature: str) -> Tuple[bool, str]:
@@ -132,9 +121,9 @@ class Gff:
 
     def summary(self) -> str:
         """A peek at the genome."""
-        df = self.read_as_df()
+        df = self.parse_as_dataframe()
         df['Length'] = df['End'] - df['Start'] + 1
-        content = [f'# Feature\tTotal\tMin_len\tMax_len\tMedian_len\tMean_len']
+        content = [f'# Feature\tTotal\tMin_len\tMax_len\tMedian_len\tMean_len\n']
         features = df['Feature'].drop_duplicates().values
         for feature in features:
             total = len(df.loc[df['Feature'] == feature])
@@ -142,8 +131,8 @@ class Gff:
             max_len = df.loc[df['Feature'] == feature, 'Length'].max()
             median_len = '%.0f' % df.loc[df['Feature'] == feature, 'Length'].median()
             mean_len = '%.0f' % df.loc[df['Feature'] == feature, 'Length'].mean()
-            content.append(f'{feature}\t{total}\t{min_len}\t{max_len}\t{median_len}\t{mean_len}')
-        content = '\n'.join(content)
+            content.append(f'{feature}\t{total}\t{min_len}\t{max_len}\t{median_len}\t{mean_len}\n')
+        content = ''.join(content)
         return content
 
 # GFF file sorted by id method==========================================================================================
@@ -174,13 +163,10 @@ class Gff:
 
     def gff_sort(self) -> str:
         """Sort the GFF file by sequence ID."""
-        if isinstance(self.path, str):
-            with open(self.path) as f:
-                l = f.readlines()
-                l.sort(key=lambda line: self.__gff_sort(line))
-        else:
-            l = self.path
-            l.sort(key=lambda line: self.__gff_sort(line))
+        l = [line for line in self.open if not line.startswith('#') and line.strip()]
+        l.sort(key=lambda line: self.__gff_sort(line))
+        if not isinstance(self.open, list):
+            self.open.seek(0)
         return ''.join(l)
 
 # Sequence extraction method============================================================================================
@@ -212,23 +198,18 @@ class Gff:
 
     def miRNA_extraction(self) -> Nucleotide:
         """Extract miRNA sequence from GFF file."""
-        for line in open(self.path):
-            if not line.startswith('#'):
-                split = line.strip().split('\t')
-                attr = split[8].replace('=', ';').split(';')
-                seq_id = attr[attr.index('ID') + 1]
-                seq = attr[attr.index('seq') + 1]
-                yield Nucleotide(seq_id, seq)
+        for line in self.parse():
+            attr_dict = line[8]
+            seq_id = attr_dict['ID']
+            seq = attr_dict['seq']
+            yield Nucleotide(seq_id, seq)
 
 # File format conversion method=========================================================================================
     def gff_to_gtf(self) -> str:
         """Convert the file format from GFF to GTF."""
         last_line = None
         gene_id = transcript_id = None
-        if isinstance(self.path, str):
-            content = ["## gff_to_gtf", f"## Convert from {self.path.split('/')[-1]}"]
-        else:
-            content = []
+        content = ["## gff_to_gtf", f"## Convert from {self.name}"]
         append = content.append
         i = 0
         for line in self.parse():
@@ -329,29 +310,17 @@ class Gff:
         if min(list(chr_len_dict.values())) / span < 1:
             echo('\033[33mError: Density statistical interval is too large.\033[0m', err=True)
             exit()
-        if isinstance(self.path, str):
-            skip_rows = sum(1 for line in open(self.path) if line.startswith('#'))
-            gff_dataframe = read_table(self.path, skiprows=skip_rows, header=None)
-        else:
-            skip_rows = sum(1 for line in self.path if line.startswith('#'))
-            with open('./tmp.gff', 'w') as o:
-                o.write(''.join(self.path))
-            gff_dataframe = read_table('./tmp.gff', skiprows=skip_rows, header=None)
-        new_cols = ['Chr', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
-        d = {i: new_cols[i] for i in range(9)}
-        gff_dataframe.rename(columns=d, inplace=True)
+        gff_dataframe = self.parse_as_dataframe()
         gff_dataframe['Site'] = (gff_dataframe['Start'] + gff_dataframe['End']) / 2
         content = []
         for chr_num, length in chr_len_dict.items():
-            df = gff_dataframe[(gff_dataframe['Chr'] == chr_num) & (gff_dataframe['Feature'] == feature_type)]
+            df = gff_dataframe[(gff_dataframe['Chromosome'] == chr_num) & (gff_dataframe['Feature'] == feature_type)]
             sites = df['Site']
             for i in range(span, length, span):
                 count = len(sites[(sites <= i) & (sites >= i - span + 1)])
-                content.append(f'{chr_num}\t{i - span + 1}\t{i}\t{count}')
+                content.append(f'{chr_num}\t{i - span + 1}\t{i}\t{count}\n')
             if length % span != 0:
                 count = len(sites[(sites <= length) & (sites >= length // span * span + 1)])
-                content.append(f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}')
-        content = '\n'.join(content)
-        if exists('./tmp.gff'):
-            remove('./tmp.gff')
+                content.append(f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}\n')
+        content = ''.join(content)
         return content

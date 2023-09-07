@@ -6,7 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import StringIO
-import click
+from click import echo, open_file
 import pandas as pd
 from typing import Union, List
 
@@ -27,7 +27,7 @@ def read_file_as_dataframe_from_stdin(sep: str = '\t',
                                       skip_rows: int = 0,
                                       use_cols: List[Union[str, int]] = None,
                                       names: List[str] = None):
-    df = pd.read_table(StringIO(''.join(click.open_file('-').readlines())),
+    df = pd.read_table(StringIO(''.join(open_file('-').readlines())),
                        sep=sep, header=header, names=names, index_col=index_col, usecols=use_cols,
                        lineterminator=line_terminator, skiprows=skip_rows)
     return df
@@ -86,7 +86,7 @@ def get_FPKM(read_count_DataFrame: pd.DataFrame,
     if min_value:
         FPKM = filter_by_min_value(FPKM, min_value=min_value)
         new_gene_num = len(FPKM.index.tolist())
-        click.echo(f"{raw_gene_num - new_gene_num} genes have been filtered out", err=True)
+        echo(f"{raw_gene_num - new_gene_num} genes have been filtered out", err=True)
     return FPKM
 
 
@@ -117,5 +117,5 @@ def get_TPM(read_count_DataFrame: pd.DataFrame,
     if min_value:
         TPM = filter_by_min_value(TPM, min_value=min_value)
         new_gene_num = len(TPM.index.tolist())
-        click.echo(f"{raw_gene_num - new_gene_num} genes have been filtered out", err=True)
+        echo(f"{raw_gene_num - new_gene_num} genes have been filtered out", err=True)
     return TPM
