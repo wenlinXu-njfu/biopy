@@ -22,6 +22,11 @@ def sub_processing(nucl_obj: Nucleotide, min_len: int, complete: bool, only_plus
     return ORF
 
 
+def write_ORF_to_file(content: str, output_file: str):
+    with open(output_file, 'a') as o:
+        o.write(content)
+
+
 def show_process_bar(fasta_file: TextIOWrapper,
                      params: Iterable[Tuple[Nucleotide, int, bool, bool]],
                      log_file: TextIOWrapper,
@@ -43,9 +48,9 @@ def show_process_bar(fasta_file: TextIOWrapper,
     log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
     log_file.write(log)
     content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
-    output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1]
-    with open(f'./{output_prefix}.orf', 'w') as o:
-        o.write(''.join(content))
+    output_prefix = fasta_file.name.split('/')[-1].replace('.gz', '')
+    output_prefix = '.'.join(output_prefix.split('.')[:-1])
+    write_ORF_to_file(''.join(content), f'./{output_prefix}_pep.fa')
 
 
 def main(fasta_files: Tuple[TextIOWrapper],
@@ -64,12 +69,25 @@ def main(fasta_files: Tuple[TextIOWrapper],
         # Do not show the progress bar on the command line.
         else:
             pool = Pool(processes=processes_num)
+            content = []
+            if to_file and fasta_file.name != '<stdin>':
+                output_prefix = fasta_file.name.split('/')[-1].replace('.gz', '')
+                output_prefix = '.'.join(output_prefix.split('.')[:-1])
+            elif to_file and fasta_file.name == '<stdin>':
+                output_prefix = 'stdin'
+            else:
+                output_prefix = ''
+            call_back_func = {True: lambda ORF: click.echo(f'\033[33m{ORF}\033[0m', err=True, file=log_file)
+                                 if isinstance(ORF, str) else content.append(f'>{ORF.id}\n{ORF.seq}\n'),
+                              False: lambda ORF: click.echo(f'\033[33m{ORF}\033[0m', err=True, file=log_file)
+                                 if isinstance(ORF, str) else click.echo(f'>{ORF.id}\n{ORF.seq}')}
             for param in params:
-                pool.apply_async(sub_processing, args=param,
-                                 callback=lambda ORF: click.echo(f'\033[33m{ORF}\033[0m', err=True, file=log_file)
-                                 if isinstance(ORF, str) else click.echo(f'>{ORF.id}\n{ORF.seq}'))
+                pool.apply_async(sub_processing, args=param, callback=call_back_func[to_file])
             pool.close()
             pool.join()
+            if content:
+                with open(f'./{output_prefix}_pep.fa', 'w') as o:
+                    o.write(''.join(content))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
