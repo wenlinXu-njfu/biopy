@@ -6,7 +6,7 @@ Date: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from typing import Union
 from re import findall
 import click
@@ -28,16 +28,8 @@ def main(fasta_file: Union[str, TextIOWrapper],
         seq_obj_list.sort(key=lambda i: (findall(r'[a-zA-Z]+', i.id)[0], int(findall(r'\d+', i.id)[0])))
     elif sort_by_len and sort_by_id:
         seq_obj_list.sort(key=lambda i: (i.len, findall(r'[a-zA-Z]+', i.id)[0], int(findall(r'\d+', i.id)[0])))
-    content = []
     for seq_obj in seq_obj_list:
-        if not out_file:
-            seq_obj.seq = seq_obj.seq.strip()
-            print(seq_obj)
-        else:
-            content.append(f'>{seq_obj.id}\n{seq_obj.seq.strip()}\n')
-    if out_file and content:
-        with out_file as o:
-            o.write(''.join(content))
+        click.echo(seq_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -50,7 +42,7 @@ def main(fasta_file: Union[str, TextIOWrapper],
 @click.option('-I', '--sort_by_id', 'sort_by_id', is_flag=True, flag_value=True,
               help='Sort sequence by id. If both "-L, --sort_by_len" and "-I, --sort_by_id" options are specified, '
                    'sort by length first then id by default.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
+@click.option('-o', '--output_file', 'outfile', type=click.File('a'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -22,7 +22,7 @@ class Sequence:
             self.len = len(sequence.replace('\n', ''))
 
     def __str__(self) -> str:
-        return f'>{self.id} length={len(self)}\n{self.seq}'
+        return f'>{self.id} length={len(self)}\n{self.seq.strip()}'
 
     def __contains__(self, item) -> bool:
         """
