@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import StringIO
 import click
 import pandas as pd
-from typing import Union
+from typing import Union, List
 
 
 def display_set(decimal: int = 2) -> None:
@@ -20,9 +20,16 @@ def display_set(decimal: int = 2) -> None:
     # pd.set_option('display.max_rows', None)
 
 
-def read_file_as_dataframe_from_stdin(sep: str = '\t', skip_rows: int = 0, index_col: int = 0):
+def read_file_as_dataframe_from_stdin(sep: str = '\t',
+                                      line_terminator: str = '\n',
+                                      index_col: int = 0,
+                                      header: int = 0,
+                                      skip_rows: int = 0,
+                                      use_cols: List[Union[str, int]] = None,
+                                      names: List[str] = None):
     df = pd.read_table(StringIO(''.join(click.open_file('-').readlines())),
-                       index_col=index_col, sep=sep, skiprows=skip_rows)
+                       sep=sep, header=header, names=names, index_col=index_col, usecols=use_cols,
+                       lineterminator=line_terminator, skiprows=skip_rows)
     return df
 
 
