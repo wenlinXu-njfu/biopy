@@ -48,10 +48,6 @@ def show_process_bar(fasta_file: TextIOWrapper,
         o.write(''.join(content))
 
 
-def call_back_func(ORF):
-    click.echo(f'\033[33m{ORF}\033[0m', err=True) if isinstance(ORF, str) else click.echo(f'>{ORF.id}\n{ORF.seq}')
-
-
 def main(fasta_files: Tuple[TextIOWrapper],
          parse_seqids: bool,
          min_len: int,
