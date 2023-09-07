@@ -22,11 +22,6 @@ def sub_processing(nucl_obj: Nucleotide, min_len: int, complete: bool, only_plus
     return ORF
 
 
-def write_pep_to_file(content: str, output_file: str):
-    with open(output_file, 'a') as o:
-        o.write(content)
-
-
 def show_process_bar(fasta_file: TextIOWrapper,
                      params: Iterable[Tuple[Nucleotide, int, bool, bool]],
                      log_file: TextIOWrapper,
@@ -45,11 +40,16 @@ def show_process_bar(fasta_file: TextIOWrapper,
         pool.close()
         pool.join()
     results = [i.get() for i in results]
-    content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
     log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
-    output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1]
-    write_pep_to_file(''.join(content), f'./{output_prefix}.orf')
     log_file.write(log)
+    content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
+    output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1]
+    with open(f'./{output_prefix}.orf', 'w') as o:
+        o.write(''.join(content))
+
+
+def call_back_func(ORF):
+    click.echo(f'\033[33m{ORF}\033[0m', err=True) if isinstance(ORF, str) else click.echo(f'>{ORF.id}\n{ORF.seq}')
 
 
 def main(fasta_files: Tuple[TextIOWrapper],
@@ -68,22 +68,12 @@ def main(fasta_files: Tuple[TextIOWrapper],
         # Do not show the progress bar on the command line.
         else:
             pool = Pool(processes=processes_num)
-            results = []
             for param in params:
-                ORF = pool.apply_async(sub_processing, args=param)
-                results.append(ORF)
+                pool.apply_async(sub_processing, args=param,
+                                 callback=lambda ORF: click.echo(f'\033[33m{ORF}\033[0m', err=True, file=log_file)
+                                 if isinstance(ORF, str) else click.echo(f'>{ORF.id}\n{ORF.seq}'))
             pool.close()
             pool.join()
-            results = [i.get() for i in results]
-            content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
-            log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
-            log_file.write(log) if log_file else click.echo(f'\033[33m{log}\033[0m', err=True)
-            output_prefix = fasta_file.name.replace('.gz', '').split('/')[-1] if fasta_file.name != '<stdin>' else 'stdin'
-            if to_file:
-                with open(f'./{output_prefix}.orf', 'w') as o:
-                    o.write(''.join(content))
-            else:
-                click.echo(''.join(content))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -93,7 +83,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
 @click.option('-c', '--completed', 'completed', is_flag=True, flag_value=True, help='Remain completed ORF.')
 @click.option('-p', '--only_plus', 'only_plus', is_flag=True, flag_value=True, help='Only predict plus chain.')
 @click.option('-log', '--log_file', 'log_file', type=click.File('a'),
-              help='Write the sequence that not found ORF to logfile.')
+              help='Write the sequence that not found ORF to logfile rather than print to terminal as stderr.')
 @click.option('-o', '--to_file', 'to_file', is_flag=True, flag_value=True, show_default=True,
               help='Write the results to file rather than print to terminal as stdout.')
 @click.option('-n', '--processes_num', 'processes_num', type=int, default=1, show_default=True, help='Number of processes.')
