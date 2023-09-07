@@ -24,11 +24,7 @@ def main(fasta_file: TextIOWrapper,
             if strand == '-':
                 sub_seq = sub_seq.get_reverse_complementary_seq()
             sub_seq.id = f'{chr_num}:{start}-{end}({strand})'
-            if output_file:
-                with output_file as o:
-                    o.write(f">{sub_seq.id}\n{sub_seq.seq}\n")
-            else:
-                print(sub_seq)
+            click.echo(sub_seq, output_file)
             break
 
 

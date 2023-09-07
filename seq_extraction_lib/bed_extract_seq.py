@@ -20,12 +20,8 @@ def main(bed_file: TextIOWrapper,
          both: int,
          extension: bool,
          out_file: TextIOWrapper = None):
-    content = []
     for nucl_obj in Bed(bed_file).bed_extract_seq(fa_file, use_id, up, down, both, extension):
-        content.append(f">{nucl_obj.id}\n{nucl_obj.seq}\n") if out_file else print(f">{nucl_obj.id}\n{nucl_obj.seq}")
-    if out_file:
-        with out_file as o:
-            o.write(''.join(content))
+        click.echo(nucl_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -47,7 +43,7 @@ def main(bed_file: TextIOWrapper,
 @click.option('--extension/--non_extension', type=bool, default=True, show_default=True,
               help='If "-u --upstream", "-d --downstream" or "-b --both_end" is specified, '
                    'specify whether extension (including sequence self in BED file).')
-@click.option('-o', '--output_file', 'output_file', type=click.File('w'),
+@click.option('-o', '--output_file', 'output_file', type=click.File('a'),
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -15,22 +15,16 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 def main(gff_file: TextIOWrapper,
          fa_file: TextIOWrapper,
          feature_type: str,
-         id_file: TextIOWrapper,
-         out_file: TextIOWrapper):
+         id_file: TextIOWrapper = None,
+         out_file: TextIOWrapper = None):
     content = []
     if id_file:
         id_list = set(i.strip() for i in id_file.readlines() if i.strip())
         for nucl_obj in Gff(gff_file).gff_extract_seq(fa_file, feature_type, id_list):
-            if out_file:
-                content.append(f">{nucl_obj.id}\n{nucl_obj.seq}\n")
-            else:
-                print(nucl_obj)
+            click.echo(nucl_obj, out_file)
     else:
         for nucl_obj in Gff(gff_file).gff_extract_seq(fa_file, feature_type):
-            if out_file:
-                content.append(f">{nucl_obj.id}\n{nucl_obj.seq}\n")
-            else:
-                print(nucl_obj)
+            click.echo(nucl_obj, out_file)
     if content:
         with out_file as o:
             o.write(''.join(content))
@@ -44,7 +38,7 @@ def main(gff_file: TextIOWrapper,
 @click.option('-d', '--id_file', 'id_file', type=click.File('r'),
               help='Provides an ID file (one id per line) that extracts sequences from the GFF file that '
                    '\033[1mmatch\033[0m the IDs in the ID file.')
-@click.option('-o', '--output_file', 'output_file', type=click.File('w'),
+@click.option('-o', '--output_file', 'output_file', type=click.File('a'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

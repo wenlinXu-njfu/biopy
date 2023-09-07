@@ -13,13 +13,8 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gtf_file: TextIOWrapper, fasta_file: TextIOWrapper, out_file: TextIOWrapper):
-    if out_file:
-        with out_file as o:
-            for cDNA_nucl_obj in Gtf(gtf_file).get_cDNA(fasta_file):
-                o.write(f">{cDNA_nucl_obj.id}\n{cDNA_nucl_obj.seq}\n")
-    else:
-        for cDNA_nucl_obj in Gtf(gtf_file).get_cDNA(fasta_file):
-            print(cDNA_nucl_obj)
+    for cDNA_nucl_obj in Gtf(gtf_file).get_cDNA(fasta_file):
+        click.echo(cDNA_nucl_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
