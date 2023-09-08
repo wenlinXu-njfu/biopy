@@ -9,6 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union
 from os import system
+from getpass import getuser
+from socket import gethostname
 from datetime import datetime
 from click import echo
 
@@ -25,8 +27,8 @@ class Displayer:
         self.version = version
 
     @staticmethod
-    def echo_and_execute_command(command: str, file: Union[str, TextIOWrapper] = None):
-        command_prompt = f'[{datetime.now().replace(microsecond=0)}]$ '
+    def echo_and_execute_command(command: str, file: Union[str, TextIOWrapper] = None) -> None:
+        command_prompt = f'[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]$ '
         if isinstance(file, str):
             echo(f'\033[33m{command_prompt}\033[0m\033[36m{command}\033[0m', err=True, file=open(file, 'a'))
         elif isinstance(file, TextIOWrapper):
