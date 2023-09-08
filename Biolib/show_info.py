@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import Union
+from typing import Union, List
 from os import system
 from getpass import getuser
 from socket import gethostname
@@ -18,12 +18,12 @@ from click import echo
 class Displayer:
     def __init__(self,
                  program: str,
-                 author: str = 'Wenlin Xu',
-                 contact: str = 'wenlinxu.njfu@outlook.com',
+                 authors: List[str] = ['Wenlin Xu'],
+                 contacts: List[str] = ['wenlinxu.njfu@outlook.com'],
                  version: str = '1.1.0'):
         self.program = program
-        self.author = author
-        self.contact = contact
+        self.authors = ', '.join(authors)
+        self.contacts = ', '.join(contacts)
         self.version = version
 
     @staticmethod
@@ -41,8 +41,8 @@ class Displayer:
         if not value or ctx.resilient_parsing:
             return
         echo(f'Program: {self.program}\n'
-             f'Author: {self.author:>10}\n'
-             f'Contact: {self.contact}\n'
+             f'Author:  {self.authors}\n'
+             f'Contact: {self.contacts}\n'
              f'Version: {self.version}',
              err=True)
         ctx.exit()
