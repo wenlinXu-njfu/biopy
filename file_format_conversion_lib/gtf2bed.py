@@ -13,15 +13,8 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gtf_file: TextIOWrapper, out_file: TextIOWrapper):
-    content = []
     for line in Gtf(gtf_file).gtf_to_bed():
-        if out_file:
-            content.append(line)
-        else:
-            print(line.strip())
-    if out_file:
-        with out_file as o:
-            o.write(''.join(content))
+        click.echo(line, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
