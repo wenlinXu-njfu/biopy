@@ -161,13 +161,13 @@ class Gff:
         else:
             return 0, 0, '0', '0', 0, line
 
-    def gff_sort(self) -> str:
+    def gff_sort(self) -> Generator[str, None, None]:
         """Sort the GFF file by sequence ID."""
-        l = [line for line in self.open if not line.startswith('#') and line.strip()]
+        l = [line.strip() for line in self.open if not line.startswith('#') and line.strip()]
         l.sort(key=lambda line: self.__gff_sort(line))
         if not isinstance(self.open, list):
             self.open.seek(0)
-        return ''.join(l)
+        yield from l
 
 # Sequence extraction method============================================================================================
     def gff_extract_seq(self,
@@ -205,41 +205,37 @@ class Gff:
             yield Nucleotide(seq_id, seq)
 
 # File format conversion method=========================================================================================
-    def gff_to_gtf(self) -> str:
+    def gff_to_gtf(self) -> Generator[str, None, None]:
         """Convert the file format from GFF to GTF."""
         last_line = None
         gene_id = transcript_id = None
-        content = ["## gff_to_gtf", f"## Convert from {self.name}"]
-        append = content.append
         i = 0
         for line in self.parse():
             i += 1
             current_line = list(line)
             if current_line[2] == 'gene':
                 if last_line:
-                    append('\t'.join(last_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";''')
+                    yield '\t'.join(last_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";'''
                     last_line = None
                     gene_id = current_line[8]['ID']
                 else:
                     gene_id = current_line[8]['ID']
-                append('\t'.join(current_line[:8]) + f'''\tgene_id "{gene_id}";''')
+                yield '\t'.join(current_line[:8]) + f'''\tgene_id "{gene_id}";'''
             elif current_line[2] == 'mRNA':
                 current_line[2] = 'transcript'
                 if last_line:
                     if gene_id is not None:
-                        append('\t'.join(last_line[:8]) +
-                               f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";''')
+                        yield '\t'.join(last_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";'''
                     else:
-                        append('\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";''')
+                        yield '\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";'''
                     last_line = None
                     transcript_id = current_line[8]['ID']
                 else:
                     transcript_id = current_line[8]['ID']
                 if gene_id is not None:
-                    append('\t'.join(current_line[:8]) +
-                           f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";''')
+                    yield '\t'.join(current_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";'''
                 else:
-                    append('\t'.join(current_line[:8]) + f'''\ttranscript_id "{transcript_id}";''')
+                    yield '\t'.join(current_line[:8]) + f'''\ttranscript_id "{transcript_id}";'''
             elif 'UTR' in current_line[2] or 'CDS' in current_line[2]:
                 current_line[2] = 'exon'
                 current_line[7] = '.'
@@ -250,32 +246,27 @@ class Gff:
                             last_line = current_line
                         else:
                             if gene_id is not None:
-                                append('\t'.join(last_line[:8]) +
+                                yield ('\t'.join(last_line[:8]) +
                                        f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";''')
                             else:
-                                append('\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";''')
+                                yield '\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";'''
                             last_line = current_line
                 else:
                     last_line = current_line
             if self.line_num == i:
                 if gene_id is not None:
-                    append('\t'.join(last_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";''')
+                    yield '\t'.join(last_line[:8]) + f'''\tgene_id "{gene_id}"; transcript_id "{transcript_id}";'''
                 else:
-                    append('\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";''')
-        content = '\n'.join(content) + '\n'
-        return content
+                    yield '\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";'''
 
     def gff_to_bed(self, feature_type: Union[str, list] = None) -> str:
         """Convert the file format from GFF to BED."""
-        content = []
         for line in self.parse():
             if feature_type:
                 if line[2] == feature_type or line[2] in feature_type:
-                    content.append(f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['ID']}\t{line[7]}\t{line[6]}")
+                    yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['ID']}\t{line[7]}\t{line[6]}"
             elif not feature_type:
-                content.append(f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['ID']}\t{line[7]}\t{line[6]}")
-        content = '\n'.join(content) + '\n'
-        return content
+                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['ID']}\t{line[7]}\t{line[6]}"
 
     def gff_to_gsds(self) -> str:
         """Convert the file format from GFF to GSDS."""
@@ -301,7 +292,7 @@ class Gff:
     def get_feature_density(self,
                             chr_len_dict: Dict[str, int],
                             feature_type: str = 'gene',
-                            span: int = 100000) -> str:
+                            span: int = 100000) -> Generator[str, None, None]:
         """Get feature density."""
         is_in_gff, msg = self.__check_feature(feature_type)
         if not is_in_gff:
@@ -312,15 +303,12 @@ class Gff:
             exit()
         gff_dataframe = self.parse_as_dataframe()
         gff_dataframe['Site'] = (gff_dataframe['Start'] + gff_dataframe['End']) / 2
-        content = []
         for chr_num, length in chr_len_dict.items():
             df = gff_dataframe[(gff_dataframe['Chromosome'] == chr_num) & (gff_dataframe['Feature'] == feature_type)]
             sites = df['Site']
             for i in range(span, length, span):
                 count = len(sites[(sites <= i) & (sites >= i - span + 1)])
-                content.append(f'{chr_num}\t{i - span + 1}\t{i}\t{count}\n')
+                yield f'{chr_num}\t{i - span + 1}\t{i}\t{count}'
             if length % span != 0:
                 count = len(sites[(sites <= length) & (sites >= length // span * span + 1)])
-                content.append(f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}\n')
-        content = ''.join(content)
-        return content
+                yield f'{chr_num}\t{length // span * span + 1}\t{length}\t{count}'

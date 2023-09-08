@@ -6,7 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from _io import TextIOWrapper
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Generator
 import click
 from Biolib.fasta import Fasta
 from Biolib.sequence import Nucleotide
@@ -224,13 +224,13 @@ class Gtf:
                             yield cDNA_nucl_obj
 
 # File format conversion method=========================================================================================
-    def gtf_to_bed(self, feature_type: str = 'exon') -> str:
+    def gtf_to_bed(self, feature_type: str = 'exon') -> Generator[str, None, None]:
         """Convert the file format from GTF to BED."""
         for line in self.parse():
             if line[2] == feature_type != 'gene':
-                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['transcript_id']}\t{line[7]}\t{line[6]}\n"
+                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['transcript_id']}\t{line[7]}\t{line[6]}"
             elif line[2] == feature_type == 'gene':
-                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}\n"
+                yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}"
 
     def gtf_to_gsds(self, feature_type: click.Choice(['gene', 'transcript']) = 'transcript') -> str:
         """Convert the file format from GTF to GSDS."""

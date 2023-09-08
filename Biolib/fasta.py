@@ -17,88 +17,37 @@ from Biolib.sequence import Nucleotide, Protein
 class Fasta:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.path = path
+            try:
+                self.open = open(path)
+            except UnicodeDecodeError:
+                self.open = (str(line, 'utf8') for line in GzipFile(path))
         else:
             if path.name == '<stdin>':
-                self.path = open_file('-')
+                self.open = (line for line in open_file('-').readlines())
             else:
-                self.path = path.name
+                if 'gz' in path.name:
+                    self.open = (str(line, 'utf8') for line in GzipFile(path.name))
+                else:
+                    self.open = path
 
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
         """A FASTA file generator that returns one Nucleotide or Protein object at one time."""
-        # Parse FASTA format from a file.
-        if isinstance(self.path, str):
-            # Parse uncompressed FASTA file (xx.fa).
-            try:
-                fa_generator = (ret[1] for ret in groupby(open(self.path), lambda line: line.startswith('>')))
-                for g in fa_generator:
-                    seq_id = g.__next__().strip()
-                    seq = ''.join(line.strip() for line in fa_generator.__next__())
-                    if parse_id:
-                        if '\t' in seq_id:
-                            seq_id = seq_id.split('\t')[0]
-                        elif '|' in seq_id:
-                            seq_id = seq_id.split('|')[0]
-                        else:
-                            seq_id = seq_id.split(' ')[0]
-                    if 'M' not in seq and '*' not in seq:
-                        yield Nucleotide(seq_id, seq)
-                    else:
-                        yield Protein(seq_id, seq)
-            # Parse compressed FASTA file (xx.fa.gz).
-            except UnicodeDecodeError:
-                l = []
-                for line in GzipFile(self.path):
-                    l.append(str(line, 'utf8'))
-                fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
-                for g in fa_generator:
-                    seq_id = g.__next__().strip()
-                    seq = ''.join(line.strip() for line in fa_generator.__next__())
-                    if parse_id:
-                        if '|' in seq_id:
-                            seq_id = seq_id.split('|')[0]
-                        else:
-                            seq_id = seq_id.split(' ')[0]
-                    if 'M' not in seq and '*' not in seq:
-                        yield Nucleotide(seq_id, seq)
-                    else:
-                        yield Protein(seq_id, seq)
-        # Parse FASTA format from command line stdin.
-        else:
-            # Parse uncompressed FASTA file (xx.fa).
-            try:
-                fa_generator = (ret[1] for ret in groupby(self.path, lambda line: line.startswith('>')))
-                for g in fa_generator:
-                    seq_id = g.__next__().strip()
-                    seq = ''.join(line.strip() for line in fa_generator.__next__())
-                    if parse_id:
-                        if '|' in seq_id:
-                            seq_id = seq_id.split('|')[0]
-                        else:
-                            seq_id = seq_id.split(' ')[0]
-                    if 'M' not in seq and '*' not in seq:
-                        yield Nucleotide(seq_id, seq)
-                    else:
-                        yield Protein(seq_id, seq)
-            # Parse compressed FASTA file (xx.fa.gz).
-            except UnicodeDecodeError:
-                l = []
-                for line in GzipFile(self.path):
-                    l.append(str(line, 'utf8'))
-                fa_generator = (ret[1] for ret in groupby(l, lambda line: line.startswith('>')))
-                for g in fa_generator:
-                    seq_id = g.__next__().strip()
-                    seq = ''.join(line.strip() for line in fa_generator.__next__())
-                    if parse_id:
-                        if '|' in seq_id:
-                            seq_id = seq_id.split('|')[0]
-                        else:
-                            seq_id = seq_id.split(' ')[0]
-                    if 'M' not in seq and '*' not in seq:
-                        yield Nucleotide(seq_id, seq)
-                    else:
-                        yield Protein(seq_id, seq)
+        fa_generator = (ret[1] for ret in groupby(self.open, lambda line: line.startswith('>')))
+        for g in fa_generator:
+            seq_id = g.__next__().strip()
+            seq = ''.join(line.strip() for line in fa_generator.__next__())
+            if parse_id:
+                if '\t' in seq_id:
+                    seq_id = seq_id.split('\t')[0]
+                elif '|' in seq_id:
+                    seq_id = seq_id.split('|')[0]
+                else:
+                    seq_id = seq_id.split(' ')[0]
+            if 'M' not in seq and '*' not in seq:
+                yield Nucleotide(seq_id, seq)
+            else:
+                yield Protein(seq_id, seq)
 
     def get_seq_dict(self, parse_id: bool = False) -> dict:
         """Get sequence dict from FASTA file."""
@@ -112,44 +61,10 @@ class Fasta:
         return seq_dict
 
 # File format conversion method=========================================================================================
-    def check_FASTA(self) -> bool:
-        """Check whether a file is formal FASTA format."""
-        if isinstance(self.path, str):
-            try:
-                with open(self.path) as f:
-                    f.readline()
-                    f.readline()
-                    line = f.readline()
-                    return True if line.startswith('>') else False
-            except UnicodeDecodeError:
-                with GzipFile(self.path) as f:
-                    f.readline()
-                    f.readline()
-                    line = str(f.readline(), 'utf8')
-                    return True if line.startswith('>') else False
-        else:
-            try:
-                with self.path as f:
-                    f.readline()
-                    f.readline()
-                    line = f.readline()
-                    return True if line.startswith('>') else False
-            except UnicodeDecodeError:
-                with GzipFile(self.path) as f:
-                    f.readline()
-                    f.readline()
-                    line = str(f.readline(), 'utf8')
-                    return True if line.startswith('>') else False
-
     def merge_sequence(self) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed on a single line."""
-        is_fa = self.check_FASTA()
-        if not is_fa:
-            for seq_obj in self.parse(False):
-                yield seq_obj
-        else:
-            echo('\033[33mThe input FASTA file does not need to be formatted.\033[0m', err=True)
-            exit()
+        for seq_obj in self.parse(False):
+            yield seq_obj
 
     def split_sequence(self, char_num: int) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed in multiple lines."""
@@ -160,7 +75,7 @@ class Fasta:
 # Other method==========================================================================================================
     def get_longest_seq(self, regular_exp: str = r'\w+.\w+', inplace_id: bool = False) -> Union[Nucleotide, Protein]:
         """Get the longest transcript of each gene locus."""
-        all_seq_dict = {seq_obj.id: seq_obj.seq for seq_obj in self.parse(False)}  # {seq_id: seq}
+        all_seq_dict = self.get_seq_dict(False)  # {seq_id: seq}
         longest_seq_dict = {}  # {locus_id: seq}
         id_map_dict = {}  # {'Potri.001G000100': 'Potri.001G000100.3', 'Potri.001G000200': 'Potri.001G000200.1', ...}
         if inplace_id:
