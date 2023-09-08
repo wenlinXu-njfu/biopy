@@ -6,20 +6,15 @@ Date: 2022/1/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from multiprocessing import Pool
 from io import TextIOWrapper
 import click
-from Biolib import Displayer
+from Biolib import TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def sub_processing(command: str):
-    displayer.echo_and_execute_command(command)
-
-
 def main(command_file: TextIOWrapper, processing_num: int):
-    with Pool(processing_num) as pool:
-        pool.map(sub_processing, (line.strip() for line in command_file))
+    task_manager = TaskManager([line.strip() for line in command_file], processing_num)
+    task_manager.parallel_run()
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
