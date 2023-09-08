@@ -84,9 +84,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
     :return: None
     """
     gff_dict = Gff(gff_file).get_gff_dict(feature)
-    content = ['Chr_num\tLncRNA_id\tTarget_id\tDistance\tLocation\tLncRNA_strand\n']
-    if out_file is None:
-        print(''.join(content).strip())
+    click.echo('Chr_num\tLncRNA_id\tTarget_id\tDistance\tLocation\tLncRNA_strand', out_file)
     for line in open(gtf_file):
         if not line.strip():
             continue
@@ -114,13 +112,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
                             dis, loc, strand = judge_distance_location(int(split[3]), int(split[4]), strand,
                                                                        gene['start'], gene['end'], gene['strand'])
                         if dis is not None:
-                            if out_file:
-                                content.append(f"{chr_num}\t{transcript_id}\t{gene['id']}\t{dis}\t{loc}\t{strand}\n")
-                            else:
-                                print(f"{chr_num}\t{transcript_id}\t{gene['id']}\t{dis}\t{loc}\t{strand}")
-    if out_file:
-        with out_file as o:
-            o.write(''.join(content))
+                            click.echo(f"{chr_num}\t{transcript_id}\t{gene['id']}\t{dis}\t{loc}\t{strand}", out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -129,7 +121,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
 @click.option('-f', '--feature_type', 'feature_type', default='mRNA',  show_default=True, help='Feature type.')
 @click.option('-d', '--distance', 'distance', type=int, default=100000, show_default=True,
               help='Genes within a certain range of upstream and downstream of lncRNA were selected as target genes.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
+@click.option('-o', '--output_file', 'outfile', type=click.File('a'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
