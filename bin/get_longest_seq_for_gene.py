@@ -16,15 +16,8 @@ def main(fasta_file: TextIOWrapper,
          regula_exp: str,
          inplace_id: bool,
          out_file: TextIOWrapper = None):
-    content = []
     for seq_obj in Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id):
-        content.append(f">{seq_obj.id}\n{seq_obj.seq}\n")
-    content = ''.join(content)
-    if out_file:
-        with out_file as o:
-            o.write(content)
-    else:
-        print(content)
+        click.echo(seq_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

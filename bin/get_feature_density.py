@@ -18,12 +18,8 @@ def main(chr_len_file: TextIOWrapper,
          span: int,
          output_file: TextIOWrapper):
     chr_len_dict = {line.split('\t')[0]: int(line.strip().split('\t')[1]) for line in chr_len_file}
-    content = Gff(gff_file).get_feature_density(chr_len_dict, feature, span)
-    if output_file:
-        with output_file as o:
-            o.write(content)
-    else:
-        print(content)
+    for line in Gff(gff_file).get_feature_density(chr_len_dict, feature, span):
+        click.echo(line, output_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

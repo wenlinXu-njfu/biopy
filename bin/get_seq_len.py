@@ -6,22 +6,15 @@ Date: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 import click
 from Biolib import Fasta, Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(fasta_file: TextIOWrapper, parse_seqids: bool, out_file: TextIOWrapper):
-    content = ''
     for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
-        if out_file:
-            content += nucl_obj.get_seq_len_info() + '\n'
-        else:
-            print(nucl_obj.get_seq_len_info())
-    if out_file:
-        with out_file as o:
-            o.write(content)
+        click.echo(nucl_obj.get_seq_len_info(), out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

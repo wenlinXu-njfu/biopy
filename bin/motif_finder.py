@@ -16,8 +16,8 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 def main(fasta_files: Tuple[TextIOWrapper],
          motif: str,
          quiet: bool,
-         log_file: str,
-         output_file: str):
+         log_file: TextIOWrapper = None,
+         output_file: TextIOWrapper = None):
     content = '# Seq_id\tStart\tEnd\tMotif\n'
     for fasta_file in fasta_files:
         for seq_obj in Fasta(fasta_file).parse():
@@ -26,8 +26,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
                 content += ret
             else:
                 if not quiet:
-                    click.echo(f"\033[33m{ret}\033[0m", err=True, file=open(log_file, 'a')) if log_file else \
-                        click.echo(f"\033[33m{ret}\033[0m", err=True)
+                    click.echo(f"\033[33m{ret}\033[0m", err=True, file=log_file)
         if output_file and len(content) > 23:
             with output_file as o:
                 o.write(content)
@@ -41,7 +40,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
 @click.option('-q', '--quiet', 'quiet', is_flag=True, flag_value=True,
               help='Do not report sequence that not found motif. This conflicts with the "-l --log_file" option and '
                    'takes precedence over the "-l --log_file" option.')
-@click.option('-log', '--log_file', 'log_file',
+@click.option('-log', '--log_file', 'log_file', type=click.File('a'),
               help='Write the sequence that not found motif to logfile. This conflicts with the "-q --quiet" option and '
                    'has a lower priority than the "-q --quiet" option.')
 @click.option('-o', '--output_file', 'outfile', type=click.File('w'),
