@@ -1,23 +1,37 @@
 #!/usr/bin/env python
 """
 File: task_manager.py
-Description: 
+Description: Instance a TaskManager.
 Date: 2023/9/8
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-import click
-from Biolib import Displayer
-displayer = Displayer(__file__.split('/')[-1])
-def main(input_file, output_file):
-    pass
-@click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', type=click.File('r'), help='Input file.')
-@click.option('-o', '--output_file', 'output_file', type=click.File('w'), help='Output file.')
-@click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(input_file, output_file):
-    """Description."""
-    main(input_file, output_file)
-if __name__ == '__main__':
-    run()
+from typing import Iterable
+from io import TextIOWrapper
+from os import system
+from datetime import datetime
+from getpass import getuser
+from socket import gethostname
+from multiprocessing import Pool
+from click import echo
+
+
+class TaskManager:
+    def __init__(self, commands: Iterable[str], processing_num: int, log_file: TextIOWrapper = None):
+        self.cmd_prompt = f'[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n$ '
+        self.task = commands
+        self.processing_num = processing_num
+        self.loger = log_file
+
+    def serial_run(self):
+        for cmd in self.task:
+            echo(f'\033[33m{self.cmd_prompt}\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
+            system(cmd)
+
+    def parallel_run(self):
+        with Pool(self.processing_num) as pool:
+            for cmd in self.task:
+                pool.apply_async(system, (cmd,),
+                                 echo(f'\033[33m{self.cmd_prompt}\033[0m\033[36m{cmd}\033[0m', self.loger, err=True))
+            pool.close()
+            pool.join()
