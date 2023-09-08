@@ -9,7 +9,7 @@ import math
 import numpy as np
 import matplotlib.axes
 import matplotlib.pyplot as plt
-from plot_lib.plot_base import bezier_curve
+from plot_lib.plot_base import _bezier_curve
 from plot_lib.circos.draw_chromosome import draw_chr
 from plot_lib.circos.draw_outer_bar import draw_outer_bar
 
@@ -43,7 +43,7 @@ def draw_bezier_curve(axes: matplotlib.axes.Axes, x1: float, y1: float, x2: floa
                            coordinates_conversion((x1 + x2) / 2, 0),
                            coordinates_conversion(x2, y2)])
     # Get the coordinates of the points on the bezier curve.
-    x, y = bezier_curve(P0, P1, P2)
+    x, y = _bezier_curve(P0, P1, P2)
     # Draw the bezier curve.
     if label:
         line2D, = axes.plot(x, y, transform=axes.transData._b, linewidth=line_width, color=line_color, label=label, alpha=alpha)

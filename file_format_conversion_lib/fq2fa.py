@@ -45,7 +45,8 @@ def main(fq_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fastq_file', 'fastq_file', required=True, help='Input FASTQ file(XXX.fq) or FASTQ compressed files(XXX.fq.gz).')
+@click.option('-i', '--fastq_file', 'fastq_file', required=True,
+              help='Input FASTQ file(XXX.fq) or FASTQ compressed files(XXX.fq.gz).')
 @click.option('-o', '--output_fasta', 'fasta_file',
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
