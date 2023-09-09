@@ -43,7 +43,7 @@ def main(bed_file: TextIOWrapper,
 @click.option('--extension/--non_extension', type=bool, default=True, show_default=True,
               help='If "-u --upstream", "-d --downstream" or "-b --both_end" is specified, '
                    'specify whether extension (including sequence self in BED file).')
-@click.option('-o', '--output_file', 'output_file', type=click.File('a'),
+@click.option('-o', '--output_file', 'output_file', type=click.File('w'),
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
