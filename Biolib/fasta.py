@@ -17,10 +17,10 @@ from Biolib.sequence import Nucleotide, Protein
 class Fasta:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            try:
-                self.open = open(path)
-            except UnicodeDecodeError:
+            if 'gz' in path:
                 self.open = (str(line, 'utf8') for line in GzipFile(path))
+            else:
+                self.open = open(path)
         else:
             if path.name == '<stdin>':
                 self.open = (line for line in open_file('-').readlines())
