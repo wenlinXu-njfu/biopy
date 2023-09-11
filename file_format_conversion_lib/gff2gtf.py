@@ -19,8 +19,11 @@ def main(gff_file: TextIOWrapper, gtf_file: TextIOWrapper = None):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gff_file', 'gff_file', type=click.File('r'), required=True, help='Input GFF file.')
-@click.option('-o', '--gtf_file', 'gtf_file', type=click.File('w'),
+@click.option('-i', '--gff_file', 'gff_file',
+              metavar='<gff file>', type=click.File('r'), required=True,
+              help='Input GFF file.')
+@click.option('-o', '--gtf_file', 'gtf_file',
+              metavar='<gtf file>', type=click.File('w'),
               help='Output GTF file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
