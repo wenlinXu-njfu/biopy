@@ -238,6 +238,8 @@ class Nucleotide(Sequence):
                     if len(match) >= 6:
                         try:
                             ssr_unit = max(findall(r'(\w+)\1{2}', match))
+                            if len(set([nucl for nucl in ssr_unit])) == 1:
+                                ssr_unit = list(set([nucl for nucl in ssr_unit]))[0]
                         except ValueError:
                             pass
                         else:
