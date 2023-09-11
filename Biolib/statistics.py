@@ -6,13 +6,13 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import StringIO
+from warnings import filterwarnings
 from click import echo, open_file
 import pandas as pd
 from typing import Union, List
 
 
 def display_set(decimal: int = 2) -> None:
-    from warnings import filterwarnings
     filterwarnings("ignore")
     pd.set_option('display.float_format', lambda x: f'%.{decimal}f' % x)
     pd.set_option('display.width', 1000)
