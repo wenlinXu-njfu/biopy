@@ -32,11 +32,15 @@ def main(in_file, seq_type: click.Choice(['aaseq', 'ntseq']), out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--seq_id', 'id_file', required=True,
+@click.option('-i', '--seq_id', 'id_file',
+              metavar='<id file>', required=True,
               help='Input KEGG list file, one id per line. (eg. pop:112323434\\npop:112323435)')
-@click.option('-t', '--seq_type', 'seq_type', type=click.Choice(['aaseq', 'ntseq']), default='aaseq', show_default=True,
+@click.option('-t', '--seq_type', 'seq_type',
+              metavar='<aaseq|ntseq>', type=click.Choice(['aaseq', 'ntseq']), default='aaseq', show_default=True,
               help='Specified sequence type.')
-@click.option('-o', '--output_file', 'output_file', help='Output FASTA file.')
+@click.option('-o', '--output_file', 'output_file',
+              metavar='<fasta file>',
+              help='Output FASTA file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(id_file, seq_type, output_file):

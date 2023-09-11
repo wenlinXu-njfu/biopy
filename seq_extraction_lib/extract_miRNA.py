@@ -36,8 +36,11 @@ def main(miRNA_gff_file, out_dir):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gff_file', 'gff_file', required=True, help='Input miRNA GFF file.')
-@click.option('-o', '--output_dir', 'output_dir', default='./', show_default=True,
+@click.option('-i', '--gff_file', 'gff_file',
+              metavar='<gff file>', required=True,
+              help='Input miRNA GFF file.')
+@click.option('-o', '--output_dir', 'output_dir',
+              metavar='<str>', default='./', show_default=True,
               help='Output directory, if the output directory does not exist, it will be created automatically.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
