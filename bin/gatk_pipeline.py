@@ -148,14 +148,23 @@ def main(genome_fasta_file: str,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-r', '--ref_genome_file', 'genome_fasta_file', type=click.File('r'), required=True,
+@click.option('-r', '--ref_genome_file', 'genome_fasta_file',
+              metavar='<fasta file>', type=click.File('r'), required=True,
               help='Reference sequence file.')
-@click.option('-samples', '--sample_list', 'sample_list', type=click.File('r'), required=True,
+@click.option('-samples', '--sample_list', 'sample_list',
+              metavar='<file>', type=click.File('r'), required=True,
               help='Sample name list. (One sample name per line, eg. Sample1\\nSample2\\n)')
-@click.option('-snp', '--snp_filter', 'snp_filter_expression', help='SNP filter expression.')
-@click.option('-indel', '--indel_filter', 'indel_filter_expression', help='INDEL filter expression.')
-@click.option('-o', '--output_prefix', 'output_prefix', required=True, help='Output file prefix.')
-@click.option('-O', '--record_command', 'record_command', type=click.File('a'),
+@click.option('-snp', '--snp_filter', 'snp_filter_expression',
+              metavar='<str>',
+              help='SNP filter expression.')
+@click.option('-indel', '--indel_filter', 'indel_filter_expression',
+              metavar='<str>',
+              help='INDEL filter expression.')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', required=True,
+              help='Output file prefix.')
+@click.option('-O', '--record_command', 'record_command',
+              metavar='<file>', type=click.File('w'),
               help='Record all commands used by the pipeline into the specified file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

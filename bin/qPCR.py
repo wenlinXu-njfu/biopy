@@ -20,7 +20,7 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 def main(in_file: str,
          ref_gene_name: str,
          control_sample_name: str,
-         out_file: str,
+         output_prefix: str,
          figsize: Tuple[float, float]):
     # step1: Read in qPCR results file.
     df = pd.read_excel(in_file, 'Results', header=39, usecols=['Sample Name', 'Target Name', 'CT'])
@@ -102,7 +102,7 @@ def main(in_file: str,
     target_gene_df = pd.concat(target_gene_df_list)
 
     # step5: Save relative expression results.
-    target_gene_df.to_csv(f'{out_file}.csv', float_format="%.3f", index=False, encoding='gbk')
+    target_gene_df.to_csv(f'{output_prefix}.csv', float_format="%.3f", index=False, encoding='gbk')
 
     # step6: Draw bar graph and save figure.
     target_gene_df = target_gene_df.loc[:,
@@ -156,16 +156,25 @@ def main(in_file: str,
             plt.delaxes(axes[i, j])
             plt.delaxes(axes[i, j + 1])
     plt.subplots_adjust(wspace=0.5, hspace=0.4)
-    plt.savefig(f'{out_file}.pdf', bbox_inches='tight')
+    plt.savefig(f'{output_prefix}.pdf', bbox_inches='tight')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', required=True, help='Input qPCR result excel file.')
-@click.option('-r', '--ref_name', 'ref_name', required=True,
+@click.option('-i', '--input_file', 'input_file',
+              metavar='<excel file>', required=True,
+              help='Input qPCR result excel file.')
+@click.option('-r', '--ref_name', 'ref_name',
+              metavar='<str>', required=True,
               help='Specify reference gene name. Multiple reference genes are separated by commas. (eg. 18s,ef1)')
-@click.option('-c', '--control_name', 'control_name', required=True, help='Specify name of control sample.')
-@click.option('-f', '--figure_size', 'figure_size', default='10x10', show_default=True, help='Figure size.')
-@click.option('-o', '--output_file_prefix', 'out_prefix', help='Prefix of output file.')
+@click.option('-c', '--control_name', 'control_name',
+              metavar='<str>', required=True,
+              help='Specify name of control sample.')
+@click.option('-f', '--figure_size', 'figure_size',
+              metavar='<str>', default='10x10', show_default=True,
+              help='Figure size.')
+@click.option('-o', '--output_file_prefix', 'out_prefix',
+              metavar='<str>', default='qPCR', show_default=True,
+              help='Prefix of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, ref_name, control_name, figure_size, out_prefix):

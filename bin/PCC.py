@@ -48,9 +48,11 @@ def main(exp_matrix_file, out_prefix):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', required=True,
+@click.option('-i', '--input_file', 'input_file',
+              metavar='<exp file>', required=True,
               help='Input gene expression matrix file (including header). Supported formats: txt, xls, xlsx, csv')
 @click.option('-o', '--output_file', 'outfile',
+              metavar='<file>',
               help='Output file prefix, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -67,14 +67,19 @@ def main(input_file: Union[TextIOWrapper, list],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', type=click.File('r'), required=True, help='Input file.')
-@click.option('-n', '--line_num', 'line_num', type=int,  required=True,
+@click.option('-i', '--input_file', 'input_file',
+              metavar='<file>', type=click.File('r'), required=True,
+              help='Input file.')
+@click.option('-n', '--line_num', 'line_num',
+              metavar='<int>', type=int,  required=True,
               help='The line num of each sub file, not including header.')
 @click.option('-H', '--header', is_flag=True, flag_value=True,
               help='If specified header, each sub file will contain header content.')
-@click.option('-N', '--header_num', 'header_num', type=int, default=1, show_default=True,
+@click.option('-N', '--header_num', 'header_num',
+              metavar='<int>', type=int, default=1, show_default=True,
               help='If header specified, specify the number of header line.')
-@click.option('-o', '--output_dir', 'output_dir', required=True,
+@click.option('-o', '--output_dir', 'output_dir',
+              metavar='<dir>', required=True,
               help='Output directory, if not exists, it will be created automatically.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -27,9 +27,12 @@ def main(exp_file, out_file_prefix):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--expression_file', 'expression_file', required=True,
+@click.option('-i', '--expression_file', 'expression_file',
+              metavar='<exp file>', required=True,
               help='Input gene expression profile file. (support format: txt, xls, xlsx, and csv)')
-@click.option('-o', '--output_prefix', 'output_prefix', default='Tau_index', show_default=True, help='Output file prefix.')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', default='Tau_index', show_default=True,
+              help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(expression_file, output_prefix):

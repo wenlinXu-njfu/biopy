@@ -116,12 +116,20 @@ def lncRNA_target_gene_prediction(gtf_file: str,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-g', '--gtf_file', 'gtf', required=True, help='Gtf annotation file of lncRNA.')
-@click.option('-a', '--gff_file', 'gff', required=True, help='Gff annotation file of mRNA.')
-@click.option('-f', '--feature_type', 'feature_type', default='mRNA',  show_default=True, help='Feature type.')
-@click.option('-d', '--distance', 'distance', type=int, default=100000, show_default=True,
+@click.option('-g', '--gtf_file', 'gtf',
+              metavar='<gtf file>', required=True,
+              help='Gtf annotation file of lncRNA.')
+@click.option('-a', '--gff_file', 'gff',
+              metavar='<gff file>', required=True,
+              help='Gff annotation file of mRNA.')
+@click.option('-f', '--feature_type', 'feature_type',
+              metavar='<str>', default='mRNA', show_default=True,
+              help='Feature type.')
+@click.option('-d', '--distance', 'distance',
+              metavar='<int>', type=int, default=100000, show_default=True,
               help='Genes within a certain range of upstream and downstream of lncRNA were selected as target genes.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('a'),
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<file name>', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

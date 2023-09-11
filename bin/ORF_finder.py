@@ -46,7 +46,7 @@ def show_process_bar(fasta_file: TextIOWrapper,
         pool.join()
     results = [i.get() for i in results]
     log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
-    log_file.write(log)
+    click.echo(log, log_file)
     content = [f'>{ORF.id}\n{ORF.seq}\n' for ORF in results if not isinstance(ORF, str)]
     output_prefix = fasta_file.name.split('/')[-1].replace('.gz', '')
     output_prefix = '.'.join(output_prefix.split('.')[:-1])
@@ -91,14 +91,24 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, type=click.File('r'), required=True)
-@click.option('-l', '--min_len', 'min_len', type=int, default=30, show_default=True, help='Minimal ORF length.')
-@click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True, help='Parse sequence id.')
-@click.option('-c', '--completed', 'completed', is_flag=True, flag_value=True, help='Remain completed ORF.')
-@click.option('-p', '--only_plus', 'only_plus', is_flag=True, flag_value=True, help='Only predict plus chain.')
-@click.option('-log', '--log_file', 'log_file', type=click.File('a'),
+@click.argument('fasta_files', nargs=-1, metavar='<fasta file>', type=click.File('r'), required=True)
+@click.option('-l', '--min_len', 'min_len',
+              metavar='<int>', type=int, default=30, show_default=True,
+              help='Minimal ORF length.')
+@click.option('-P', '--parse_seqids', 'parse_seqids',
+              is_flag=True, flag_value=True,
+              help='Parse sequence id.')
+@click.option('-c', '--completed', 'completed',
+              is_flag=True, flag_value=True,
+              help='Remain completed ORF.')
+@click.option('-p', '--only_plus', 'only_plus',
+              is_flag=True, flag_value=True,
+              help='Only predict plus chain.')
+@click.option('-log', '--log_file', 'log_file',
+              metavar='<file>', type=click.File('w'),
               help='Write the sequence that not found ORF to logfile rather than print to terminal as stderr.')
-@click.option('-o', '--to_file', 'to_file', is_flag=True, flag_value=True, show_default=True,
+@click.option('-o', '--to_file', 'to_file',
+              is_flag=True, flag_value=True, show_default=True,
               help='Write the results to file rather than print to terminal as stdout.')
 @click.option('-n', '--processes_num', 'processes_num', type=int, default=1, show_default=True, help='Number of processes.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

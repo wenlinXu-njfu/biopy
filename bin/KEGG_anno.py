@@ -52,8 +52,11 @@ def main(keg_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--htext_file', 'htext_file', required=True, help='Input kegg file. (format: htext)')
+@click.option('-i', '--htext_file', 'htext_file',
+              metavar='<htext file>', required=True,
+              help='Input kegg file. (format: htext)')
 @click.option('-o', '--output_file', 'outfile',
+              metavar='<file>',
               help='Output file (eg. pop7465650\tK18835\tWRKY transcription factor 2\tko04626\tPlant-pathogen interaction), '
                    'if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

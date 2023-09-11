@@ -43,16 +43,21 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, required=True, type=click.File('r'))
-@click.option('-P', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True,
+@click.argument('fasta_files', nargs=-1, metavar='<fasta files>', required=True, type=click.File('r'))
+@click.option('-P', '--parse_seqids', 'parse_seqids',
+              is_flag=True, flag_value=True,
               help='Parse sequence id in FASTA file.')
-@click.option('-id', '--id_file', 'id_file', type=click.File('r'), required=True,
+@click.option('-id', '--id_file', 'id_file',
+              metavar='<file>', type=click.File('r'), required=True,
               help='Input id file (one id per line).')
-@click.option('--match/--contain', default=True, show_default=True,
+@click.option('--match/--contain',
+              default=True, show_default=True,
               help='Whether the id supplied should exactly match the ID of the sequence.')
-@click.option('-log', '--log_file', 'log_file', type=click.File('a'),
+@click.option('-log', '--log_file', 'log_file',
+              metavar='<file>', type=click.File('w'),
               help='Output log file, if not specified, the log will print to terminal as stderr.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<file>', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

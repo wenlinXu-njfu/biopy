@@ -30,15 +30,20 @@ def main(fasta_files: Tuple[TextIOWrapper],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, type=click.File('r'), required=True)
-@click.option('-m', '--motif', 'motif', required=True, help='Specify motif sequence, support for regular expressions.')
-@click.option('-q', '--quiet', 'quiet', is_flag=True, flag_value=True,
+@click.argument('fasta_files', nargs=-1, metavar='<fasta file>', type=click.File('r'), required=True)
+@click.option('-m', '--motif', 'motif',
+              metavar='<str>', required=True,
+              help='Specify motif sequence, support for regular expressions.')
+@click.option('-q', '--quiet', 'quiet',
+              is_flag=True, flag_value=True,
               help='Do not report sequence that not found motif. This conflicts with the "-l --log_file" option and '
                    'takes precedence over the "-l --log_file" option.')
-@click.option('-log', '--log_file', 'log_file', type=click.File('a'),
+@click.option('-log', '--log_file', 'log_file',
+              metavar='<file>', type=click.File('w'),
               help='Write the sequence that not found motif to logfile. This conflicts with the "-q --quiet" option and '
                    'has a lower priority than the "-q --quiet" option.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<file>', type=click.File('w'),
               help='Output file (Seq_id\\tStart\\tEnd\\tMotif), if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
