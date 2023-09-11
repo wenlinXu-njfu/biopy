@@ -23,9 +23,14 @@ def main(gene_exp_file: str, color_map: str, out_file: str):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gene_exp', 'gene_exp_file', help='Input gene expression file. (TAB split)')
-@click.option('-c', '--color_map', 'color_map', default='vlag', help='[optional] Color map. {default: vlag}')
-@click.option('-o', '--output_file', 'outfile', default='cluster_heatmap.pdf', show_default=True,
+@click.option('-i', '--gene_exp', 'gene_exp_file',
+              metavar='<exp file>', required=True,
+              help='Input gene expression file. (TAB split)')
+@click.option('-c', '--color_map', 'color_map',
+              metavar='<str>', default='vlag', show_default=True,
+              help='Color map.')
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<figure file>', default='cluster_heatmap.pdf', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

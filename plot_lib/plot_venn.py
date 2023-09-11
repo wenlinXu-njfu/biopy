@@ -26,12 +26,19 @@ def main(in_dir: str, figure_size: tuple, out_prefix: str, fmt: str):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_dir', 'input_dir', help='Input directory where data files are stored.')
-@click.option('-s', '--figure_size', default='8.0x8.0', show_default=True, help='Figure size.')
-@click.option('-o', '--output_prefix', 'output_prefix', default='venn', show_default=True, help='Prefix of output file.')
+@click.option('-i', '--input_dir', 'input_dir',
+              metavar='<dir>', required=True,
+              help='Input directory where data files are stored.')
+@click.option('-s', '--figure_size',
+              metavar='<str>', default='8.0x8.0', show_default=True,
+              help='Figure size.')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', default='venn', show_default=True,
+              help='Prefix of output file.')
 @click.option('-O', '--output_format', 'output_format',
               type=click.Choice(['eps', 'jpeg', 'jpg', 'pdf', 'pgf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']),
-              default='pdf', show_default=True, help='The format of output file.')
+              metavar='<str>', default='pdf', show_default=True,
+              help='The format of output file (support eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, and tiff).')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_dir, figure_size, out, output_format):

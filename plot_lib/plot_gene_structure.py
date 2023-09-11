@@ -30,34 +30,46 @@ def main(in_file: str, in_file_format: click.Choice(['gff', 'gtf']),
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file', help='Input file.')
-@click.option('-t', '--format', 't', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
+@click.option('-i', '--input_file', 'input_file',
+              metavar='<anno file>', required=True,
+              help='Input GFF or GTF file.')
+@click.option('-t', '--format', 't',
+              metavar='<gff|gtf>', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
               help='Specify the format of input file.')
-@click.option('-u', '--utr_color', 'utr_color', default='salmon', show_default=True,
-              help='[optional] If input GFF file, specify color of utr, it supports color code.')
+@click.option('-u', '--utr_color', 'utr_color',
+              metavar='<str>', default='salmon', show_default=True,
+              help='If input GFF file, specify color of utr, it supports color code.')
 @click.option('-uh', '--utr_hatch', 'utr_hatch',
-              type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']), default=None, show_default=True,
-              help='[optional] If input GFF file, specify hatch of utr.')
-@click.option('-c', '--cds_color', 'cds_color', default='skyblue', show_default=True,
-              help='[optional] If input GFF file, specify color of utr, it supports color code.')
+              metavar='<str>', type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']),
+              help='If input GFF file, specify hatch of utr.')
+@click.option('-c', '--cds_color', 'cds_color',
+              metavar='<str>', default='skyblue', show_default=True,
+              help='If input GFF file, specify color of utr, it supports color code.')
 @click.option('-ch', '--cds_hatch', 'cds_hatch',
-              type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']), default=None, show_default=True,
-              help='[optional] If input GFF file, specify hatch of cds.')
-@click.option('-e', '--exon_color', 'exon_color', default='salmon', show_default=True,
+              metavar='<str>', type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']),
+              help='If input GFF file, specify hatch of cds.')
+@click.option('-e', '--exon_color', 'exon_color',
+              metavar='<str>', default='salmon', show_default=True,
               help='[optional] If input GTF file, specify color of exon, it supports color code.')
 @click.option('-eh', '--exon_hatch', 'exon_hatch',
-              type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']), default=None, show_default=True,
-              help='[optional] If input GTF file, specify hatch of exon.')
-@click.option('-E', '--edge_color', 'edge_color', default=None, show_default=True, help='[optional] Set edge color.')
-@click.option('-W', '--figure_width', 'figure_width', type=float, default=20.0, show_default=True,
+              metavar='<str>', type=click.Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']),
+              help='If input GTF file, specify hatch of exon.')
+@click.option('-ec', '--edge_color', 'edge_color',
+              metavar='<str>', default='black', show_default=True,
+              help='Set edge color.')
+@click.option('-width', '--figure_width', 'figure_width',
+              metavar='<float>', type=float, default=20.0, show_default=True,
               help='Output figure width.')
-@click.option('-H', '--figure_height', 'figure_height', type=float, default=10.0, show_default=True,
+@click.option('-height', '--figure_height', 'figure_height',
+              metavar='<float>', type=float, default=10.0, show_default=True,
               help='Output figure height.')
-@click.option('-o', '--output_path', 'output_path', default='./', show_default=True,
-              help='Output file path. {default: ./}')
-@click.option('-O', '--output_format', 'output_format', default='pdf', show_default=True,
+@click.option('-out', '--output_path', 'output_path',
+              metavar='<str>', default='./', show_default=True,
+              help='Output file path.')
+@click.option('-outfmt', '--output_format', 'output_format',
+              metavar='<str>', default='pdf', show_default=True,
               type=click.Choice(['eps', 'jpeg', 'jpg', 'pdf', 'pgf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']),
-              help='Output file format.')
+              help='Output file format (support eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, and tiff).')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, t, utr_color, utr_hatch, cds_color, cds_hatch, exon_color, exon_hatch, edge_color,

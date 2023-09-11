@@ -55,13 +55,21 @@ def main(chr_len_file, gene_density_file, stat_file, link_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-c', '--chr_len', 'chr_len_file', help='Input chromosome length file.\n(Chr_num\\tLength\\n)')
+@click.option('-c', '--chr_len', 'chr_len_file',
+              metavar='<length file>', required=True,
+              help='Input chromosome length file.\n(Chr_num\\tLength\\n)')
 @click.option('-d', '--gene_density', 'gene_density_file',
+              metavar='<density file>', required=True,
               help='Input gene density file.\n(Chr_num\\tStart\\tEnd\\tCount\\n)')
-@click.option('-s', '--feature_stat', 'feature_stat', help='Input statistical file.\n(Chr_num\\tType\\tCount\\tColor\\n)')
+@click.option('-s', '--feature_stat', 'feature_stat',
+              metavar='<stat file>', required=True,
+              help='Input statistical file.\n(Chr_num\\tType\\tCount\\tColor\\n)')
 @click.option('-l', '--link_file', 'link_file',
+              metavar='<link file>', required=True,
               help='Input associated site file.\n(Chr_num\\tStart\\tEnd\\tChr_num\\tStart\\tEnd\\tColor\\tDescription\\n)')
-@click.option('-o', '--output_file', 'outfile', default='circos.pdf', show_default=True, help='Output file.')
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<figure file>', required=True, default='circos.pdf',
+              show_default=True, help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(chr_len_file, gene_density_file, feature_stat, link_file, outfile):

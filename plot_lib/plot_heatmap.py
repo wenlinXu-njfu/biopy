@@ -25,8 +25,12 @@ def main(gene_exp_file: str, out_file: str):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gene_exp', 'gene_exp_file', help='Input gene expression file. (support format: txt, xls, xlsx, csv)')
-@click.option('-o', '--output_file', 'output_file', default='heatmap.pdf', show_default=True, help='Output file.')
+@click.option('-i', '--gene_exp', 'gene_exp_file',
+              metavar='<exp file>', required=True,
+              help='Input gene expression file. (support format: txt, xls, xlsx, and csv)')
+@click.option('-o', '--output_file', 'output_file',
+              metavar='<figure file>', default='heatmap.pdf', show_default=True,
+              help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gene_exp_file, output_file):
