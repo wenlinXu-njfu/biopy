@@ -150,12 +150,18 @@ def main(genome_fasta_file, genome_gtf_file, circRNA_bed_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-f', '--genome_fasta', 'genome_fasta', help='Input genome FASTA file.')
-@click.option('-a', '--gtf_file', 'gtf_file', help='Input genome GTF file.')
+@click.option('-f', '--genome_fasta', 'genome_fasta',
+              metavar='<fasta file>', required=True,
+              help='Input genome FASTA file.')
+@click.option('-a', '--gtf_file', 'gtf_file',
+              metavar='<gtf file>', required=True,
+              help='Input genome GTF file.')
 @click.option('-b', '--circ_bed_file', 'circ_bed_file',
+              metavar='<bed file>', required=True,
               help='Input circRNA locus BED file, the site of first nucleotide is one.\n'
                    '(Chr_num\\tStart\\tEnd\\tCircRNA_ID\\tFrame\\tStrand\\n)')
 @click.option('-o', '--output_file', 'outfile',
+              metavar='<file>',
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

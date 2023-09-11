@@ -51,12 +51,19 @@ def main(circ_bed_file, repeat_seq_gff_file, genome_fasta_file, distance: int, o
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-b', '--circ_bed_file', 'circ_bed_file',
+              metavar='<bed file>', required=True,
               help='Input circRNA BED file\n(Chr_num\\tStart\\tEnd\\tID\\tFrame\\tStrand).')
-@click.option('-g', '--gff_file', 'repeat_gff', help='Input repeat sequence GFF file generated from RepeatMasker software.')
-@click.option('-f', '--genome_fasta', 'genome_fasta', help='Input genome FASTA file.')
-@click.option('-d', '--distance', 'distance', type=int, default=100, show_default=True,
+@click.option('-g', '--gff_file', 'repeat_gff',
+              metavar='<gff file>', required=True,
+              help='Input repeat sequence GFF file generated from RepeatMasker software.')
+@click.option('-f', '--genome_fasta', 'genome_fasta',
+              metavar='<fasta file>', required=True,
+              help='Input genome FASTA file.')
+@click.option('-d', '--distance', 'distance',
+              metavar='<int>', type=int, default=100, show_default=True,
               help='Specify the minimum distance between circRNA and repeat sequence.')
 @click.option('-o', '--output_file', 'outfile',
+              metavar='<file>',
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -22,8 +22,11 @@ def main(BSJ_matrix_file, out_file):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--bsj_matrix', 'bsj_matrix', help='Input BSJ matrix file. (support format: txt, xls, xlsx, csv)')
-@click.option('-o', '--output_prefix', 'output_prefix', default='circ_CPM', show_default=True,
+@click.option('-i', '--bsj_matrix', 'bsj_matrix',
+              metavar='<exp file>', required=True,
+              help='Input BSJ matrix file. (support format: txt, xls, xlsx, csv)')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', default='circ_CPM', show_default=True,
               help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

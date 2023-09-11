@@ -40,11 +40,17 @@ def main(bed_file, ref_seq_file, flanking_seq_len: int, out_file):
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--circ_bed_file', 'circ_bed_file',
+              metavar='<bed file>', required=True,
               help='Input circRNA BED file\n(Chr_num\\tStart\\tEnd\\tID\\tFrame\\tStrand\\n).')
-@click.option('-f', '--ref_fasta_file', 'ref_fasta_file', help='Input reference sequence FASTA file.')
-@click.option('-l', '--flank_seq_len', 'flank_seq_len', type=int, default=100, show_default=True,
+@click.option('-f', '--ref_fasta_file', 'ref_fasta_file',
+              metavar='<fasta file>', required=True,
+              help='Input reference sequence FASTA file.')
+@click.option('-l', '--flank_seq_len', 'flank_seq_len',
+              metavar='<int>', type=int, default=100, show_default=True,
               help='Length of flanking sequence.')
-@click.option('-o', '--output_file', 'outfile', help='Output file.')
+@click.option('-o', '--output_file', 'outfile',
+              metavar='<file>',
+              help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(circ_bed_file, ref_fasta_file, flank_seq_len, outfile):

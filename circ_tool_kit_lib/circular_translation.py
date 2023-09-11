@@ -80,10 +80,14 @@ def main(fa_file, out_file_prefix, min_len: int = None):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--circ_fasta', 'circ_fasta', help='Input circRNA nucleotide sequence FASTA file.')
-@click.option('-m', '--min_len', 'min_len', type=int,
+@click.option('-i', '--circ_fasta', 'circ_fasta',
+              metavar='<fasta file>', required=True,
+              help='Input circRNA nucleotide sequence FASTA file.')
+@click.option('-m', '--min_len', 'min_len',
+              metavar='<int>', type=int,
               help='Minimal length of peptide chain. [default: length of sequence itself]')
 @click.option('-o', '--output_prefix', 'out_prefix',
+              metavar='<str>',
               help='Output file prefix, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

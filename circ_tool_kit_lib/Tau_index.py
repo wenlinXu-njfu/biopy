@@ -28,8 +28,10 @@ def main(exp_file, out_file_prefix):
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--circ_exp_file', 'circ_exp_file',
+              metavar='<exp file>', required=True,
               help='Input circRNA expression profile file. (support format: txt, xls, xlsx, csv)')
-@click.option('-o', '--output_prefix', 'out_prefix', default='circ_Tau', show_default=True,
+@click.option('-o', '--output_prefix', 'out_prefix',
+              metavar='<str>', required=True, default='circ_Tau', show_default=True,
               help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

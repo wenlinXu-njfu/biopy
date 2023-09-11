@@ -101,21 +101,33 @@ def main(mRNA_exp_file: str,
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-m', '--mRNA_exp_file', 'mrna', help='Input mRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
-@click.option('-c', '--circ_exp_file', 'circ', help='Input circRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
+@click.option('-m', '--mRNA_exp_file', 'mrna',
+              metavar='<exp file>', required=True,
+              help='Input mRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
+@click.option('-c', '--circ_exp_file', 'circ',
+              metavar='<exp file>', required=True,
+              help='Input circRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
 @click.option('-C', '--ceRNA', 'cerna',
+              metavar='<file>', required=True,
               help='Input ceRNA file as followed content:\n'
                    'miRNA156\\tChr01:100|1000\\tcircRNA\\n\nmiRNA156\\tPotri.001G001000.1\\tmRNA\\n')
 @click.option('-M', '--miRNA_exp_file', 'mirna',
-              help='[optional] Input miRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
-@click.option('-o', '--output_path', 'out_path', default='./', show_default=True, help='Output path.')
-@click.option('-r1', '--ceRNA_PCC', 'ceRNA_PCC', type=float, default=0.9, show_default=True,
+              metavar='<exp file>',
+              help='Input miRNA expression file. (Supported formats: txt, xls, xlsx and csv)')
+@click.option('-o', '--output_path', 'out_path',
+              metavar='<str>', default='./', show_default=True,
+              help='Output path.')
+@click.option('-r1', '--ceRNA_PCC', 'ceRNA_PCC',
+              metavar='<float>', type=float, default=0.9, show_default=True,
               help='The cutoff of Pearson coefficient between ceRNA.')
-@click.option('-p1', '--ceRNA_Pvalue', 'ceRNA_Pvalue', type=float, default=0.05, show_default=True,
+@click.option('-p1', '--ceRNA_Pvalue', 'ceRNA_Pvalue',
+              metavar='<float>', type=float, default=0.05, show_default=True,
               help='The cutoff of p value between ceRNA.')
-@click.option('-r2', '--miRNA_target_PCC', 'miRNA_target_PCC', type=float, default=-0.3, show_default=True,
+@click.option('-r2', '--miRNA_target_PCC', 'miRNA_target_PCC',
+              metavar='<float>', type=float, default=-0.3, show_default=True,
               help='The cutoff of Pearson coefficient between miRNA and target (miRNA/circRNA).')
-@click.option('-p2', '--miRNA_target_Pvalue', 'miRNA_target_Pvalue', type=float, default=1.0, show_default=True,
+@click.option('-p2', '--miRNA_target_Pvalue', 'miRNA_target_Pvalue',
+              metavar='<float>', type=float, default=1.0, show_default=True,
               help='The cutoff of p value between miRNA and target (miRNA/circRNA).')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
