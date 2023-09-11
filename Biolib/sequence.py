@@ -225,28 +225,31 @@ class Nucleotide(Sequence):
             summary = f"Base content statistics of {self.id}\nA: {A}%\nG: {G}%\nC: {C}%\nT: {T}%\n"
             return A, G, C, T, summary
 
-    def find_SSR(self, ssr_unit: str = None) -> str:
+    def find_SSR(self) -> str:
         """Find the simple sequence repeat (SSR) in the DNA sequence."""
         ret = []
         raw_seq = self.seq.replace('\n', '').replace('U', 'T')
-        pattern = rf'(({ssr_unit})\2+)'
-        # pattern = rf'((A?G?C?T?)\2+)'
+        pattern = rf'((\w+)\2\2+)'
         matched = findall(pattern, raw_seq)
         matched = list(set(matched))
         if matched:
             for match_tuple in matched:
                 for match in match_tuple:
                     if len(match) >= 6:
-                        count = match.count(ssr_unit)
-                        split = raw_seq.split(match)
-                        end = 0
-                        for i in split:
-                            if i != split[-1]:
-                                start = end + len(i) + 1
-                                end = start + len(match) - 1
-                                ret.append(f"{self.id}\t{start}\t{end}\t{ssr_unit}({count})\t{match}")
-                                # ret.append(f"{self.id}\t{start}\t{end}\t{match}")
-                            ret.sort(key=lambda item: (int(item.split('\t')[1]), int(item.split('\t')[2])))
+                        try:
+                            ssr_unit = max(findall(r'(\w+)\1{2}', match))
+                        except ValueError:
+                            pass
+                        else:
+                            count = match.count(ssr_unit)
+                            split = raw_seq.split(match)
+                            end = 0
+                            for i in split:
+                                if i != split[-1]:
+                                    start = end + len(i) + 1
+                                    end = start + len(match) - 1
+                                    ret.append(f"{self.id}\t{start}\t{end}\t({ssr_unit}){count}\t{match}")
+                                ret.sort(key=lambda item: (int(item.split('\t')[1]), int(item.split('\t')[2])))
             yield from ret
         else:
             yield ''
