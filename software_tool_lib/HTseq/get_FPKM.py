@@ -6,10 +6,9 @@ Date: 2023/6/15
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from Biolib.statistics import click, pd, get_FPKM
-from Biolib.gtf import Gtf
-from Biolib.gff import Gff
-from Biolib.show_info import Displayer
+from pandas import read_table
+import click
+from Biolib import get_FPKM, Gtf, Gff, Displayer
 
 
 def main(header_file: str, htseq_file: str, anno_file: str, min_exp: float, out_prefix: str):
@@ -28,7 +27,7 @@ def main(header_file: str, htseq_file: str, anno_file: str, min_exp: float, out_
             else:
                 length_dict[transcript_id] = length
     columns = [line.strip() for line in open(header_file)]
-    df = pd.read_table(htseq_file, index_col=0, names=columns).iloc[:-5]
+    df = read_table(htseq_file, index_col=0, names=columns).iloc[:-5]
     df.insert(0, 'length', 0)
     for transcript_id in df.index.tolist():
         df.loc[transcript_id, 'length'] = length_dict[transcript_id]
@@ -38,12 +37,21 @@ def main(header_file: str, htseq_file: str, anno_file: str, min_exp: float, out_
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--header_info', 'header_info_file', help='Input header file. (eg. Gene_id\\nSample1\\nSample2\\netc\\n)')
-@click.option('-I', '--htseq_result', 'htseq_result_file', help='Input Htseq results file.')
-@click.option('-a', '--anno_file', 'anno_file', help='Input genome annotation GFF or GTF file, must contain exon information.')
-@click.option('-m', '--min_exp', 'min_exp', type=float, default=0, show_default=True,
+@click.option('-i', '--header_info', 'header_info_file',
+              metavar='<header file>', required=True,
+              help='Input header file. (eg. Gene_id\\nSample1\\nSample2\\netc\\n)')
+@click.option('-I', '--htseq_result', 'htseq_result_file',
+              metavar='<htseq file>', type=click.File('r'), required=True,
+              help='Input Htseq results file.')
+@click.option('-a', '--anno_file', 'anno_file',
+              metavar='<anno file>', type=click.File('r'), required=True,
+              help='Input genome annotation GFF or GTF file, must contain exon information.')
+@click.option('-m', '--min_exp', 'min_exp',
+              metavar='<float>', type=float, default=0, show_default=True,
               help='Gene minimum expression threshold in all samples.')
-@click.option('-o', '--output_prefix', 'output_prefix', default='htseq_FPKM', show_default=True, help='Prefix of output file.')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', default='htseq_FPKM', show_default=True,
+              help='Prefix of output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
 def run(header_info_file, htseq_result_file, anno_file, min_exp, output_prefix):

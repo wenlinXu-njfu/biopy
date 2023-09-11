@@ -10,7 +10,7 @@ from os import listdir, mkdir, system
 from os.path import exists
 import click
 from tqdm import tqdm
-from Biolib.show_info import Displayer
+from Biolib import Displayer
 
 
 def main(in_dir, pfamscan_database, out_dir):
@@ -25,9 +25,14 @@ def main(in_dir, pfamscan_database, out_dir):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--fasta_dir', 'fasta_dir', help='Input FASTA file directory.')
-@click.option('-d', '--database', 'pfam_database', help='Input PfamScan database.')
-@click.option('-o', '--output_dir', 'output_dir', default='./', show_default=True,
+@click.option('-i', '--fasta_dir', 'fasta_dir',
+              metavar='<dir>', required=True,
+              help='Input FASTA file directory.')
+@click.option('-d', '--database', 'pfam_database',
+              metavar='<path>', required=True,
+              help='PfamScan database path.')
+@click.option('-o', '--output_dir', 'output_dir',
+              metavar='<dir>', default='./', show_default=True,
               help='Output directory, if not exits, create automatically.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
