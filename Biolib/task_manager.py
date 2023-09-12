@@ -21,7 +21,6 @@ class TaskManager:
                  commands: Iterable[str],
                  processing_num: int = None,
                  log_file: Union[str, TextIOWrapper] = None):
-        self.cmd_prompt = f'[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n$ '
         self.task = list(commands)
         self.processing_num = processing_num
         if isinstance(log_file, str):
@@ -46,14 +45,17 @@ class TaskManager:
 
     def serial_run(self):
         for cmd in self.task:
-            echo(f'\033[33m{self.cmd_prompt}\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
+            echo(f'\033[33m[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n'
+                 f'$ \033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
             system(cmd)
 
     def parallel_run(self):
         with Pool(self.processing_num) as pool:
             for cmd in self.task:
-                pool.apply_async(system, (cmd,),
-                                 callback=echo(f'\033[33m{self.cmd_prompt}\033[0m\033[36m{cmd}\033[0m',
-                                               self.loger, err=True))
+                pool.apply_async(system,
+                                 args=(cmd,),
+                                 callback=lambda _: echo(f'\033[33m[{getuser()}@{gethostname()}: '
+                                                         f'{datetime.now().replace(microsecond=0)}]\n$ '
+                                                         f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True))
             pool.close()
             pool.join()
