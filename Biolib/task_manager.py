@@ -18,21 +18,27 @@ from click import echo
 
 class TaskManager:
     def __init__(self,
-                 commands: Iterable[str],
+                 commands: Iterable[str] = None,
                  processing_num: int = None,
                  log_file: Union[str, TextIOWrapper] = None):
-        self.task = list(commands)
+        try:
+            self.task = list(commands)
+        except TypeError:
+            self.task = []
         self.processing_num = processing_num
         if isinstance(log_file, str):
             self.loger = open(log_file, 'a')
         else:
             self.loger = log_file
 
-    def add_task(self, command: str):
-        self.task.append(command)
+    def add_task(self, command: Union[str, Iterable[str]]):
+        if isinstance(command, str):
+            self.task.append(command)
+        else:
+            command = list(command)
+            self.task.extend(command)
 
     def del_task(self, index: Union[int, str] = None):
-        print(index)
         if isinstance(index, int):
             del self.task[index]
         elif isinstance(index, str):
@@ -56,6 +62,9 @@ class TaskManager:
             system(cmd)
 
     def parallel_run(self):
+        if not self.task:
+            echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
+            exit()
         with Pool(self.processing_num) as pool:
             for cmd in self.task:
                 pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
