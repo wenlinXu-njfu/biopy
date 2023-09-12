@@ -28,7 +28,7 @@ class Displayer:
 
     @staticmethod
     def echo_and_execute_command(command: str, file: Union[str, TextIOWrapper] = None) -> None:
-        command_prompt = f'[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]$ '
+        command_prompt = f'[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n$ '
         if isinstance(file, str):
             echo(f'\033[33m{command_prompt}\033[0m\033[36m{command}\033[0m', err=True, file=open(file, 'a'))
         elif isinstance(file, TextIOWrapper):
