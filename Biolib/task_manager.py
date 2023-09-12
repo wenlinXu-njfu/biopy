@@ -43,6 +43,12 @@ class TaskManager:
     def clear_task(self):
         self.task = []
 
+    def echo_and_exec_cmd(self, cmd: str):
+        echo(f'\033[33m[{getuser()}@{gethostname()}: '
+             f'{datetime.now().replace(microsecond=0)}]\n$ '
+             f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
+        system(cmd)
+
     def serial_run(self):
         for cmd in self.task:
             echo(f'\033[33m[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n'
@@ -52,10 +58,6 @@ class TaskManager:
     def parallel_run(self):
         with Pool(self.processing_num) as pool:
             for cmd in self.task:
-                pool.apply_async(system,
-                                 args=(cmd,),
-                                 callback=lambda _: echo(f'\033[33m[{getuser()}@{gethostname()}: '
-                                                         f'{datetime.now().replace(microsecond=0)}]\n$ '
-                                                         f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True))
+                pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
             pool.close()
             pool.join()
