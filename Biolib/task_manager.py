@@ -65,8 +65,15 @@ class TaskManager:
         if not self.task:
             echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
             exit()
-        with Pool(self.processing_num) as pool:
-            for cmd in self.task:
-                pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
-            pool.close()
-            pool.join()
+        pool = Pool(self.processing_num)
+        for cmd in self.task:
+            pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
+        pool.close()
+        pool.join()
+
+
+if __name__ == '__main__':
+    tkm = TaskManager()
+    cmds = [f'echo Hello World x {i}' for i in range(10)]
+    tkm.add_task(cmds)
+    tkm.serial_run()

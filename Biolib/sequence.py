@@ -229,7 +229,7 @@ class Nucleotide(Sequence):
         """Find the simple sequence repeat (SSR) in the DNA sequence."""
         ret = []
         raw_seq = self.seq.replace('\n', '').replace('U', 'T')
-        pattern = rf'((\w+)\2\2+)'
+        pattern = r'((\w+)\2\2+)'
         matched = findall(pattern, raw_seq)
         matched = list(set(matched))
         if matched:
