@@ -9,40 +9,40 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import List
 import click
-from Biolib import Timer, Displayer
+from Biolib import Timer, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 @Timer('Build genome index.')
 def build_genome_index(genome_fasta_file: str,
-                       record_command: TextIOWrapper):
+                       tkm: TaskManager):
     command = f'samtools faidx {genome_fasta_file}'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     command = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
 
 
 @Timer('Merge bam files.')
 def merge_bam_files(sorted_bam_files: list,
                     output_file_prefix: str,
-                    record_command: TextIOWrapper):
+                    tkm: TaskManager):
     bam_files = ' '.join(sorted_bam_files)
     command = f'samtools merge {output_file_prefix}.merge.bam {bam_files}'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{output_file_prefix}.merge.bam'
 
 
 @Timer('Mark duplicates.')
 def MarkDuplicates(sorted_bam_file: str,
-                   record_command: TextIOWrapper):
+                   tkm: TaskManager):
     markdup_bam_file = sorted_bam_file.replace('bam', 'markdup.bam')
     command = f'gatk MarkDuplicates ' \
               f'-I {sorted_bam_file} ' \
               f'-M {sorted_bam_file}.metrics ' \
               f'-O {markdup_bam_file}'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     command = f'samtools index {markdup_bam_file}'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return markdup_bam_file
 
 
@@ -50,16 +50,16 @@ def MarkDuplicates(sorted_bam_file: str,
 def HaplottypeCaller(genome_fasta_file: str,
                      bam_file: str,
                      sample_name: str,
-                     record_command: TextIOWrapper):
+                     tkm: TaskManager):
     command = f'gatk HaplotypeCaller ' \
               f'--emit-ref-confidence GVCF ' \
               f'-R {genome_fasta_file} ' \
               f'-I {bam_file} ' \
               f'--sample-name {sample_name} ' \
               f'-O {sample_name}.HC.gvcf.gz'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     command = f'gatk IndexFeatureFile -F {sample_name}.HC.gvcf.gz'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{sample_name}.HC.gvcf.gz'
 
 
@@ -67,13 +67,13 @@ def HaplottypeCaller(genome_fasta_file: str,
 def SNP_calling(genome_fasta_file: str,
                 vcf_file: str,
                 sample_name: str,
-                record_command: TextIOWrapper):
+                tkm: TaskManager):
     command = f'gatk SelectVariants ' \
               f'-R {genome_fasta_file} ' \
               f'--select-type-to-include SNP ' \
               f'-V {vcf_file} ' \
               f'-O {sample_name}.HC.snp.vcf.gz'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{sample_name}.HC.snp.vcf.gz'
 
 
@@ -81,13 +81,13 @@ def SNP_calling(genome_fasta_file: str,
 def SNP_filter(snp_vcf_file: str,
                filter_expression: str,
                sample_name: str,
-               record_command: TextIOWrapper):
+               tkm: TaskManager):
     command = f'gatk SelectVariantsFilteration ' \
               f'-V {snp_vcf_file} ' \
               f'-O {sample_name}.HC.snp.filter.vcf.gz ' \
               f'--filter-expression {filter_expression} ' \
               f'--filter-name PASS'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{sample_name}.HC.snp.filter.vcf.gz'
 
 
@@ -95,13 +95,13 @@ def SNP_filter(snp_vcf_file: str,
 def INDEL_calling(genome_fasta_file: str,
                   vcf_file: str,
                   sample_name: str,
-                  record_command: TextIOWrapper):
+                  tkm: TaskManager):
     command = f'gatk SelectVariants ' \
               f'-R {genome_fasta_file} ' \
               f'--select-type-to-include INDEL ' \
               f'-V {vcf_file} ' \
               f'-O {sample_name}.HC.indel.vcf.gz'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{sample_name}.HC.indel.vcf.gz'
 
 
@@ -109,22 +109,22 @@ def INDEL_calling(genome_fasta_file: str,
 def INDEL_filter(indel_vcf_file: str,
                  filter_expression: str,
                  sample_name: str,
-                 record_command: TextIOWrapper):
+                 tkm: TaskManager):
     command = f'gatk SelectVariantsFilteration ' \
               f'-V {indel_vcf_file} ' \
               f'-O {sample_name}.HC.indel.filter.vcf.gz ' \
               f'--filter-expression {filter_expression} ' \
               f'--filter-name PASS'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
     return f'{sample_name}.HC.indel.filter.vcf.gz'
 
 
 def merge_variant(snp_vcf_file: str,
                   indel_vcf_file: str,
                   sample_name: str,
-                  record_command: TextIOWrapper):
+                  tkm: TaskManager):
     command = f'gatk mergeVcfs -I {snp_vcf_file} -I {indel_vcf_file} -O {sample_name}.HC.filter.vcf.gz'
-    displayer.echo_and_execute_command(command, record_command)
+    tkm.echo_and_exec_cmd(command)
 
 
 def main(genome_fasta_file: str,
@@ -135,16 +135,17 @@ def main(genome_fasta_file: str,
          sorted_bam_files: List[str],
          record_command: TextIOWrapper = None):
     """Variation analysis pipeline of GATK."""
-    build_genome_index(genome_fasta_file, record_command)
-    merge_bam_file = merge_bam_files(sorted_bam_files, output_prefix, record_command)
-    markdup_bam_file = MarkDuplicates(merge_bam_file, record_command)
+    tkm = TaskManager(processing_num=1, log_file=record_command)
+    build_genome_index(genome_fasta_file, tkm)
+    merge_bam_file = merge_bam_files(sorted_bam_files, output_prefix, tkm)
+    markdup_bam_file = MarkDuplicates(merge_bam_file, tkm)
     for sample_name in sample_list:
-        gvcf_file = HaplottypeCaller(genome_fasta_file, markdup_bam_file, sample_name, record_command)
-        snp_vcf_file = SNP_calling(genome_fasta_file, gvcf_file, sample_name, record_command)
-        snp_vcf_file = SNP_filter(snp_vcf_file, snp_filter_expression, sample_name, record_command)
-        indel_vcf_file = INDEL_calling(genome_fasta_file, gvcf_file, sample_name, record_command)
-        indel_vcf_file = INDEL_filter(indel_vcf_file, indel_filter_expression, sample_name, record_command)
-        merge_variant(snp_vcf_file, indel_vcf_file, sample_name, record_command)
+        gvcf_file = HaplottypeCaller(genome_fasta_file, markdup_bam_file, sample_name, tkm)
+        snp_vcf_file = SNP_calling(genome_fasta_file, gvcf_file, sample_name, tkm)
+        snp_vcf_file = SNP_filter(snp_vcf_file, snp_filter_expression, sample_name, tkm)
+        indel_vcf_file = INDEL_calling(genome_fasta_file, gvcf_file, sample_name, tkm)
+        indel_vcf_file = INDEL_filter(indel_vcf_file, indel_filter_expression, sample_name, tkm)
+        merge_variant(snp_vcf_file, indel_vcf_file, sample_name, tkm)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
