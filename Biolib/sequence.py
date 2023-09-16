@@ -254,7 +254,7 @@ class Nucleotide(Sequence):
                                 ret.sort(key=lambda item: (int(item.split('\t')[1]), int(item.split('\t')[2])))
             yield from ret
         else:
-            yield ''
+            yield f'{self.id} not found SSR.'
 
     def translation(self, complete: bool = True):
         """Translate nucleotide sequence to peptide chain."""
