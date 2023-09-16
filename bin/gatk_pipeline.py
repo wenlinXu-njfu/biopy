@@ -169,7 +169,7 @@ def main(genome_fasta_file: str,
               help='Record all commands used by the pipeline into the specified file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@click.argument('sorted_bam_files', nargs=-1, type=click.File('r'), required=True)
+@click.argument('sorted_bam_files', metavar='<sorted bam files>', nargs=-1, type=click.File('r'), required=True)
 def run(genome_fasta_file,
         sample_list,
         snp_filter_expression,
