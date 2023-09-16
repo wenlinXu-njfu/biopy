@@ -6,7 +6,7 @@ Date: 2023/9/8
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, Iterable
+from typing import Union, Iterable, Callable
 from io import TextIOWrapper
 from os import system
 from datetime import datetime
@@ -20,11 +20,13 @@ class TaskManager:
     def __init__(self,
                  commands: Iterable[str] = None,
                  processing_num: int = None,
+                 params: Iterable[tuple] = None,
                  log_file: Union[str, TextIOWrapper] = None):
         try:
             self.task = list(commands)
         except TypeError:
             self.task = []
+        self.params = params
         self.processing_num = processing_num
         if isinstance(log_file, str):
             self.loger = open(log_file, 'a')
@@ -55,13 +57,13 @@ class TaskManager:
              f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
         system(cmd)
 
-    def serial_run(self):
+    def serial_run_cmd(self):
         for cmd in self.task:
             echo(f'\033[33m[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n'
                  f'$ \033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
             system(cmd)
 
-    def parallel_run(self):
+    def parallel_run_cmd(self):
         if not self.task:
             echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
             exit()
@@ -71,9 +73,19 @@ class TaskManager:
         pool.close()
         pool.join()
 
+    def parallel_run_func(self, func: Callable, call_back_func: Callable = None):
+        results = []
+        with Pool(self.processing_num) as pool:
+            for param in self.params:
+                ret = pool.apply_async(func, args=param, callback=call_back_func)
+                results.append(ret)
+            pool.close()
+            pool.join()
+        return results
+
 
 if __name__ == '__main__':
     tkm = TaskManager()
     cmds = [f'echo Hello World x {i}' for i in range(10)]
     tkm.add_task(cmds)
-    tkm.serial_run()
+    tkm.serial_run_cmd()

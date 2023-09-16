@@ -252,9 +252,9 @@ class Nucleotide(Sequence):
                                     end = start + len(match) - 1
                                     ret.append(f"{self.id}\t{start}\t{end}\t({ssr_unit}){count}\t{match}")
                                 ret.sort(key=lambda item: (int(item.split('\t')[1]), int(item.split('\t')[2])))
-            yield from ret
+            return '\n'.join(ret)
         else:
-            yield f'{self.id} not found SSR.'
+            return f'{self.id} not found SSR.'
 
     def translation(self, complete: bool = True):
         """Translate nucleotide sequence to peptide chain."""
