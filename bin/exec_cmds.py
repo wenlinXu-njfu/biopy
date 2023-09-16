@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-File: execute_duplicate_command.py
+File: exec_cmds.py
 Description: Execute commands in a file line by line.
 Date: 2022/1/16
 Author: xuwenlin
