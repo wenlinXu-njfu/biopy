@@ -19,16 +19,22 @@ class Fasta:
         if isinstance(path, str):
             if 'gz' in path:
                 self.open = (str(line, 'utf8') for line in GzipFile(path))
+                self.seq_num = sum(1 for line in GzipFile(path) if str(line, 'utf8').startswith('>'))
             else:
                 self.open = open(path)
+                self.seq_num = sum(1 for line in open(path) if line.startswith('>'))
         else:
             if path.name == '<stdin>':
-                self.open = (line for line in open_file('-').readlines())
+                self.open = open_file('-').readlines()
+                self.seq_num = sum(1 for line in self.open if line.startswith('>'))
             else:
                 if 'gz' in path.name:
                     self.open = (str(line, 'utf8') for line in GzipFile(path.name))
+                    self.seq_num = sum(1 for line in GzipFile(path.name) if str(line, 'utf8').startswith('>'))
                 else:
                     self.open = path
+                    self.seq_num = sum(1 for line in self.open if line.startswith('>'))
+                    self.open.seek(0)
 
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator

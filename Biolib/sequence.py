@@ -252,7 +252,7 @@ class Nucleotide(Sequence):
                                     end = start + len(match) - 1
                                     ret.append(f"{self.id}\t{start}\t{end}\t({ssr_unit}){count}\t{match}")
                                 ret.sort(key=lambda item: (int(item.split('\t')[1]), int(item.split('\t')[2])))
-            return '\n'.join(ret)
+            return '\n'.join(ret) if ret else f'{self.id} not found SSR.'
         else:
             return f'{self.id} not found SSR.'
 
