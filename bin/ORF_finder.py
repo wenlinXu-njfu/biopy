@@ -31,12 +31,10 @@ def show_process_bar(fasta_file: TextIOWrapper,
                      params: Iterable[Tuple[Nucleotide, int, bool, bool]],
                      log_file: TextIOWrapper,
                      processes_num: int):
+    fasta_obj = Fasta(fasta_file)
+    seq_num = fasta_obj.seq_num
     pool = Pool(processes=processes_num)
     results = []
-    try:
-        seq_num = sum(1 for _ in fasta_file if _.startswith('>'))
-    except UnicodeDecodeError:
-        seq_num = sum(1 for _ in GzipFile(fasta_file.name) if str(_, 'utf8').startswith('>'))
     with tqdm(total=seq_num, unit=' sequence',
               desc=f'\033[36m[Processing {abspath(fasta_file.name)}]\033[0m') as pbar:
         for param in params:

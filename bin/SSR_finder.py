@@ -9,11 +9,11 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union
 import click
-from Biolib import Fasta, TaskManager, Displayer
+from Biolib import Fasta, Nucleotide, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1])
 
 
-def sub_processing(nucl):
+def sub_processing(nucl: Nucleotide):
     return nucl.find_SSR()
 
 
@@ -29,7 +29,10 @@ def main(fasta_file: Union[str, TextIOWrapper],
     click.echo('# Seq_id\tStart\tEnd\tSSR_unit\tSSR_seq', output_file)
     for result in results:
         result = result.strip()
-        click.echo(result, output_file) if 'not found' not in result else click.echo(result, err=True)
+        if quiet and 'not found' not in result:
+            click.echo(result, output_file)
+        elif not quiet:
+            click.echo(result, output_file) if 'not found' not in result else click.echo(result, err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
