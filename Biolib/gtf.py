@@ -5,9 +5,9 @@ Date: 2021/12/1
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from typing import Dict, List, Union, Generator
-import click
+from click import open_file, Choice
 from Biolib.fasta import Fasta
 from Biolib.sequence import Nucleotide
 
@@ -15,21 +15,22 @@ from Biolib.sequence import Nucleotide
 class Gtf:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.path = path
-            self.line_num = sum(1 for line in open(path) if not line.startswith('#'))
+            self.__open = open(path)
+            self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+            self.__open.seek(0)
         else:
             if path.name == '<stdin>':
-                self.path = click.open_file('-').readlines()
-                self.line_num = sum(1 for line in self.path if not line.startswith('#'))
+                self.__open = open_file('-').readlines()
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
             else:
-                self.path = path.name
-                self.line_num = sum(1 for line in open(path.name) if not line.startswith('#'))
+                self.__open = path
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                self.__open.seek(0)
 
 # Basic method==========================================================================================================
     def parse(self):
         """Parse information of each column of GTF file line by line."""
-        open_gtf = open(self.path) if isinstance(self.path, str) else self.path
-        for line in open_gtf:
+        for line in self.__open:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -232,7 +233,7 @@ class Gtf:
             elif line[2] == feature_type == 'gene':
                 yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}"
 
-    def gtf_to_gsds(self, feature_type: click.Choice(['gene', 'transcript']) = 'transcript') -> str:
+    def gtf_to_gsds(self, feature_type: Choice(['gene', 'transcript']) = 'transcript') -> str:
         """Convert the file format from GTF to GSDS."""
         content = []
         append = content.append

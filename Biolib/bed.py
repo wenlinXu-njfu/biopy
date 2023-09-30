@@ -6,7 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from click import open_file
 from Biolib.sequence import Nucleotide
 from Biolib.fasta import Fasta
@@ -15,18 +15,17 @@ from Biolib.fasta import Fasta
 class Bed:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.path = path
+            self.__open = open(path)
         else:
             if path.name == '<stdin>':
-                self.path = open_file('-').readlines()
+                self.__open = open_file('-').readlines()
             else:
-                self.path = path.name
+                self.__open = path
 
 # Basic method==========================================================================================================
     def get_bed_dict(self) -> dict:
         bed_dict = {}  # {Chr1: [{start: int, end: int, id: str, frame: str, strand: str}, ...], ...}
-        open_bed = open(self.path) if isinstance(self.path, str) else self.path
-        for line in open_bed:
+        for line in self.__open:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 item = {'start': int(split[1]), 'end': int(split[2]), 'id': split[3],

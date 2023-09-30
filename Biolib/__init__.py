@@ -11,4 +11,4 @@ from Biolib.task_manager import TaskManager
 from Biolib.statistics import (display_set, read_file_as_dataframe_from_stdin, read_in_gene_expression_as_dataframe,
                                merge_duplicate_indexes, filter_by_min_value, get_FPKM, get_TPM)
 
-__version__ = '1.1.1'
+__version__ = '0.1.0'

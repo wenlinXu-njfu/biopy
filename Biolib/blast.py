@@ -5,7 +5,7 @@ Date: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from typing import Union, Tuple
 from click import open_file
 
@@ -13,18 +13,17 @@ from click import open_file
 class Blast:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.path = path
+            self.__open = open(path)
         else:
             if path.name == '<stdin>':
-                self.path = open_file('-').readlines()
+                self.__open = open_file('-').readlines()
             else:
-                self.path = path.name
+                self.__open = path
 
 # Basic method==========================================================================================================
-    def parse_BLAST(self) -> Tuple[str]:
+    def parse(self) -> Tuple[str]:
         """Parse information of each column of BLAST6 file line by line."""
-        open_blast = open(self.path) if isinstance(self.path, str) else self.path
-        for line in open_blast:
+        for line in self.__open:
             split = line.strip().split('\t')
             querry_id, sbject_id, align_rate = split[0], split[1], split[2]
             align_len, mismatch, gap = split[3], split[4], split[5]
@@ -36,7 +35,7 @@ class Blast:
 
     def get_pair_dict(self, top: int = 3):
         pair_dict = {}  # {query1: {sbject1: [], sbject2: [], ...}, query2: {}, ...}
-        for line in self.parse_BLAST():
+        for line in self.parse():
             if line[0] not in pair_dict:
                 pair_dict[line[0]] = {line[1]: '\t'.join(line[2:])}
             else:
@@ -48,7 +47,7 @@ class Blast:
     def blast_to_BED(self, query_is_chr: bool = False) -> str:
         """Transform the result of align the query sequence with the reference sequence into a BED file."""
         content = ''
-        for line in self.parse_BLAST():
+        for line in self.parse():
             if not query_is_chr:
                 if int(line[6]) - int(line[7]) > 0:
                     content += f'{line[1]}\t{int(line[7]) - 1}\t{line[6]}\t{line[0]}\t.\t-\n'

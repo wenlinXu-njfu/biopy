@@ -18,29 +18,29 @@ class Gff:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
             self.name = path.split('/')[-1]
-            self.open = open(path)
-            self.line_num = sum(1 for line in self.open.readlines() if not line.startswith('#'))
-            self.open.seek(0)
-            self.anno_line_num = sum(1 for line in self.open.readlines() if line.startswith('#'))
-            self.open.seek(0)
+            self.__open = open(path)
+            self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+            self.__open.seek(0)
+            self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+            self.__open.seek(0)
         else:
             if path.name == '<stdin>':
                 self.name = 'stdin'
-                self.open = open_file('-').readlines()
-                self.line_num = sum(1 for line in self.open if not line.startswith('#'))
-                self.anno_line_num = sum(1 for line in self.open if line.startswith('#'))
+                self.__open = open_file('-').readlines()
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
             else:
                 self.name = path.name.split('/')[-1]
-                self.open = path
-                self.line_num = sum(1 for line in self.open.readlines() if not line.startswith('#'))
-                self.open.seek(0)
-                self.anno_line_num = sum(1 for line in self.open.readlines() if line.startswith('#'))
-                self.open.seek(0)
+                self.__open = path
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                self.__open.seek(0)
+                self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+                self.__open.seek(0)
 
 # Basic method==========================================================================================================
     def parse(self) -> Generator[Tuple[str, str, str, str, str, str, str, str, Dict[str, str]], None, None]:
         """Parse information of each column of GFF file line by line."""
-        for line in self.open:
+        for line in self.__open:
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -48,16 +48,16 @@ class Gff:
                 attr_list = [attr for attr in split[8].split(';') if '=' in attr]
                 attr_dict: Dict[str, str] = {attr.split('=')[0]: attr.split('=')[1] for attr in attr_list if attr}
                 yield chr_num, source, feature, start, end, score, strand, frame, attr_dict
-        if not isinstance(self.open, list):
-            self.open.seek(0)
+        if not isinstance(self.__open, list):
+            self.__open.seek(0)
 
     def parse_as_dataframe(self) -> DataFrame:
         names = ['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
-        data = [line.strip().split('\t') for line in self.open if not line.startswith('#')]
+        data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
         df = DataFrame(data, columns=names, dtype=str)
         df[['Start', 'End']] = df[['Start', 'End']].astype(int)
-        if not isinstance(self.open, list):
-            self.open.seek(0)
+        if not isinstance(self.__open, list):
+            self.__open.seek(0)
         return df
 
     def __check_feature(self, feature: str) -> Tuple[bool, str]:
@@ -163,10 +163,10 @@ class Gff:
 
     def gff_sort(self) -> Generator[str, None, None]:
         """Sort the GFF file by sequence ID."""
-        l = [line.strip() for line in self.open if not line.startswith('#') and line.strip()]
+        l = [line.strip() for line in self.__open if not line.startswith('#') and line.strip()]
         l.sort(key=lambda line: self.__gff_sort(line))
-        if not isinstance(self.open, list):
-            self.open.seek(0)
+        if not isinstance(self.__open, list):
+            self.__open.seek(0)
         yield from l
 
 # Sequence extraction method============================================================================================
