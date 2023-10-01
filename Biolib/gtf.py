@@ -15,14 +15,17 @@ from Biolib.sequence import Nucleotide
 class Gtf:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
+            self.name = path
             self.__open = open(path)
             self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
             self.__open.seek(0)
         else:
             if path.name == '<stdin>':
+                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
                 self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
             else:
+                self.name = path.name
                 self.__open = path
                 self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
                 self.__open.seek(0)
@@ -173,6 +176,15 @@ class Gtf:
                                 d['end'] = end
                         gene_dict[gene_id] = raw_exon_list
         return gene_dict
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
 # Sequence extraction method============================================================================================
     def get_cDNA(self, fasta_file: Union[str, TextIOWrapper]) -> Nucleotide:  # return Nucleotide objet generator

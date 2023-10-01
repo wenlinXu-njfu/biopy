@@ -15,12 +15,20 @@ from Biolib.fasta import Fasta
 class Bed:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
+            self.name = path
             self.__open = open(path)
+            self.line_num = sum(1 for _ in self.__open)
+            self.__open.seek(0)
         else:
             if path.name == '<stdin>':
+                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
+                self.line_num = sum(1 for _ in self.__open)
             else:
+                self.name = path.name
                 self.__open = path
+                self.line_num = sum(1 for _ in self.__open)
+                self.__open.seek(0)
 
 # Basic method==========================================================================================================
     def get_bed_dict(self) -> dict:
@@ -35,6 +43,15 @@ class Bed:
                 else:
                     bed_dict[split[0]] = [item]
         return bed_dict
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
 # Sequence extraction method============================================================================================
     @staticmethod

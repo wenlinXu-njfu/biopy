@@ -17,7 +17,7 @@ from Biolib.sequence import Nucleotide
 class Gff:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.name = path.split('/')[-1]
+            self.name = path
             self.__open = open(path)
             self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
             self.__open.seek(0)
@@ -134,6 +134,15 @@ class Gff:
             content.append(f'{feature}\t{total}\t{min_len}\t{max_len}\t{median_len}\t{mean_len}\n')
         content = ''.join(content)
         return content
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
 # GFF file sorted by id method==========================================================================================
     @staticmethod

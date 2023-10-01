@@ -17,21 +17,28 @@ from Biolib.sequence import Nucleotide, Protein
 class Fasta:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            if 'gz' in path:
-                self.__open = (str(line, 'utf8') for line in GzipFile(path))
-                self.seq_num = sum(1 for line in GzipFile(path) if str(line, 'utf8').startswith('>'))
+            if path.endswith('gz'):
+                self.name = path
+                self.__open = GzipFile(path)
+                self.seq_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('>'))
+                self.__open.seek(0)
             else:
+                self.name = path
                 self.__open = open(path)
                 self.seq_num = sum(1 for line in open(path) if line.startswith('>'))
         else:
             if path.name == '<stdin>':
+                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
                 self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
             else:
-                if 'gz' in path.name:
-                    self.__open = (str(line, 'utf8') for line in GzipFile(path.name))
-                    self.seq_num = sum(1 for line in GzipFile(path.name) if str(line, 'utf8').startswith('>'))
+                if path.name.endswith('gz'):
+                    self.name = path.name
+                    self.__open = GzipFile(path.name)
+                    self.seq_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('>'))
+                    self.__open.seek(0)
                 else:
+                    self.name = path.name
                     self.__open = path
                     self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
                     self.__open.seek(0)
@@ -39,10 +46,17 @@ class Fasta:
 # Basic method==========================================================================================================
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
         """A FASTA file generator that returns one Nucleotide or Protein object at one time."""
-        fa_generator = (ret[1] for ret in groupby(self.__open, lambda line: line.startswith('>')))
+        if self.name.endswith('gz'):
+            fa_generator = (ret[1] for ret in groupby(self.__open, lambda line: str(line, 'utf8').startswith('>')))
+        else:
+            fa_generator = (ret[1] for ret in groupby(self.__open, lambda line: line.startswith('>')))
         for g in fa_generator:
-            seq_id = g.__next__().strip()
-            seq = ''.join(line.strip() for line in fa_generator.__next__())
+            if self.name.endswith('gz'):
+                seq_id = str(g.__next__(), 'utf8').strip()
+                seq = ''.join(str(line, 'utf8').strip() for line in fa_generator.__next__())
+            else:
+                seq_id = g.__next__().strip()
+                seq = ''.join(line.strip() for line in fa_generator.__next__())
             if parse_id:
                 if '\t' in seq_id:
                     seq_id = seq_id.split('\t')[0]
@@ -65,6 +79,15 @@ class Fasta:
                 echo(f'\033[31mError: FASTA file has repeat id {nucl_obj.id}.', err=True)
                 exit()
         return seq_dict
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
 # File format conversion method=========================================================================================
     def merge_sequence(self) -> Union[Nucleotide, Protein]:

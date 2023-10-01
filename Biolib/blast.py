@@ -13,12 +13,20 @@ from click import open_file
 class Blast:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
+            self.name = path
             self.__open = open(path)
+            self.line_num = sum(1 for _ in self.__open)
+            self.__open.seek(0)
         else:
             if path.name == '<stdin>':
+                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
+                self.line_num = sum(1 for _ in self.__open)
             else:
+                self.name = path.name
                 self.__open = path
+                self.line_num = sum(1 for _ in self.__open)
+                self.__open.seek(0)
 
 # Basic method==========================================================================================================
     def parse(self) -> Tuple[str]:
@@ -42,6 +50,15 @@ class Blast:
                 if len(pair_dict[line[0]]) < top:
                     pair_dict[line[0]][line[1]] = '\t'.join(line[2:])
         return pair_dict
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
 # File format conversion method=========================================================================================
     def blast_to_BED(self, query_is_chr: bool = False) -> str:
