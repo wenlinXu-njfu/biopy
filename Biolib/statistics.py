@@ -26,10 +26,11 @@ def read_file_as_dataframe_from_stdin(sep: str = '\t',
                                       header: int = 0,
                                       skip_rows: int = 0,
                                       use_cols: List[Union[str, int]] = None,
-                                      names: List[str] = None):
+                                      names: List[str] = None,
+                                      chunk_size: int = None):
     df = pd.read_table(StringIO(''.join(open_file('-').readlines())),
                        sep=sep, header=header, names=names, index_col=index_col, usecols=use_cols,
-                       lineterminator=line_terminator, skiprows=skip_rows)
+                       lineterminator=line_terminator, skiprows=skip_rows, chunksize=chunk_size)
     return df
 
 
