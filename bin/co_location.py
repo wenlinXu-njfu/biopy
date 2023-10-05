@@ -83,7 +83,7 @@ def lncRNA_target_gene_prediction(gtf_file: str,
     :param target_range: the farthest distance between lncRNA and target gene (type=int)
     :return: None
     """
-    gff_dict = Gff(gff_file).get_gff_dict(feature)
+    gff_dict = Gff(gff_file).to_dict(feature)
     click.echo('Chr_num\tLncRNA_id\tTarget_id\tDistance\tLocation\tLncRNA_strand', out_file)
     for line in open(gtf_file):
         if not line.strip():

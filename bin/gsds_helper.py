@@ -15,7 +15,7 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 def main(in_file, file_format, feature_type, out_file: TextIOWrapper):
     if file_format == 'gff':
         gff_file_obj = Gff(in_file)
-        content = gff_file_obj.gff_to_gsds()
+        content = gff_file_obj.to_gsds()
         if out_file:
             with out_file as o:
                 o.write(content)
@@ -23,7 +23,7 @@ def main(in_file, file_format, feature_type, out_file: TextIOWrapper):
             print(content)
     else:
         gtf_file_obj = Gtf(in_file)
-        content = gtf_file_obj.gtf_to_gsds(feature_type)
+        content = gtf_file_obj.to_gsds(feature_type)
         if out_file:
             with out_file as o:
                 o.write(content)
