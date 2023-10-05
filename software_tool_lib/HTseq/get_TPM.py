@@ -6,14 +6,15 @@ Date: 2023/6/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from io import TextIOWrapper
 from pandas import read_table
 import click
 from Biolib import get_TPM, Gtf, Gff, Displayer
 
 
-def main(header_file: str, htseq_file: str, anno_file: str, min_exp: float, out_prefix: str):
+def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: float, out_prefix: str):
     parse_anno_file = {'gff': Gff, 'gff3': Gff, 'gtf': Gtf}
-    file_obj = parse_anno_file[anno_file.split('.')[-1]](anno_file)
+    file_obj = parse_anno_file[anno_file.name.split('.')[-1]](anno_file)
     length_dict = {}
     for line in file_obj.parse():
         if line[2] == 'exon':
