@@ -20,7 +20,8 @@ def main(bed_file: TextIOWrapper,
          both: int,
          extension: bool,
          out_file: TextIOWrapper = None):
-    for nucl_obj in Bed(bed_file).bed_extract_seq(fa_file, use_id, up, down, both, extension):
+    bed = Bed(bed_file)
+    for nucl_obj in bed.extract_seq(fa_file, use_id, up, down, both, extension):
         click.echo(nucl_obj, out_file)
 
 

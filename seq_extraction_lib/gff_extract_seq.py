@@ -20,10 +20,10 @@ def main(gff_file: TextIOWrapper,
     content = []
     if id_file:
         id_list = set(i.strip() for i in id_file.readlines() if i.strip())
-        for nucl_obj in Gff(gff_file).gff_extract_seq(fa_file, feature_type, id_list):
+        for nucl_obj in Gff(gff_file).extract_seq(fa_file, feature_type, id_list):
             click.echo(nucl_obj, out_file)
     else:
-        for nucl_obj in Gff(gff_file).gff_extract_seq(fa_file, feature_type):
+        for nucl_obj in Gff(gff_file).extract_seq(fa_file, feature_type):
             click.echo(nucl_obj, out_file)
 
 

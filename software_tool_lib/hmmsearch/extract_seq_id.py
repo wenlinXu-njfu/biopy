@@ -6,10 +6,10 @@ Date: 2022/4/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from io import TextIOWrapper
 from re import sub
 import click
-from Biolib.show_info import Displayer
+from Biolib import Displayer
 
 
 def main(hmmseqrch_result_file: TextIOWrapper, out_file: TextIOWrapper):

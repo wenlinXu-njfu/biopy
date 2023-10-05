@@ -13,7 +13,7 @@ from Biolib import Blast, Displayer
 
 def main(blast_file: TextIOWrapper, out_file: TextIOWrapper):
     blast_file_obj = Blast(blast_file)
-    content = blast_file_obj.blast_to_bed()
+    content = blast_file_obj.to_bed()
     click.echo(content, out_file)
 
 
