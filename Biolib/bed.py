@@ -74,7 +74,7 @@ class Bed:
                 end += up
                 return start, end
 
-    def bed_extract_seq(self,
+    def extract_seq(self,
                         fasta_file: Union[str, TextIOWrapper],
                         use_id: bool = True,
                         up: int = 0,

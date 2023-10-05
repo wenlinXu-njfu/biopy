@@ -69,7 +69,7 @@ class Fasta:
             else:
                 yield Protein(seq_id, seq)
 
-    def get_seq_dict(self, parse_id: bool = False) -> dict:
+    def to_dict(self, parse_id: bool = False) -> dict:
         """Get sequence dict from FASTA file."""
         seq_dict = {}
         for nucl_obj in self.parse(parse_id):
@@ -104,7 +104,7 @@ class Fasta:
 # Other method==========================================================================================================
     def get_longest_seq(self, regular_exp: str = r'\w+.\w+', inplace_id: bool = False) -> Union[Nucleotide, Protein]:
         """Get the longest transcript of each gene locus."""
-        all_seq_dict = self.get_seq_dict(False)  # {seq_id: seq}
+        all_seq_dict = self.to_dict(False)  # {seq_id: seq}
         longest_seq_dict = {}  # {locus_id: seq}
         id_map_dict = {}  # {'Potri.001G000100': 'Potri.001G000100.3', 'Potri.001G000200': 'Potri.001G000200.1', ...}
         if inplace_id:

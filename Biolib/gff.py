@@ -51,7 +51,7 @@ class Gff:
         if not isinstance(self.__open, list):
             self.__open.seek(0)
 
-    def parse_as_dataframe(self) -> DataFrame:
+    def to_dataframe(self) -> DataFrame:
         names = ['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
         data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
         df = DataFrame(data, columns=names, dtype=str)
@@ -68,7 +68,7 @@ class Gff:
         else:
             return False, f'"{feature}" not found.'
 
-    def get_gff_dict(self, feature_type: str = None) -> Dict[str, List[Dict[str, Union[str, int]]]]:
+    def to_dict(self, feature_type: str = None) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         """Save the feature information in the GFF file into the dictionary."""
         # gff_dict = {
         #             Chr_num: [{id: str, start: int, end: int, strand: str}, {}, ...],
@@ -121,7 +121,7 @@ class Gff:
 
     def summary(self) -> str:
         """A peek at the genome."""
-        df = self.parse_as_dataframe()
+        df = self.to_dataframe()
         df['Length'] = df['End'] - df['Start'] + 1
         content = [f'# Feature\tTotal\tMin_len\tMax_len\tMedian_len\tMean_len\n']
         features = df['Feature'].drop_duplicates().values
@@ -170,7 +170,7 @@ class Gff:
         else:
             return 0, 0, '0', '0', 0, line
 
-    def gff_sort(self) -> Generator[str, None, None]:
+    def sort(self) -> Generator[str, None, None]:
         """Sort the GFF file by sequence ID."""
         l = [line.strip() for line in self.__open if not line.startswith('#') and line.strip()]
         l.sort(key=lambda line: self.__gff_sort(line))
@@ -179,7 +179,7 @@ class Gff:
         yield from l
 
 # Sequence extraction method============================================================================================
-    def gff_extract_seq(self,
+    def extract_seq(self,
                         fasta_file: Union[str, TextIOWrapper],
                         feature_type: str = 'gene',
                         feature_id_set: set = None) -> Nucleotide:
@@ -188,7 +188,7 @@ class Gff:
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
-        gff_dict = self.get_gff_dict(feature_type)
+        gff_dict = self.to_dict(feature_type)
         for nucl_obj in Fasta(fasta_file).parse():
             try:
                 features = gff_dict[nucl_obj.id]  # features = [{feature1}, {feature2}, ...]
@@ -214,7 +214,7 @@ class Gff:
             yield Nucleotide(seq_id, seq)
 
 # File format conversion method=========================================================================================
-    def gff_to_gtf(self) -> Generator[str, None, None]:
+    def to_gtf(self) -> Generator[str, None, None]:
         """Convert the file format from GFF to GTF."""
         last_line = None
         gene_id = transcript_id = None
@@ -268,7 +268,7 @@ class Gff:
                 else:
                     yield '\t'.join(last_line[:8]) + f'''\ttranscript_id "{transcript_id}";'''
 
-    def gff_to_bed(self, feature_type: Union[str, list] = None) -> str:
+    def to_bed(self, feature_type: Union[str, list] = None) -> str:
         """Convert the file format from GFF to BED."""
         for line in self.parse():
             if feature_type:
@@ -277,7 +277,7 @@ class Gff:
             elif not feature_type:
                 yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['ID']}\t{line[7]}\t{line[6]}"
 
-    def gff_to_gsds(self) -> str:
+    def to_gsds(self) -> str:
         """Convert the file format from GFF to GSDS."""
         content = []
         transcript_id, transcript_start = None, 0
@@ -310,7 +310,7 @@ class Gff:
         if min(list(chr_len_dict.values())) / span < 1:
             echo('\033[33mError: Density statistical interval is too large.\033[0m', err=True)
             exit()
-        gff_dataframe = self.parse_as_dataframe()
+        gff_dataframe = self.to_dataframe()
         gff_dataframe['Site'] = (gff_dataframe['Start'] + gff_dataframe['End']) / 2
         for chr_num, length in chr_len_dict.items():
             df = gff_dataframe[(gff_dataframe['Chromosome'] == chr_num) & (gff_dataframe['Feature'] == feature_type)]

@@ -237,7 +237,7 @@ class Gtf:
                             yield cDNA_nucl_obj
 
 # File format conversion method=========================================================================================
-    def gtf_to_bed(self, feature_type: str = 'exon') -> Generator[str, None, None]:
+    def to_bed(self, feature_type: str = 'exon') -> Generator[str, None, None]:
         """Convert the file format from GTF to BED."""
         for line in self.parse():
             if line[2] == feature_type != 'gene':
@@ -245,7 +245,7 @@ class Gtf:
             elif line[2] == feature_type == 'gene':
                 yield f"{line[0]}\t{int(line[3]) - 1}\t{line[4]}\t{line[8]['gene_id']}\t{line[7]}\t{line[6]}"
 
-    def gtf_to_gsds(self, feature_type: Choice(['gene', 'transcript']) = 'transcript') -> str:
+    def to_gsds(self, feature_type: Choice(['gene', 'transcript']) = 'transcript') -> str:
         """Convert the file format from GTF to GSDS."""
         content = []
         append = content.append

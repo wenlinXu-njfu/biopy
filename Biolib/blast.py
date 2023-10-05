@@ -61,7 +61,7 @@ class Blast:
             pass
 
 # File format conversion method=========================================================================================
-    def blast_to_bed(self, query_is_chr: bool = False) -> str:
+    def to_bed(self, query_is_chr: bool = False) -> str:
         """Transform the result of align the query sequence with the reference sequence into a BED file."""
         content = ''
         for line in self.parse():
