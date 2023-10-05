@@ -13,7 +13,7 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gtf_file: TextIOWrapper, out_file: TextIOWrapper):
-    for line in Gtf(gtf_file).gtf_to_bed():
+    for line in Gtf(gtf_file).to_bed():
         click.echo(line, out_file)
 
 

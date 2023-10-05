@@ -13,8 +13,8 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
 def main(gff_file: TextIOWrapper, gtf_file: TextIOWrapper = None):
-    gff_file_obj = Gff(gff_file)
-    for line in gff_file_obj.gff_to_gtf():
+    gff = Gff(gff_file)
+    for line in gff.to_gtf():
         click.echo(line, gtf_file)
 
 

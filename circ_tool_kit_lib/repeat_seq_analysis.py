@@ -12,7 +12,7 @@ displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 
 def main(circ_bed_file, repeat_seq_gff_file, genome_fasta_file, distance: int, out_file):
-    repeat_loci: dict = Gff(repeat_seq_gff_file).get_gff_dict()
+    repeat_loci: dict = Gff(repeat_seq_gff_file).to_dict()
     repeat_class: dict = {line.strip().split('\t')[8].replace('=', ';').split(';')[1]:
                               line.strip().split('\t')[8].replace('=', ';').split(';')[-1]
                           for line in open(repeat_seq_gff_file) if not line.startswith('#')}

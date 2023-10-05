@@ -18,7 +18,7 @@ def main(gff_file: TextIOWrapper,
     gff_file_obj = Gff(gff_file)
     if feature_type:
         feature_type = feature_type.split(',')
-    for line in gff_file_obj.gff_to_bed(feature_type):
+    for line in gff_file_obj.to_bed(feature_type):
         click.echo(line, bed_file)
 
 

@@ -14,7 +14,7 @@ displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 def main(gff_file: TextIOWrapper, out_file: TextIOWrapper = None):
     gff_file_obj = Gff(gff_file)
-    for line in gff_file_obj.gff_sort():
+    for line in gff_file_obj.sort():
         click.echo(line, out_file)
 
 
