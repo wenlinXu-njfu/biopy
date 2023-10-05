@@ -20,9 +20,9 @@ def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: f
         if line[2] == 'exon':
             length = int(line[4]) - int(line[3]) + 1
             if isinstance(file_obj, Gff):
-                transcript_id = line[-1]
+                transcript_id = line[-1]['Parent']
             else:
-                transcript_id = line[-2]
+                transcript_id = line[-1]['transcript_id']
             if transcript_id in length_dict:
                 length_dict[transcript_id] += length
             else:
