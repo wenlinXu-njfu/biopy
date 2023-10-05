@@ -12,7 +12,7 @@ import click
 from Biolib import get_FPKM, Gtf, Gff, Displayer
 
 
-def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: float, out_prefix: str):
+def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: float, output_file: str):
     parse_anno_file = {'gff': Gff, 'gff3': Gff, 'gtf': Gtf}
     file_obj = parse_anno_file[anno_file.name.split('.')[-1]](anno_file)
     length_dict = {}
@@ -33,7 +33,7 @@ def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: f
     for transcript_id in df.index.tolist():
         df.loc[transcript_id, 'length'] = length_dict[transcript_id]
     FPKM = get_FPKM(df, min_exp)
-    FPKM.to_csv(f'./{out_prefix}.csv')
+    FPKM.to_csv(f'./{output_file}', sep='\t')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -49,14 +49,14 @@ def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: f
 @click.option('-m', '--min_exp', 'min_exp',
               metavar='<float>', type=float, default=0, show_default=True,
               help='Gene minimum expression threshold in all samples.')
-@click.option('-o', '--output_prefix', 'output_prefix',
-              metavar='<str>', default='htseq_FPKM', show_default=True,
-              help='Prefix of output file.')
+@click.option('-o', '--output_file', 'output_file',
+              metavar='<str>', default='htseq_FPKM.xls', show_default=True,
+              help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
-def run(header_info_file, htseq_result_file, anno_file, min_exp, output_prefix):
+def run(header_info_file, htseq_result_file, anno_file, min_exp, output_file):
     """Standardize gene expression with FPKM based on HTSeq results."""
-    main(header_info_file, htseq_result_file, anno_file, min_exp, output_prefix)
+    main(header_info_file, htseq_result_file, anno_file, min_exp, output_file)
 
 
 if __name__ == '__main__':
