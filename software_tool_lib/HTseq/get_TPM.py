@@ -12,7 +12,7 @@ import click
 from Biolib import get_TPM, Gtf, Gff, Displayer
 
 
-def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: float, output_file: str):
+def main(header_file: str, htseq_file: TextIOWrapper, anno_file: TextIOWrapper, min_exp: float, output_file: str):
     parse_anno_file = {'gff': Gff, 'gff3': Gff, 'gtf': Gtf}
     file_obj = parse_anno_file[anno_file.name.split('.')[-1]](anno_file)
     length_dict = {}
@@ -27,7 +27,7 @@ def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: f
                 length_dict[transcript_id] += length
             else:
                 length_dict[transcript_id] = length
-    columns = [line.strip() for line in open(header_file)]
+    columns = [line.strip() for line in header_file]
     df = read_table(htseq_file, index_col=0, names=columns).iloc[:-5]
     df.insert(0, 'length', 0)
     for transcript_id in df.index.tolist():
