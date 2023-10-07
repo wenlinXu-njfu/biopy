@@ -107,7 +107,9 @@ def main(fasta_files: Tuple[TextIOWrapper],
 @click.option('-o', '--to_file', 'to_file',
               is_flag=True, flag_value=True, show_default=True,
               help='Write the results to file rather than print to terminal as stdout.')
-@click.option('-n', '--processes_num', 'processes_num', type=int, default=1, show_default=True, help='Number of processes.')
+@click.option('-n', '--processes_num', 'processes_num',
+              metavar='<int>', type=int, default=1, show_default=True,
+              help='Number of processes.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_files, parse_seqids, min_len, completed, only_plus, log_file, to_file, processes_num):
