@@ -6,12 +6,7 @@ Date: 2023/8/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from io import TextIOWrapper
-from typing import Union, List
-from os import system
-from getpass import getuser
-from socket import gethostname
-from datetime import datetime
+from typing import List
 from click import echo
 
 
