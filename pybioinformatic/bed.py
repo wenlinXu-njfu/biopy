@@ -8,8 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from typing import Union
 from io import TextIOWrapper
 from click import open_file
-from Biolib.sequence import Nucleotide
-from Biolib.fasta import Fasta
+from pybioinformatic.sequence import Nucleotide
+from pybioinformatic.fasta import Fasta
 
 
 class Bed:

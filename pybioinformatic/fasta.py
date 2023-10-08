@@ -11,7 +11,7 @@ from typing import Union
 from gzip import GzipFile
 from click import echo, open_file
 from itertools import groupby
-from Biolib.sequence import Nucleotide, Protein
+from pybioinformatic.sequence import Nucleotide, Protein
 
 
 class Fasta:

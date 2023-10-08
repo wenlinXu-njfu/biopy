@@ -8,8 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Dict, List, Union, Generator
 from click import open_file, Choice
-from Biolib.fasta import Fasta
-from Biolib.sequence import Nucleotide
+from pybioinformatic.fasta import Fasta
+from pybioinformatic.sequence import Nucleotide
 
 
 class Gtf:

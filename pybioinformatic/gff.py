@@ -10,8 +10,8 @@ from typing import Union, List, Dict, Tuple, Generator
 from re import findall
 from click import echo, open_file
 from pandas import DataFrame
-from Biolib.fasta import Fasta
-from Biolib.sequence import Nucleotide
+from pybioinformatic.fasta import Fasta
+from pybioinformatic.sequence import Nucleotide
 
 
 class Gff:
