@@ -10,7 +10,7 @@ from os import listdir
 from venn import venn
 import matplotlib.pyplot as plt
 import click
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

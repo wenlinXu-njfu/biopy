@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from software_tool_lib.featureCounts.get_FPKM import run as run1
 from software_tool_lib.featureCounts.get_TPM import run as run2
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union
 import click
-from Biolib import Fasta, Nucleotide, TaskManager, Displayer
+from pybioinformatic import Fasta, Nucleotide, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1])
 
 

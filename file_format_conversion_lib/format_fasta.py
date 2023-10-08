@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from typing import Union
 from re import findall
 import click
-from Biolib import Fasta, Displayer, __version__
+from pybioinformatic import Fasta, Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

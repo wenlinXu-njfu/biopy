@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from pandas import read_table
 import click
-from Biolib import get_FPKM, Gtf, Gff, Displayer
+from pybioinformatic import get_FPKM, Gtf, Gff, Displayer
 
 
 def main(header_file: str, htseq_file: str, anno_file: TextIOWrapper, min_exp: float, output_file: str):

@@ -10,7 +10,7 @@ from os.path import exists
 import click
 import requests
 from tqdm import tqdm
-from Biolib import Displayer, __version__
+from pybioinformatic import Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

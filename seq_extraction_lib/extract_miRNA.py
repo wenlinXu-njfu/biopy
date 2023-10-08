@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import mkdir
 from os.path import exists
 import click
-from Biolib import Gff, Displayer, __version__
+from pybioinformatic import Gff, Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

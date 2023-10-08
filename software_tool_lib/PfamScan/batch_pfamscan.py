@@ -10,7 +10,7 @@ from os import listdir, mkdir, system
 from os.path import exists
 import click
 from tqdm import tqdm
-from Biolib import Displayer
+from pybioinformatic import Displayer
 
 
 def main(in_dir, pfamscan_database, out_dir):

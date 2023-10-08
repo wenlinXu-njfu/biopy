@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
 import click
-from Biolib import Blast, Displayer
+from pybioinformatic import Blast, Displayer
 
 
 def main(blast1: TextIOWrapper,

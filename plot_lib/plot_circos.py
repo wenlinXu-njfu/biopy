@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 import matplotlib.pyplot as plt
 from plot_lib.circos.draw_gene_density import draw_chr, draw_gene_density, draw_outer_bar, draw_bezier_curve
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

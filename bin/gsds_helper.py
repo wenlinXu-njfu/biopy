@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from _io import TextIOWrapper
 import click
-from Biolib import Gff, Gtf, Displayer, __version__
+from pybioinformatic import Gff, Gtf, Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

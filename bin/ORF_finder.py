@@ -12,7 +12,7 @@ from multiprocessing import Pool
 from io import TextIOWrapper
 from typing import Tuple, Iterable
 import click
-from Biolib import Fasta, Nucleotide, Displayer
+from pybioinformatic import Fasta, Nucleotide, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.1.0')
 
 

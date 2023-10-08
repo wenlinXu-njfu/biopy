@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import StringIO, TextIOWrapper
 from pandas import read_csv, read_table
 import click
-from Biolib import get_FPKM, Displayer
+from pybioinformatic import get_FPKM, Displayer
 file_content = """
 # featureCounts command\n
 Geneid  Chr  Start End Strand Length Sample1 Sample2 Sample3 ...\n

@@ -13,7 +13,7 @@ from scipy.stats import pearsonr
 import pandas as pd
 import matplotlib.pyplot as plt
 import click
-from Biolib import read_in_gene_expression_as_dataframe, Displayer
+from pybioinformatic import read_in_gene_expression_as_dataframe, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 

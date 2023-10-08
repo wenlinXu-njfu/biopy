@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib import Nucleotide, Fasta, Displayer
+from pybioinformatic import Nucleotide, Fasta, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 

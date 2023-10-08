@@ -10,7 +10,7 @@ import click
 from circ_tool_kit_lib import extract_circrna
 from seq_extraction_lib import (extract_single_sequence, bed_extract_seq, gtf_extract_seq, gff_extract_seq,
                                 extract_mirna, kegg)
-from Biolib import Displayer, __version__
+from pybioinformatic import Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 

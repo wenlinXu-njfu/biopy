@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib import Displayer
+from pybioinformatic import Displayer
 from circ_tool_kit_lib import (extract_circrna, get_circ_exp, tau_index, reverse_complementary_analysis,
                                repeat_seq_analysis, alternative_cyclization_analysis, circular_translation,
                                cerna_identification, __version__)

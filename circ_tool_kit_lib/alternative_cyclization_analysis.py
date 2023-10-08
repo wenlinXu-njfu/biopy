@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall
 import click
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 

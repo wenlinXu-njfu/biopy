@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from re import sub
 import click
-from Biolib import Displayer
+from pybioinformatic import Displayer
 
 
 def main(hmmseqrch_result_file: TextIOWrapper, out_file: TextIOWrapper):

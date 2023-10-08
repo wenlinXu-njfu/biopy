@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from Biolib import Gff, Bed, Fasta, Displayer
+from pybioinformatic import Gff, Bed, Fasta, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
 
 

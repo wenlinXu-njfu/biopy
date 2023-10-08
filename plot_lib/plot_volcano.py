@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Tuple, List, Union
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

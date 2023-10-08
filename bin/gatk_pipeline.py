@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import List
 import click
-from Biolib import Timer, TaskManager, Displayer
+from pybioinformatic import Timer, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

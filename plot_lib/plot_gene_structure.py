@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from plot_lib.gene_structure.gff import plot_mRNA_structure
 from plot_lib.gene_structure.gtf import plot_gene_structure
-from Biolib import Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 

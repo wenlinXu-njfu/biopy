@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import click
-from Biolib import read_in_gene_expression_as_dataframe, Displayer
+from pybioinformatic import read_in_gene_expression_as_dataframe, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
