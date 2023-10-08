@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from click import Choice
 import matplotlib.pyplot as plt
-from Biolib.gff import Gff
+from pybioinformatic.gff import Gff
 
 
 def plot_mRNA_structure(gff_file: str, utr_color: str, cds_color: str, edge_color: str = None,

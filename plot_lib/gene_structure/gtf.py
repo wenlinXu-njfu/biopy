@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from click import Choice
 import matplotlib.pyplot as plt
-from Biolib.gtf import Gtf
+from pybioinformatic.gtf import Gtf
 
 
 def plot_gene_structure(gtf_file: str, exon_color: str, intron_color: str = 'black', edge_color: str = None,
