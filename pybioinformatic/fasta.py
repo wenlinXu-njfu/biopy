@@ -101,6 +101,10 @@ class Fasta:
             seq_obj = seq_obj.display_set(char_num)
             yield seq_obj
 
+    def fa2tab(self, parse_id: bool = False):
+        for seq_obj in self.parse(parse_id):
+            yield f'{seq_obj.id}\t{seq_obj.seq}'
+
 # Other method==========================================================================================================
     def get_longest_seq(self, regular_exp: str = r'\w+.\w+', inplace_id: bool = False) -> Union[Nucleotide, Protein]:
         """Get the longest transcript of each gene locus."""
