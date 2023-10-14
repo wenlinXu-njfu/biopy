@@ -90,14 +90,14 @@ class Fasta:
             pass
 
 # File format conversion method=========================================================================================
-    def merge_sequence(self) -> Union[Nucleotide, Protein]:
+    def merge_sequence(self, parse_id: bool = False) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed on a single line."""
-        for seq_obj in self.parse(False):
+        for seq_obj in self.parse(parse_id):
             yield seq_obj
 
-    def split_sequence(self, char_num: int) -> Union[Nucleotide, Protein]:
+    def split_sequence(self, parse_id: bool = False, char_num: int = 60) -> Union[Nucleotide, Protein]:
         """Make each sequence to be displayed in multiple lines."""
-        for seq_obj in self.parse(False):
+        for seq_obj in self.parse(parse_id):
             seq_obj = seq_obj.display_set(char_num)
             yield seq_obj
 
