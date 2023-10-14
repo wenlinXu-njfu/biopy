@@ -22,7 +22,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
     raw_id_set = set(line.strip() for line in id_file)
     have_found_id_set = set()
     for fasta_file in fasta_files:
-        file_name = fasta_file.name.split('/')[-1].replace('<', '').replace('>', '')
+        file_name = fasta_file.name.replace('<', '').replace('>', '')
         for seq_obj in Fasta(fasta_file).parse(parse_seqids):
             if match and seq_obj.id in raw_id_set:
                 have_found_id_set.add(seq_obj.id)
