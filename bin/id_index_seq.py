@@ -8,6 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Tuple
 from io import TextIOWrapper
+from os.path import abspath
 import click
 from pybioinformatic import Fasta, Displayer, __version__
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
@@ -22,7 +23,7 @@ def main(fasta_files: Tuple[TextIOWrapper],
     raw_id_set = set(line.strip() for line in id_file)
     have_found_id_set = set()
     for fasta_file in fasta_files:
-        file_name = fasta_file.name.replace('<', '').replace('>', '')
+        file_name = abspath(fasta_file.name).replace('<', '').replace('>', '')
         for seq_obj in Fasta(fasta_file).parse(parse_seqids):
             if match and seq_obj.id in raw_id_set:
                 have_found_id_set.add(seq_obj.id)
