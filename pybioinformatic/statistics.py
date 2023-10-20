@@ -5,11 +5,11 @@ Date: 2022/1/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union, List
 from io import StringIO
 from warnings import filterwarnings
 from click import echo, open_file
 import pandas as pd
-from typing import Union, List
 
 
 def display_set(decimal: int = 2) -> None:
@@ -22,7 +22,7 @@ def display_set(decimal: int = 2) -> None:
 
 def read_file_as_dataframe_from_stdin(sep: str = '\t',
                                       line_terminator: str = '\n',
-                                      index_col: int = 0,
+                                      index_col: Union[int, None] = 0,
                                       header: int = 0,
                                       skip_rows: int = 0,
                                       use_cols: List[Union[str, int]] = None,
