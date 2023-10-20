@@ -4,7 +4,8 @@ from os.path import abspath
 from warnings import filterwarnings
 from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat
-from pybioinformatic import TaskManager, read_file_as_dataframe_from_stdin
+from pybioinformatic.task_manager import TaskManager
+from pybioinformatic.statistics import read_file_as_dataframe_from_stdin
 filterwarnings("ignore")
 
 
