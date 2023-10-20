@@ -114,7 +114,7 @@ class GenoType:
             return df
 
     def to_dataframes(self,
-                      sheet: Union[str, int, List[Union[str, int]]] = 0,
+                      sheet: Union[str, int, List[Union[str, int]]] = None,
                       chunk_size: int = 10000) -> DataFrame:
         if 'stdin' in self.name:  # read from stdin
             dfs = read_file_as_dataframe_from_stdin(chunk_size=chunk_size, index_col=None)
@@ -137,8 +137,12 @@ class GenoType:
         stat_df.sort_index(inplace=True, key=natsort_key)
         return stat_df
 
-    @staticmethod
-    def compare(df1: DataFrame, df2: DataFrame):
+    def compare(self, other,
+                sheet1: Union[str, int, List[Union[str, int]]] = None,
+                sheet2: Union[str, int, List[Union[str, int]]] = None):
+        """Calculate genotype consistency."""
+        df1 = self.to_dataframe(sheet1)
+        df2 = other.to_dataframe(sheet2)
         df1_sample_num = len(df1.columns.tolist()) - 4
         # 取出两个GT文件的位点交集
         left_on = df1.columns[0]
@@ -147,6 +151,7 @@ class GenoType:
         loci_num = len(merge)
         left_sample_range = list(range(4, 4 + df1_sample_num))
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
+        # 计算基因型一致率
         for index1 in left_sample_range:
             gt1 = merge.iloc[:, index1]
             for index2 in right_sample_range:
@@ -156,10 +161,14 @@ class GenoType:
                     if loci[0] == loci[1]:
                         consistency_count += 1
                 ratio = '%.3f' % (consistency_count / loci_num)
-                print(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}')
+                yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'
 
-    def parallel_compare(self, other,
-                         sheet1: Union[str, int, List[Union[str, int]]] = 0,
-                         sheet2: Union[str, int, List[Union[str, int]]] = 0):
-        dfs1 = self.to_dataframes(sheet1)
-        dfs2 = other.to_dataframes(sheet2)
+
+if __name__ == '__main__':
+    from pybioinformatic import display_set
+    display_set()
+    gt1 = GenoType('E:/Desktop/GT.xls')
+    gt2 = GenoType('E:/Desktop/GT.xls')
+    results = gt1.compare(gt2)
+    for result in results:
+        print(result)
