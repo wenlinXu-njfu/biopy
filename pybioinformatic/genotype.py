@@ -154,11 +154,13 @@ class GenoType:
         # 计算基因型一致率
         for index1 in left_sample_range:
             gt1 = merge.iloc[:, index1]
+            gt1.name = gt1.name.replace('_x', '')
             for index2 in right_sample_range:
                 consistency_count = 0
                 gt2 = merge.iloc[:, index2]
+                gt2.name = gt2.name.replace('_y', '')
                 for loci in zip(gt1, gt2):
                     if loci[0] == loci[1]:
                         consistency_count += 1
                 ratio = '%.3f' % (consistency_count / loci_num)
-                yield f'{gt1.name.replace('_x', '')}\t{gt2.name.replace('_y', '')}\t{consistency_count}\t{loci_num}\t{ratio}'
+                yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'
