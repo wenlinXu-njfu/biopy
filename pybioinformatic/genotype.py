@@ -161,14 +161,4 @@ class GenoType:
                     if loci[0] == loci[1]:
                         consistency_count += 1
                 ratio = '%.3f' % (consistency_count / loci_num)
-                yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'
-
-
-if __name__ == '__main__':
-    from pybioinformatic import display_set
-    display_set()
-    gt1 = GenoType('E:/Desktop/GT.xls')
-    gt2 = GenoType('E:/Desktop/GT.xls')
-    results = gt1.compare(gt2)
-    for result in results:
-        print(result)
+                yield f'{gt1.name.replace('_x', '')}\t{gt2.name.replace('_y', '')}\t{consistency_count}\t{loci_num}\t{ratio}'

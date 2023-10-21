@@ -14,8 +14,9 @@ displayer = Displayer(__file__.split('/')[-1])
 def main(gt_file1, gt_file2, output_prefix):
     gt1 = GenoType(gt_file1)
     gt2 = GenoType(gt_file2)
-    for result in gt1.compare(gt2):
-        click.echo(result, open(f'{output_prefix}.xls', 'a'))
+    with open(f'{output_prefix}.xls', 'w') as o:
+        for result in gt1.compare(gt2):
+            click.echo(result, o)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
