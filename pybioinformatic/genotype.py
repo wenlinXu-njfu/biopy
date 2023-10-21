@@ -22,7 +22,7 @@ def __check_hom(row: Series) -> Series:
     return Series(data, row.index)
 
 
-def __allele_count(row: Series):
+def __allele_count(row: Series) -> str:
     all_allele = ''
     for value in row:
         if '/' in str(value):
@@ -87,13 +87,15 @@ class GenoType:
         self.__open = path
 
     @staticmethod
-    def __allele_sort(allele: str):
+    def __allele_sort(allele: str) -> str:
         if '/' in allele:
             return '/'.join(sorted(allele.split('/')))
+        elif 'ins' in allele or 'del' in allele:
+            return allele
         else:
             return ''.join(sorted(allele))
 
-    def allele_sort(self, df: DataFrame):
+    def allele_sort(self, df: DataFrame) -> DataFrame:
         snp_ref = df.iloc[:, :4]
         sorted_allele = df.iloc[:, 4:].applymap(self.__allele_sort, na_action='ignore')
         df = snp_ref.join(sorted_allele)
@@ -139,7 +141,7 @@ class GenoType:
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
-                sheet2: Union[str, int, List[Union[str, int]]] = None):
+                sheet2: Union[str, int, List[Union[str, int]]] = None) -> str:
         """Calculate genotype consistency."""
         df1 = self.to_dataframe(sheet1)
         df2 = other.to_dataframe(sheet2)
@@ -148,19 +150,18 @@ class GenoType:
         left_on = df1.columns[0]
         right_on = df2.columns[0]
         merge = df1.merge(df2, left_on=left_on, right_on=right_on)
+        merge.fillna('', inplace=True)
         loci_num = len(merge)
         left_sample_range = list(range(4, 4 + df1_sample_num))
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
         # 计算基因型一致率
+        yield 'Sample1\tSample2\tConsensus_number\tTotal_number\tRatio(%)'
         for index1 in left_sample_range:
             gt1 = merge.iloc[:, index1]
             gt1.name = gt1.name.replace('_x', '')
             for index2 in right_sample_range:
-                consistency_count = 0
                 gt2 = merge.iloc[:, index2]
                 gt2.name = gt2.name.replace('_y', '')
-                for loci in zip(gt1, gt2):
-                    if loci[0] == loci[1]:
-                        consistency_count += 1
-                ratio = '%.3f' % (consistency_count / loci_num)
+                consistency_count = gt1.eq(gt2).sum()
+                ratio = '%.2f' % (consistency_count / loci_num * 100)
                 yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'

@@ -6,12 +6,16 @@ Date: 2023/10/20
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
+from io import TextIOWrapper
 import click
-from pybioinformatic import GenoType, Displayer
+from pybioinformatic import GenoType, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1])
 
 
-def main(gt_file1, gt_file2, output_prefix):
+def main(gt_file1: Union[str, TextIOWrapper],
+         gt_file2: Union[str, TextIOWrapper],
+         output_prefix: str):
     gt1 = GenoType(gt_file1)
     gt2 = GenoType(gt_file2)
     with open(f'{output_prefix}.xls', 'w') as o:
@@ -31,6 +35,7 @@ def main(gt_file1, gt_file2, output_prefix):
               help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
+@Timer('Genotype consistency analysis underway.')
 def run(gt_file1, gt_file2, output_prefix):
     """Genotype consistency analysis."""
     main(gt_file1, gt_file2, output_prefix)
