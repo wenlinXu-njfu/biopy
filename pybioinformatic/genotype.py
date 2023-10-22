@@ -169,5 +169,5 @@ class GenoType:
         # 输出测试样本GT文件
         right_sample_range.insert(0, 0)  # 只输出位点ID，不输出位点所在染色体及位置
         test_sample_gt_df = merge.iloc[:, right_sample_range]
-        test_sample_gt_df.rename(index=lambda i: str(i).replace('_y', ''), inplace=True)
+        test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
         test_sample_gt_df.to_csv(f'{output_prefix}.GT.xls', sep='\t', index=False)
