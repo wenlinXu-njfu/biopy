@@ -3,6 +3,7 @@
 ## Dependency of python packages
 **python ≥ 3.8.5<br />
 click ≥ 8.1.2<br />
+natsort ≥ 8.4.0<br />
 matplotlib ≥ 3.5.1<br />
 numpy ≥ 1.23.1<br />
 openpyxl ≥ 3.0.9<br />
