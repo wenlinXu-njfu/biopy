@@ -18,27 +18,27 @@ def main(gt_file1: Union[str, TextIOWrapper],
          output_prefix: str):
     gt1 = GenoType(gt_file1)
     gt2 = GenoType(gt_file2)
-    with open(f'{output_prefix}.xls', 'w') as o:
-        for result in gt1.compare(gt2):
+    with open(f'{output_prefix}.consistency.xls', 'w') as o:
+        for result in gt1.compare(gt2, output_prefix=output_prefix):
             click.echo(result, o)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--gt-file1', 'gt_file1',
+@click.option('-i', '--database-gt', 'database_gt',
               metavar='<GT file>', type=click.File('r'), required=True,
-              help='Input gt file.')
-@click.option('-I', '--gt-file2', 'gt_file2',
+              help='Input database sample gt file.')
+@click.option('-I', '--test-gt', 'test_gt',
               metavar='<GT file>', type=click.File('r'), required=True,
-              help='Input another gt file.')
+              help='Input test sample gt file.')
 @click.option('-o', '--output-prefix', 'output_prefix',
-              metavar='<str>', default='consistency', show_default=True,
+              metavar='<str>', default='TestSample', show_default=True,
               help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Genotype consistency analysis underway.')
-def run(gt_file1, gt_file2, output_prefix):
+def run(database_gt, test_gt, output_prefix):
     """Genotype consistency analysis."""
-    main(gt_file1, gt_file2, output_prefix)
+    main(database_gt, test_gt, output_prefix)
 
 
 if __name__ == '__main__':

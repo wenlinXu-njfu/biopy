@@ -141,7 +141,8 @@ class GenoType:
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
-                sheet2: Union[str, int, List[Union[str, int]]] = None) -> str:
+                sheet2: Union[str, int, List[Union[str, int]]] = None,
+                output_prefix: str = 'TestSample') -> str:
         """Calculate genotype consistency."""
         df1 = self.to_dataframe(sheet1)
         df2 = other.to_dataframe(sheet2)
@@ -165,3 +166,6 @@ class GenoType:
                 consistency_count = gt1.eq(gt2).sum()
                 ratio = '%.2f' % (consistency_count / loci_num * 100)
                 yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'
+        # 输出测试样本GT文件
+        right_sample_range.insert(0, 0)  # 只输出位点ID，不输出位点所在染色体及位置
+        merge.iloc[:, right_sample_range].to_csv(f'{output_prefix}.GT.xls', sep='\t', index=False)
