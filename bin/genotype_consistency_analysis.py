@@ -15,12 +15,14 @@ displayer = Displayer(__file__.split('/')[-1])
 
 def main(gt_file1: Union[str, TextIOWrapper],
          gt_file2: Union[str, TextIOWrapper],
-         output_prefix: str):
+         database_compare: bool,
+         output_path: str):
     gt1 = GenoType(gt_file1)
     gt2 = GenoType(gt_file2)
-    with open(f'{output_prefix}.consistency.xls', 'w') as o:
-        for result in gt1.compare(gt2, output_prefix=output_prefix):
-            click.echo(result, o)
+    if database_compare:
+        gt1.compare(gt2, output_path=output_path)
+    else:
+        gt1.self_compare(gt2, output_path=output_path)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -30,15 +32,19 @@ def main(gt_file1: Union[str, TextIOWrapper],
 @click.option('-I', '--test-gt', 'test_gt',
               metavar='<GT file>', type=click.File('r'), required=True,
               help='Input test sample gt file.')
-@click.option('-o', '--output-prefix', 'output_prefix',
-              metavar='<str>', default='TestSample', show_default=True,
-              help='Output file prefix.')
+@click.option('--database-compare/--self-compare', 'database_compare',
+              default=True, show_default=True,
+              help='Specify comparison mode. Database compare means test sample compare with database sample. '
+                   'Self compare means each sample compares with its different test batch.')
+@click.option('-o', '--output-path', 'output_path',
+              metavar='<path>', default='./', show_default=True,
+              help='Output file path.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Genotype consistency analysis underway.')
-def run(database_gt, test_gt, output_prefix):
+def run(database_gt, test_gt, database_compare, output_path):
     """Genotype consistency analysis."""
-    main(database_gt, test_gt, output_prefix)
+    main(database_gt, test_gt, database_compare, output_path)
 
 
 if __name__ == '__main__':

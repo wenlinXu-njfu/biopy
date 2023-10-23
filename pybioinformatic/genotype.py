@@ -2,8 +2,10 @@ from typing import Union, List
 from io import TextIOWrapper
 from os.path import abspath
 from warnings import filterwarnings
+from re import sub
 from natsort import natsort_key
-from pandas import Series, DataFrame, read_table, read_excel, concat
+from pandas import Series, DataFrame, read_table, read_excel, concat, cut
+from click import echo
 from pybioinformatic.task_manager import TaskManager
 from pybioinformatic.statistics import read_file_as_dataframe_from_stdin
 filterwarnings("ignore")
@@ -103,14 +105,15 @@ class GenoType:
 
     def to_dataframe(self,
                      sheet: Union[str, int, List[Union[str, int]]] = 0,
+                     index_col: int = None,
                      sort_allele: bool = True) -> DataFrame:
         try:  # read from text file
-            df = read_table(self.__open)
+            df = read_table(self.__open, index_col=index_col)
             if sort_allele:
                 df = self.allele_sort(df)
             return df
         except UnicodeDecodeError:  # read from Excel file
-            df = read_excel(self.__open, sheet)
+            df = read_excel(self.__open, sheet, index_col=index_col)
             if sort_allele:
                 df = self.allele_sort(df)
             return df
@@ -139,10 +142,34 @@ class GenoType:
         stat_df.sort_index(inplace=True, key=natsort_key)
         return stat_df
 
+    def self_compare(self, other,
+                     sheet1: Union[str, int, List[Union[str, int]]] = None,
+                     sheet2: Union[str, int, List[Union[str, int]]] = None,
+                     output_path: str = './') -> None:
+        """Genotype consistency of different test batches in a single sample."""
+        df1 = self.to_dataframe(sheet1, index_col=0)
+        df2 = other.to_dataframe(sheet2, index_col=0)
+        # fill NA
+        df1.fillna('', inplace=True)
+        df2.fillna('', inplace=True)
+        # sort by ID (index of DataFrame)
+        df1.sort_index(key=natsort_key, inplace=True)
+        df2.sort_index(key=natsort_key, inplace=True)
+        if df1.index.tolist() != df2.index.tolist():
+            echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
+            exit()
+        total_loci_num = len(df1)
+        bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        sample_count = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
+        bins_count = cut(sample_count, bins).value_counts(sort=False).to_string()
+        sample_count = sample_count.to_string()
+        echo(sample_count, open(f'{output_path}/Sample.consistency.xls', 'w'))
+        echo(bins_count, open(f'{output_path}/Bins.stat.xls', 'w'))
+
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
-                output_prefix: str = 'TestSample') -> str:
+                output_path: str = './') -> None:
         """Calculate genotype consistency."""
         df1 = self.to_dataframe(sheet1)
         df2 = other.to_dataframe(sheet2)
@@ -156,18 +183,19 @@ class GenoType:
         left_sample_range = list(range(4, 4 + df1_sample_num))
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
         # 计算基因型一致率
-        yield 'Sample1\tSample2\tConsensus_number\tTotal_number\tRatio(%)'
-        for index1 in left_sample_range:
-            gt1 = merge.iloc[:, index1]
-            gt1.name = gt1.name.replace('_x', '')
-            for index2 in right_sample_range:
-                gt2 = merge.iloc[:, index2]
-                gt2.name = gt2.name.replace('_y', '')
-                consistency_count = gt1.eq(gt2).sum()
-                ratio = '%.2f' % (consistency_count / loci_num * 100)
-                yield f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}'
+        with open(f'{output_path}/TestSample.consistency.xls', 'w') as o:
+            echo('Sample1\tSample2\tConsensus_number\tTotal_number\tRatio(%)', o)
+            for index1 in left_sample_range:
+                gt1 = merge.iloc[:, index1]
+                gt1.name = gt1.name.replace('_x', '')
+                for index2 in right_sample_range:
+                    gt2 = merge.iloc[:, index2]
+                    gt2.name = gt2.name.replace('_y', '')
+                    consistency_count = gt1.eq(gt2).sum()
+                    ratio = '%.2f' % (consistency_count / loci_num * 100)
+                    echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
         # 输出测试样本GT文件
         right_sample_range.insert(0, 0)  # 只输出位点ID，不输出位点所在染色体及位置
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
-        test_sample_gt_df.to_csv(f'{output_prefix}.GT.xls', sep='\t', index=False)
+        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False)

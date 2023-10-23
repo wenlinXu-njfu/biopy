@@ -18,14 +18,14 @@ class Timer:
         def wrapper(*args, **kwargs):
             start_time = datetime.now().replace(microsecond=0)
             if self.start_message:
-                echo(f"[{datetime.now().replace(microsecond=0)}] {self.start_message}", err=True)
+                echo(f"\033[36m[{datetime.now().replace(microsecond=0)}] {self.start_message}\033[0m", err=True)
             else:
                 msg = function.__name__.replace('_', ' ')
-                echo(f"[{datetime.now().replace(microsecond=0)}] Start run {msg}.", err=True)
+                echo(f"\033[36m[{datetime.now().replace(microsecond=0)}] Start run {msg}.\033[0m", err=True)
             if self.command_content:
-                echo(f"[{datetime.now().replace(microsecond=0)}] {self.command_content}", err=True)
+                echo(f"\033[36m[{datetime.now().replace(microsecond=0)}] {self.command_content}\033[0m", err=True)
             value = function(*args, **kwargs)
             end_time = datetime.now().replace(microsecond=0)
-            echo(f'[{datetime.now().replace(microsecond=0)}] Finish in {end_time - start_time}.', err=True)
+            echo(f'\033[36m[{datetime.now().replace(microsecond=0)}] Finish in {end_time - start_time}.\033[0m', err=True)
             return value
         return wrapper
