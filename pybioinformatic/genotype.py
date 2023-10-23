@@ -184,7 +184,7 @@ class GenoType:
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
         # 计算基因型一致率
         with open(f'{output_path}/TestSample.consistency.xls', 'w') as o:
-            echo('Sample1\tSample2\tConsensus_number\tTotal_number\tRatio(%)', o)
+            echo('Database_sample\tTest_sample\tConsensus_number\tTotal_number\tRatio(%)', o)
             for index1 in left_sample_range:
                 gt1 = merge.iloc[:, index1]
                 gt1.name = gt1.name.replace('_x', '')
