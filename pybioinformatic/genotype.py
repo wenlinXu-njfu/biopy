@@ -2,7 +2,6 @@ from typing import Union, List
 from io import TextIOWrapper
 from os.path import abspath
 from warnings import filterwarnings
-from re import sub
 from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat, cut
 from click import echo
@@ -159,7 +158,7 @@ class GenoType:
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
             exit()
         total_loci_num = len(df1)
-        bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        bins = range(0, 110, 10)
         sample_count = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
         bins_count = cut(sample_count, bins).value_counts(sort=False).to_string()
         sample_count = sample_count.to_string()
