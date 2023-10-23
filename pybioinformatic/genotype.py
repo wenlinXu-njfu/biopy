@@ -148,20 +148,24 @@ class GenoType:
         """Genotype consistency of different test batches in a single sample."""
         df1 = self.to_dataframe(sheet1, index_col=0)
         df2 = other.to_dataframe(sheet2, index_col=0)
-        # fill NA
+        # Fill NA.
         df1.fillna('', inplace=True)
         df2.fillna('', inplace=True)
-        # sort by ID (index of DataFrame)
+        # Sort by SNP ID (index of DataFrame).
         df1.sort_index(key=natsort_key, inplace=True)
         df2.sort_index(key=natsort_key, inplace=True)
+        # Check whether the two GT files contain the same loci.
         if df1.index.tolist() != df2.index.tolist():
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
             exit()
         total_loci_num = len(df1)
-        bins = range(0, 110, 10)
+        # Calculate genotype consistency.
+        bins = range(0, 110, 10)  # Set the consistency statistics interval.
+        # Calculate the consistency of each sample under different test batches.
         sample_count = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
         bins_count = cut(sample_count, bins).value_counts(sort=False).to_string()
         sample_count = sample_count.to_string()
+        # Write results to output file.
         echo(sample_count, open(f'{output_path}/Sample.consistency.xls', 'w'))
         echo(bins_count, open(f'{output_path}/Bins.stat.xls', 'w'))
 
