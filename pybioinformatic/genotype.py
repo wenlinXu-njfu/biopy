@@ -125,15 +125,15 @@ class GenoType:
             dfs = read_file_as_dataframe_from_stdin(chunk_size=chunk_size, index_col=index_col)
         else:
             try:  # read from text file
-                dfs = read_table(self.__open, chunksize=chunk_size)
+                dfs = read_table(self.__open, chunksize=chunk_size, index_col=index_col)
             except UnicodeDecodeError:  # read from Excel file
-                dfs = read_excel(self.__open, sheet)
+                dfs = read_excel(self.__open, sheet, index_col=index_col)
         yield from dfs
 
     def parallel_stat_MHM(self, processing_num: int):
         """Calculate the MissRate, HetRate and MAF (MHM) of SNP sites from GT files parallely."""
         # Calculate with multiprocessing
-        params = ((df,) for df in self.to_dataframes(index_col=0))
+        params = ((df,) for df in self.to_dataframes())  # Index of DataFrame is None
         tkm = TaskManager(processing_num=processing_num, params=params)
         ret = tkm.parallel_run_func(stat_MHM)
         stat_dfs = [i.get() for i in ret]
