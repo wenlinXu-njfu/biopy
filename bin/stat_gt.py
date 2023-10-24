@@ -26,7 +26,7 @@ def run(gt_file, num_processing, output_file):
     gt = GenoType(gt_file)
     stat_df = gt.parallel_stat_MHM(num_processing)
     if output_file:
-        stat_df.to_csv(output_file, sep='\t')
+        stat_df.to_csv(output_file, sep='\t', index=False)
     else:
         text = stat_df.to_string(index=False)
         text = sub(r' +', '\t', text)
