@@ -119,9 +119,10 @@ class GenoType:
 
     def to_dataframes(self,
                       sheet: Union[str, int, List[Union[str, int]]] = None,
+                      index_col: int = None,
                       chunk_size: int = 10000) -> DataFrame:
         if 'stdin' in self.name:  # read from stdin
-            dfs = read_file_as_dataframe_from_stdin(chunk_size=chunk_size, index_col=None)
+            dfs = read_file_as_dataframe_from_stdin(chunk_size=chunk_size, index_col=index_col)
         else:
             try:  # read from text file
                 dfs = read_table(self.__open, chunksize=chunk_size)
@@ -132,7 +133,7 @@ class GenoType:
     def parallel_stat_MHM(self, processing_num: int):
         """Calculate the MissRate, HetRate and MAF (MHM) of SNP sites from GT files parallely."""
         # Calculate with multiprocessing
-        params = ((df,) for df in self.to_dataframes())
+        params = ((df,) for df in self.to_dataframes(index_col=0))
         tkm = TaskManager(processing_num=processing_num, params=params)
         ret = tkm.parallel_run_func(stat_MHM)
         stat_dfs = [i.get() for i in ret]
@@ -180,7 +181,7 @@ class GenoType:
         # 取出两个GT文件的位点交集
         left_on = df1.columns[0]
         right_on = df2.columns[0]
-        merge = df1.merge(df2, left_on=left_on, right_on=right_on)
+        merge = df1.merge(df2, left_on=left_on, right_on=right_on)  # 避免两GT文件ID字段名不一致
         merge.fillna('', inplace=True)
         loci_num = len(merge)
         left_sample_range = list(range(4, 4 + df1_sample_num))
