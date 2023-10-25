@@ -62,7 +62,7 @@ def stat_MHM(df: DataFrame) -> DataFrame:
     df['MissRate(%)'] = df.isnull().sum(axis=1) / sample_num * 100
     # Calculate HetRate
     df.fillna('', inplace=True)  # fill NA
-    df['HetRate(%)'] = df.iloc[:, 4:-1].apply(lambda row: 1 - __check_hom(row).sum() / (row != '').sum() * 100, axis=1)
+    df['HetRate(%)'] = df.iloc[:, 4:-1].apply(lambda row: (1 - __check_hom(row).sum() / (row != '').sum()) * 100, axis=1)
     # Calculate MAF
     df['all_gt'] = df.iloc[:, 4:-2].apply(lambda row: __allele_count(row), axis=1)
     df['total'] = df['all_gt'].apply(len)
