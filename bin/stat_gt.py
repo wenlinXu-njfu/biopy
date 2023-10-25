@@ -39,8 +39,8 @@ def run(gt_file, num_processing, output_path):
     histplot(stat_df, x='MissRate(%)', ax=ax1, bins=20)
     histplot(stat_df, x='HetRate(%)', ax=ax2, bins=20)
     histplot(stat_df, x='MAF', ax=ax3, bins=20)
-    # ax1.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
-    # ax2.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
+    ax1.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
+    ax2.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
     subplots_adjust(wspace=0.3)
     savefig(f'{output_path}/distribution.png', bbox_inches='tight')
 
