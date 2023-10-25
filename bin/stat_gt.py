@@ -7,6 +7,8 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from re import sub
+from matplotlib.pyplot import rcParams, style, figure, subplots_adjust, savefig
+from seaborn import histplot
 import click
 from pybioinformatic import GenoType, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1])
@@ -18,20 +20,29 @@ displayer = Displayer(__file__.split('/')[-1])
               help='Input GT file.')
 @click.option('-n', '--num-processing', 'num_processing',
               type=int, metavar='<int>', default=1, show_default=True, help='Number of Processing.')
-@click.option('-o', '--output-file', 'output_file',
-              metavar='<file>',
-              help='Output file path and name. Print to terminal by default.')
+@click.option('-o', '--output-path', 'output_path',
+              metavar='<path>', default='./', show_default=True,
+              help='Output file path.')
 @Timer('Calculating MissRate, HetRate, and MAF.')
-def run(gt_file, num_processing, output_file):
+def run(gt_file, num_processing, output_path):
     gt = GenoType(gt_file)
     stat_df = gt.parallel_stat_MHM(num_processing)
-    if output_file:
-        stat_df.to_csv(output_file, sep='\t', index=False)
-    else:
-        text = stat_df.to_string(index=False)
-        text = sub(r' +', '\t', text)
-        text = sub(r'\n\t', '\n', text).strip()
-        click.echo(text)
+    stat_df.to_csv(f'{output_path}/site_stat.xls', sep='\t', index=False)
+    # plot figure
+    style.use('ggplot')
+    rcParams['font.family'] = 'Arial'
+    rcParams['font.size'] = 8
+    fig = figure(figsize=(12, 5), dpi=300)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+    histplot(stat_df, x='MissRate', ax=ax1, bins=20)
+    histplot(stat_df, x='HetRate', ax=ax2, bins=20)
+    histplot(stat_df, x='MAF', ax=ax3, bins=20)
+    # ax1.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
+    # ax2.set_xticks(range(0, 110, 10), range(0, 110, 10), rotation=45)
+    subplots_adjust(wspace=0.3)
+    savefig(f'{output_path}/distribution.png', bbox_inches='tight')
 
 
 if __name__ == '__main__':

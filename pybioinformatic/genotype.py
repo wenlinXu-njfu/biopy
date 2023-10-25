@@ -59,10 +59,10 @@ def stat_MHM(df: DataFrame) -> DataFrame:
     snp_ref = df.copy().iloc[:, :4]
     # Calculate MissRate
     sample_num = len(df.columns.tolist()) - 4
-    df['MissRate'] = df.isnull().sum(axis=1) / sample_num
+    df['MissRate(%)'] = df.isnull().sum(axis=1) / sample_num * 100
     # Calculate HetRate
     df.fillna('', inplace=True)  # fill NA
-    df['HetRate'] = df.iloc[:, 4:-1].apply(lambda row: 1 - __check_hom(row).sum() / (row != '').sum(), axis=1)
+    df['HetRate(%)'] = df.iloc[:, 4:-1].apply(lambda row: 1 - __check_hom(row).sum() / (row != '').sum() * 100, axis=1)
     # Calculate MAF
     df['all_gt'] = df.iloc[:, 4:-2].apply(lambda row: __allele_count(row), axis=1)
     df['total'] = df['all_gt'].apply(len)
@@ -74,7 +74,7 @@ def stat_MHM(df: DataFrame) -> DataFrame:
     df['I'] = df['all_gt'].str.count('I') / df['total']
     df['MAF'] = df.loc[:, ['A', 'G', 'C', 'T', 'D', 'I']].apply(lambda row: sorted(row, reverse=True)[1], axis=1)
     # Output results
-    df = df.loc[:, ['MissRate', 'HetRate', 'MAF']]
+    df = df.loc[:, ['MissRate(%)', 'HetRate(%)', 'MAF']]
     merge = snp_ref.join(df)
     return merge
 
