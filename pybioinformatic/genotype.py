@@ -2,6 +2,7 @@ from typing import Union, List
 from io import TextIOWrapper
 from os.path import abspath
 from warnings import filterwarnings
+from tqdm import tqdm
 from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat, cut
 from click import echo
@@ -168,38 +169,45 @@ class GenoType:
         sample_count = sample_count.to_string()
         # Write results to output file.
         echo(sample_count, open(f'{output_path}/Sample.consistency.xls', 'w'))
-        echo(bins_count, open(f'{output_path}/Bins.stat.xls', 'w'))
+        echo(bins_count, open(f'{output_path}/Interval.stat.xls', 'w'))
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
                 output_path: str = './') -> None:
         """Calculate genotype consistency."""
-        df1 = self.to_dataframe(sheet1)
-        df2 = other.to_dataframe(sheet2)
-        df1_sample_num = len(df1.columns.tolist()) - 4
-        # 取出两个GT文件的位点交集
+        # Read GT file as DataFrame.
+        df1 = self.to_dataframe(sheet1)  # index = 0, 1, 2, ...
+        df2 = other.to_dataframe(sheet2)  # index = 0, 1, 2, ...
+
+        # Select the site intersection of two GT files.
         left_on = df1.columns[0]
         right_on = df2.columns[0]
-        merge = df1.merge(df2, left_on=left_on, right_on=right_on)  # 避免两GT文件ID字段名不一致
-        merge.fillna('', inplace=True)
+        merge = df1.merge(df2, left_on=left_on, right_on=right_on)  # Avoid inconsistency between the two GT file ID fields
+        merge.fillna('', inplace=True)  # fill NA
+
+        # Calculate genotype consistency.
         loci_num = len(merge)
+        df1_sample_num = len(df1.columns.tolist()) - 4
         left_sample_range = list(range(4, 4 + df1_sample_num))
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
-        # 计算基因型一致率
         with open(f'{output_path}/TestSample.consistency.xls', 'w') as o:
             echo('Database_sample\tTest_sample\tConsensus_number\tTotal_number\tRatio(%)', o)
-            for index1 in left_sample_range:
-                gt1 = merge.iloc[:, index1]
-                gt1.name = gt1.name.replace('_x', '')
-                for index2 in right_sample_range:
-                    gt2 = merge.iloc[:, index2]
-                    gt2.name = gt2.name.replace('_y', '')
-                    consistency_count = gt1.eq(gt2).sum()
-                    ratio = '%.2f' % (consistency_count / loci_num * 100)
-                    echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
-        # 输出测试样本GT文件
-        right_sample_range.insert(0, 0)  # 只输出位点ID，不输出位点所在染色体及位置
+            with tqdm(total=len(left_sample_range), unit='sample') as pbar:  # Show process bar
+                for index1 in left_sample_range:
+                    gt1 = merge.iloc[:, index1]
+                    gt1.name = gt1.name.replace('_x', '')
+                    pbar.set_description(f'Processing {gt1.name}')
+                    for index2 in right_sample_range:
+                        gt2 = merge.iloc[:, index2]
+                        gt2.name = gt2.name.replace('_y', '')
+                        consistency_count = gt1.eq(gt2).sum()
+                        ratio = '%.2f' % (consistency_count / loci_num * 100)
+                        echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
+                    pbar.update(1)
+
+        # Output GT file of test sample.
+        right_sample_range.insert(0, 0)  # Only output site ID
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
         test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False)
