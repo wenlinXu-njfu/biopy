@@ -6,7 +6,6 @@ Date: 2023/10/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from re import sub
 from matplotlib.pyplot import rcParams, style, figure, subplots_adjust, savefig
 from seaborn import histplot
 import click
