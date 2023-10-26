@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 File: stat_gt.py
 Description: Calculate the miss rate, heterozygosity rate and MAF of SNP sites from GT files.
@@ -26,7 +26,7 @@ displayer = Displayer(__file__.split('/')[-1])
 def run(gt_file, num_processing, output_path):
     gt = GenoType(gt_file)
     stat_df = gt.parallel_stat_MHM(num_processing)
-    stat_df.to_csv(f'{output_path}/site_stat.xls', sep='\t', index=False)
+    stat_df.to_csv(f'{output_path}/site_stat.xls', sep='\t', index=False, float_format='%.2f')
     # plot figure
     style.use('ggplot')
     rcParams['font.family'] = 'Arial'
