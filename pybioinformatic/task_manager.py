@@ -29,7 +29,7 @@ class TaskManager:
         self.params = params
         self.processing_num = processing_num
         if isinstance(log_file, str):
-            self.loger = open(log_file, 'a')
+            self.loger = open(log_file, 'w')
         else:
             self.loger = log_file
 
@@ -52,6 +52,10 @@ class TaskManager:
         self.task = []
 
     def echo_and_exec_cmd(self, cmd: str):
+        """
+        NOTICE: This method cannot run normally when it is called by multiprocessing.
+                Because different subprocess will share same TaskManager.loger attribution.
+        """
         echo(f'\033[33m[{getuser()}@{gethostname()}: '
              f'{datetime.now().replace(microsecond=0)}]\n$ '
              f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)

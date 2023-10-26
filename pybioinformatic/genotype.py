@@ -11,6 +11,12 @@ from pybioinformatic.statistics import read_file_as_dataframe_from_stdin
 filterwarnings("ignore")
 
 
+# =====================================================================================================================#
+# NOTICE:                                                                                                              #
+# The "__check_hom" and "__get_all_allele" functions cannot be defined in the "GenoType" class.                        #
+# Because the "GenoType.parallel_stat_MHM" method runs with multiprocessing,                                           #
+# the subprocess cannot call the private method of the "GenoType" class.                                               #
+# =====================================================================================================================#
 def __check_hom(row: Series) -> Series:
     """Check which samples are homozygous genotypes at specific loci."""
     genotype_set = {'AT', 'TA',
@@ -24,7 +30,8 @@ def __check_hom(row: Series) -> Series:
     return Series(data, row.index)
 
 
-def __allele_count(row: Series) -> str:
+def __get_all_allele(row: Series) -> str:
+    """Get all allele at specified loci."""
     all_allele = ''
     for value in row:
         if '/' in str(value):
@@ -64,7 +71,7 @@ def stat_MHM(df: DataFrame) -> DataFrame:
     df.fillna('', inplace=True)  # fill NA
     df['HetRate(%)'] = df.iloc[:, 4:-1].apply(lambda row: (1 - __check_hom(row).sum() / (row != '').sum()) * 100, axis=1)
     # Calculate MAF
-    df['all_gt'] = df.iloc[:, 4:-2].apply(lambda row: __allele_count(row), axis=1)
+    df['all_gt'] = df.iloc[:, 4:-2].apply(lambda row: __get_all_allele(row), axis=1)
     df['total'] = df['all_gt'].apply(len)
     df['A'] = df['all_gt'].str.count('A') / df['total']
     df['G'] = df['all_gt'].str.count('G') / df['total']
@@ -176,17 +183,16 @@ class GenoType:
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
                 output_path: str = './') -> None:
         """Calculate genotype consistency."""
-        # Read GT file as DataFrame.
+        # Step1: Read GT file as DataFrame.
         df1 = self.to_dataframe(sheet1)  # index = 0, 1, 2, ...
         df2 = other.to_dataframe(sheet2)  # index = 0, 1, 2, ...
-
-        # Select the site intersection of two GT files.
+        # Step2: Select the site intersection of two GT files.
         left_on = df1.columns[0]
         right_on = df2.columns[0]
-        merge = df1.merge(df2, left_on=left_on, right_on=right_on)  # Avoid inconsistency between the two GT file ID fields
+        merge = df1.merge(df2, left_on=left_on,  # index = 0, 1, 2, ...
+                          right_on=right_on)  # Avoid inconsistency between the two GT file ID fields
         merge.fillna('', inplace=True)  # fill NA
-
-        # Calculate genotype consistency.
+        # Step3: Calculate genotype consistency.
         loci_num = len(merge)
         df1_sample_num = len(df1.columns.tolist()) - 4
         left_sample_range = list(range(4, 4 + df1_sample_num))
@@ -205,8 +211,7 @@ class GenoType:
                         ratio = '%.2f' % (consistency_count / loci_num * 100)
                         echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
                     pbar.update(1)
-
-        # Output GT file of test sample.
+        # Step4: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
