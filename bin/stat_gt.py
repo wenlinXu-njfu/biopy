@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 File: stat_gt.py
 Description: Calculate the miss rate, heterozygosity rate and MAF of SNP sites from GT files.
