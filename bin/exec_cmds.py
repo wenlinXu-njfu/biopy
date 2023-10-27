@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: exec_cmds.py
-Description: Execute commands in a file line by line.
+Description: Execute commands asynchronously.
 Date: 2022/1/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -27,7 +27,7 @@ def main(command_file: TextIOWrapper, processing_num: int):
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(command_file, processing_num):
-    """Execute commands in a file line by line."""
+    """Execute commands asynchronously."""
     main(command_file, processing_num)
 
 
