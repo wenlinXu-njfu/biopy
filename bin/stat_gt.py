@@ -12,7 +12,7 @@ from matplotlib.pyplot import rcParams, style, figure, subplots_adjust, savefig
 from seaborn import histplot
 import click
 from pybioinformatic import GenoType, Timer, Displayer
-displayer = Displayer(__file__.split('/')[-1])
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(gt_file: Union[str, TextIOWrapper],
@@ -52,6 +52,8 @@ def main(gt_file: Union[str, TextIOWrapper],
 @click.option('-o', '--output-path', 'output_path',
               metavar='<path>', default='./', show_default=True,
               help='Output file path.')
+@click.option('-V', '--version', 'version', help='Show author and version information.',
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Calculating MissRate, HetRate, and MAF.')
 def run(gt_file, num_processing, output_path):
     main(gt_file, num_processing, output_path)

@@ -10,7 +10,7 @@ from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import GenoType, Timer, Displayer
-displayer = Displayer(__file__.split('/')[-1])
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(gt_file1: Union[str, TextIOWrapper],
