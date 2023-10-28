@@ -2,7 +2,7 @@
 """
 File: genotype_consistency_analysis.py
 Description: Genotype consistency analysis.
-Date: 2023/10/20
+CreateDate: 2023/10/20
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

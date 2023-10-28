@@ -2,7 +2,7 @@
 """
 File: bed_extract_seq.py
 Description: Extract sequences from BED file.
-Date: 2022/3/21
+CreateDate: 2022/3/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: plot_figure.py
 Description: Plot tools.
-Date: 2022/2/24
+CreateDate: 2022/2/24
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

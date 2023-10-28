@@ -2,7 +2,7 @@
 """
 File: hmmsearch_helper.py
 Description: Hmmsearch helper
-Date: 2022/4/12
+CreateDate: 2022/4/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

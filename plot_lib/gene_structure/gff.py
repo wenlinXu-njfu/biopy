@@ -2,7 +2,7 @@
 """
 File: gff.py
 Description: Plot mRNA structure based on GFF annotation file
-Date: 2022/4/4
+CreateDate: 2022/4/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

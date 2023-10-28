@@ -2,7 +2,7 @@
 """
 File: batch_rename.py
 Description: Batch rename files.
-Date: 2021-10-06
+CreateDate: 2021-10-06
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

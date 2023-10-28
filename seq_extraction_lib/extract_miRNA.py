@@ -2,7 +2,7 @@
 """
 File: extract_miRNA.py
 Description: Extract miRNA sequence from miRNA GFF file
-Date: 2022/3/24
+CreateDate: 2022/3/24
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

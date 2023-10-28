@@ -2,7 +2,7 @@
 """
 File: plot_circos.py
 Description: Plot circos graphic.
-Date: 2022/10/12
+CreateDate: 2022/10/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

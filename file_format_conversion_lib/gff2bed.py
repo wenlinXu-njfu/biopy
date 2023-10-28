@@ -2,7 +2,7 @@
 """
 File: gff2bed.py
 Description: Convert the file format from GFF to BED.
-Date: 2022/3/23
+CreateDate: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

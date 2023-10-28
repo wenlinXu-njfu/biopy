@@ -1,7 +1,7 @@
 """
 File: draw_chromosome.py
 Description: Draw chromosome bar.
-Date: 2022/10/10
+CreateDate: 2022/10/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

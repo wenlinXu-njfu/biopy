@@ -1,7 +1,7 @@
 """
 File: bed.py
 Description: Instantiate a BED file object.
-Date: 2021/12/4
+CreateDate: 2021/12/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

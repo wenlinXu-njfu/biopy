@@ -2,7 +2,7 @@
 """
 File: repeat_seq_analysis.py
 Description: Repeat sequence analysis of circRNAs flanking sequences.
-Date: 2023/2/26
+CreateDate: 2023/2/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: CircToolKit.py
 Description: CircRNAs analysis tools.
-Date: 2022/4/3
+CreateDate: 2022/4/3
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

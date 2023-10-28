@@ -2,7 +2,7 @@
 """
 File: SSR_finder.py
 Description: Find simple sequence repeat (SSR) in the DNA sequences.
-Date: 2023/9/9
+CreateDate: 2023/9/9
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

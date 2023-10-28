@@ -2,7 +2,7 @@
 """
 File: GO_anno.py
 Description: Preprocess go-basic.obo file
-Date: 2022/1/14
+CreateDate: 2022/1/14
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

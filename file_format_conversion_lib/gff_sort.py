@@ -2,7 +2,7 @@
 """
 File: gff_sort.py
 Description: Sort the GFF file by sequence ID.
-Date: 2022/3/31
+CreateDate: 2022/3/31
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

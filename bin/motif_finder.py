@@ -2,7 +2,7 @@
 """
 File: motif_finder.py
 Description: Find the motif in the sequence.
-Date: 2022/3/29
+CreateDate: 2022/3/29
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

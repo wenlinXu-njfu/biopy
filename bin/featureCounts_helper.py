@@ -2,7 +2,7 @@
 """
 File: featureCounts_helper.py
 Description: Standardize gene expression with FPKM or TPM based on featureCounts results.
-Date: 2022/3/29
+CreateDate: 2022/3/29
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

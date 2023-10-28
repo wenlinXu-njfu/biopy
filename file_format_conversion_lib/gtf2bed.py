@@ -2,7 +2,7 @@
 """
 File: gtf2bed.py
 Description: Convert the file format from GTF to BED.
-Date: 2022/4/2
+CreateDate: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

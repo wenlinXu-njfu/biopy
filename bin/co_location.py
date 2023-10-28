@@ -2,7 +2,7 @@
 """
 File: co_location.py
 Description: Target genes were predicted according to the location relationship between lncRNA and genes.
-Date: 2023/4/16
+CreateDate: 2023/4/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

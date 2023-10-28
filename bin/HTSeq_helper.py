@@ -2,7 +2,7 @@
 """
 File: HTSeq_helper.py
 Description: Standardize gene expression with FPKM or TPM based on HTSeq results.
-Date: 2023/6/15
+CreateDate: 2023/6/15
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: seq_extraction_tool.py
 Description: Sequence extraction tool.
-Date: 2022/3/23
+CreateDate: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: vcf.py
 Description: Instantiate a VCF file object.
-Date: 2023/10/28
+CreateDate: 2023/10/28
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

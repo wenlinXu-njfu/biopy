@@ -2,7 +2,7 @@
 """
 File: plot_gene_structure.py
 Description: Plot gene structure based on annotation file
-Date: 2022/3/27
+CreateDate: 2022/3/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -1,7 +1,7 @@
 """
 File: gff.py
 Description: Instantiate a GFF file object.
-Date: 2021/11/27
+CreateDate: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

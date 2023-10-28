@@ -2,7 +2,7 @@
 """
 File: blast_helper.py
 Description: Blast software helper
-Date: 2022/4/2
+CreateDate: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

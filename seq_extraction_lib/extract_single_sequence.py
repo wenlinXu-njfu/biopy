@@ -2,7 +2,7 @@
 """
 File: extract_single_sequence.py
 Description: Extract one sub-sequence from reference sequence file.
-Date: 2022/5/3
+CreateDate: 2022/5/3
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

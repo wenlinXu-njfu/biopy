@@ -2,7 +2,7 @@
 """
 File: reverse_complementary_analysis.py
 Description: Reverse complementary analysis of circRNAs flanking sequences.
-Date: 2022/4/2
+CreateDate: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

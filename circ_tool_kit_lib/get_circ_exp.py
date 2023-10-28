@@ -2,7 +2,7 @@
 """
 File: get_circ_exp.py
 Description: Standardize circRNAs expression with CPM.
-Date: 2023/3/4
+CreateDate: 2023/3/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

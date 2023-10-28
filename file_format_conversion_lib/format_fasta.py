@@ -2,7 +2,7 @@
 """
 File: format_fasta.py
 Description: Make each sequence to be displayed in a single line or in multiple lines and sort sequence by length or ID.
-Date: 2022/3/23
+CreateDate: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

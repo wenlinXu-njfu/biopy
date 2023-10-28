@@ -2,7 +2,7 @@
 """
 File: get_reverse_complementary_seq.py
 Description: Get reverse complementary sequence.
-Date: 2022/6/8
+CreateDate: 2022/6/8
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

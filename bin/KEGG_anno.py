@@ -2,7 +2,7 @@
 """
 File: KEGG_anno.py
 Description: Preprocess xxx00001.keg file.
-Date: 2022/6/22
+CreateDate: 2022/6/22
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -1,7 +1,7 @@
 """
 File: draw_bezier_curve.py
 Description: Draw bezier curve.
-Date: 2022/10/11
+CreateDate: 2022/10/11
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: gtf_extract_seq.py
 Description: Extract cDNA sequence from GTF file
-Date: 2022/3/25
+CreateDate: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

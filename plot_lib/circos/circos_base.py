@@ -1,7 +1,7 @@
 """
 File: circos_base.py
 Description: Get theta angle and width of each chromosome.
-Date: 2022/10/10
+CreateDate: 2022/10/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: circular_translation.py
 Description: Prediction of circRNAs translation.
-Date: 2022/5/5
+CreateDate: 2022/5/5
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

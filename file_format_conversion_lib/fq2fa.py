@@ -2,7 +2,7 @@
 """
 File: fq2fa.py
 Description: Convert FASTQ to FASTA
-Date: 2022/4/22
+CreateDate: 2022/4/22
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

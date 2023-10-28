@@ -2,7 +2,7 @@
 """
 File: get_longest_seq_for_gene.py
 Description: Get the longest transcript of each gene locus.
-Date: 2022/3/26
+CreateDate: 2022/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

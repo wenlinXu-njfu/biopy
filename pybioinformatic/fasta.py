@@ -1,7 +1,7 @@
 """
 File: fasta.py
 Description: Instantiate a FASTA file object.
-Date: 2021/11/26
+CreateDate: 2021/11/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

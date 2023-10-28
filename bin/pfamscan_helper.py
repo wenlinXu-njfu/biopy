@@ -2,7 +2,7 @@
 """
 File: pfamscan_helper.py
 Description: PfamScan helper.
-Date: 2022/4/28
+CreateDate: 2022/4/28
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

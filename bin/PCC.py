@@ -2,7 +2,7 @@
 """
 File: PCC.py
 Description: Calculation of Pearson correlation coefficient from gene expression.
-Date: 2022/9/10
+CreateDate: 2022/9/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

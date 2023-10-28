@@ -2,7 +2,7 @@
 """
 File: gatk_pipeline.py
 Description: Variation analysis pipeline of GATK.
-Date: 2023/8/13
+CreateDate: 2023/8/13
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

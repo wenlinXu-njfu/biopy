@@ -2,7 +2,7 @@
 """
 File: gtf.py
 Description: Plot gene structure based on GTF annotation file
-Date: 2022/4/10
+CreateDate: 2022/4/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

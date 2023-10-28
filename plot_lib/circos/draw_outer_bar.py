@@ -1,7 +1,7 @@
 """
 File: draw_outer_bar.py
 Description: Draw outer bar.
-Date: 2022/10/10
+CreateDate: 2022/10/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

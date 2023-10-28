@@ -2,7 +2,7 @@
 """
 File: reciprocal_blast.py
 Description: By reciprocal blast, obtain sequence pair that best match each other
-Date: 2022/4/27
+CreateDate: 2022/4/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

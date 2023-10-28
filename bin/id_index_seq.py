@@ -2,7 +2,7 @@
 """
 File: id_index_seq.py
 Description: Extract sequences from FASTA file based on the id provided.
-Date: 2022/3/25
+CreateDate: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: get_TPM.py
 Description: Standardize gene expression with TPM based on HTSeq results.
-Date: 2023/6/16
+CreateDate: 2023/6/16
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

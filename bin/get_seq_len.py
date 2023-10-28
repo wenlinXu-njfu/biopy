@@ -2,7 +2,7 @@
 """
 File: get_seq_len.py
 Description: Get each sequence length of FASTA file.
-Date: 2022/3/25
+CreateDate: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

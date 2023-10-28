@@ -2,7 +2,7 @@
 """
 File: file_split.py
 Description: Divide a large file into several smaller files.
-Date: 2022/1/23
+CreateDate: 2022/1/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

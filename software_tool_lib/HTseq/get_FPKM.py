@@ -2,7 +2,7 @@
 """
 File: get_FPKM.py
 Description: Standardize gene expression with FPKM based on HTSeq results.
-Date: 2023/6/15
+CreateDate: 2023/6/15
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

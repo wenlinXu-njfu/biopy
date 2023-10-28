@@ -2,7 +2,7 @@
 """
 File: qPCR.py
 Description: Calculate relative expression based on qPCR results.
-Date: 2022/5/7
+CreateDate: 2022/5/7
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

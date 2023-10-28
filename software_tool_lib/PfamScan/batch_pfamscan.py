@@ -2,7 +2,7 @@
 """
 File: batch_pfamscan.py
 Description: Batch pfamscan with multiple FASTA files
-Date: 2022/4/28
+CreateDate: 2022/4/28
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: stat_gt.py
 Description: Calculate the miss rate, heterozygosity rate and MAF of SNP sites from GT files.
-Date: 2023/10/2
+CreateDate: 2023/10/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

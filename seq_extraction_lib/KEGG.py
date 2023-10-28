@@ -2,7 +2,7 @@
 """
 File: KEGG.py
 Description: Extract sequences from KEGG url.
-Date: 2022/6/19
+CreateDate: 2022/6/19
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

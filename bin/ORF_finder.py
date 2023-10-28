@@ -2,7 +2,7 @@
 """
 File: ORF_finder.py
 Description: ORF prediction.
-Date: 2022/3/25
+CreateDate: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

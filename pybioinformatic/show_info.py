@@ -2,7 +2,7 @@
 """
 File: show_info.py
 Description: Show other information.
-Date: 2023/8/4
+CreateDate: 2023/8/4
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

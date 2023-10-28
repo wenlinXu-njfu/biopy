@@ -2,7 +2,7 @@
 """
 File: file_format_conversion.py
 Description: File format conversion tool.
-Date: 2022/3/23
+CreateDate: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

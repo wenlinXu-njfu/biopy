@@ -2,7 +2,7 @@
 """
 File: gsds_helper.py
 Description: Convert the file format from GFF or GTF to GSDS.
-Date: 2022/3/7
+CreateDate: 2022/3/7
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: blast2bed.py
 Description: Convert balst result to BED format
-Date: 2022/4/2
+CreateDate: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

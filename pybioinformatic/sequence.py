@@ -1,7 +1,7 @@
 """
 File: sequence.py
 Description: Instantiate a sequence object (including nucleotide and amino acid sequences).
-Date: 2021/11/26
+CreateDate: 2021/11/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

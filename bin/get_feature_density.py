@@ -2,7 +2,7 @@
 """
 File: get_feature_density.py
 Description: Get feature density from GFF file.
-Date: 2022/10/21
+CreateDate: 2022/10/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

@@ -2,7 +2,7 @@
 """
 File: alternative_cyclization_analysis.py
 Description: CircRNA alternative cyclization sites analysis.
-Date: 2023/3/26
+CreateDate: 2023/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

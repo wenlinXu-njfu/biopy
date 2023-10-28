@@ -2,7 +2,7 @@
 """
 File: extract_circRNA.py
 Description: Extract circRNA sequence.
-Date: 2022/10/29
+CreateDate: 2022/10/29
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """

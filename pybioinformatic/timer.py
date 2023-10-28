@@ -1,7 +1,7 @@
 """
 File: timer.py
 Description: Instantiate a timer class object
-Date: 2021/12/31
+CreateDate: 2021/12/31
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
