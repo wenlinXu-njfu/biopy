@@ -7,7 +7,9 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from file_format_conversion_lib import gff_sort, gff2gtf, gff2bed, gtf2bed, format_fasta, fa2tab, fq2fa, __version__
+from file_format_conversion_lib import (gff_sort, gff2gtf, gff2bed, gtf2bed,
+                                        format_fasta, fa2tab, fq2fa, vcf2gt,
+                                        __version__)
 from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
@@ -27,6 +29,7 @@ file_format_conversion.add_command(gtf2bed, 'gtf2bed')
 file_format_conversion.add_command(format_fasta, 'fasta')
 file_format_conversion.add_command(fa2tab, 'fa2tab')
 file_format_conversion.add_command(fq2fa, 'fq2fa')
+file_format_conversion.add_command(vcf2gt, 'vcf2gt')
 
 
 if __name__ == '__main__':
