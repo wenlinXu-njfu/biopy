@@ -9,8 +9,8 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import mkdir
 from os.path import exists
 import click
-from pybioinformatic import Gff, Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Gff, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(miRNA_gff_file, out_dir):

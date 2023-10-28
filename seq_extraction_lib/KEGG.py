@@ -10,8 +10,8 @@ from os.path import exists
 import click
 import requests
 from tqdm import tqdm
-from pybioinformatic import Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(in_file, seq_type: click.Choice(['aaseq', 'ntseq']), out_file):
