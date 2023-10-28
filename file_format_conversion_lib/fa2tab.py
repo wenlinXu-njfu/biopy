@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 import click
 from pybioinformatic import Fasta, Displayer
-displayer = Displayer(__file__.split('/')[-1])
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(fasta_file: TextIOWrapper,

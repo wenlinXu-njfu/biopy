@@ -8,8 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 import click
 from gzip import GzipFile
-from pybioinformatic import Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(fq_file, out_file):

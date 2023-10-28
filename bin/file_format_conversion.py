@@ -7,8 +7,8 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from file_format_conversion_lib import gff_sort, gff2gtf, gff2bed, gtf2bed, format_fasta, fa2tab, fq2fa
-from pybioinformatic import Displayer, __version__
+from file_format_conversion_lib import gff_sort, gff2gtf, gff2bed, gtf2bed, format_fasta, fa2tab, fq2fa, __version__
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
 
