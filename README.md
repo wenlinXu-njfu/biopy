@@ -7,7 +7,7 @@ natsort ≥ 8.4.0<br />
 matplotlib ≥ 3.5.1<br />
 numpy ≥ 1.23.1<br />
 openpyxl ≥ 3.0.9<br />
-pandas ≥ 1.4.2<br />
+pandas ≥ 2.0.3<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 seaborn ≥ 0.11.2<br />
