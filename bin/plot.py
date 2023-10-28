@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from plot_lib import plot_venn, plot_volcano, plot_heatmap, plot_cluster_heatmap, plot_gene_structure, plot_circos
 from pybioinformatic import Displayer
-displayer = Displayer(__file__.split('/')[-1], version='1.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
