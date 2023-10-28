@@ -8,6 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from re import findall
 from io import TextIOWrapper
 from typing import Union
+from os.path import abspath
 from gzip import GzipFile
 from click import echo, open_file
 from itertools import groupby
@@ -17,13 +18,12 @@ from pybioinformatic.sequence import Nucleotide, Protein
 class Fasta:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
+            self.name = abspath(path)
             if path.endswith('gz'):
-                self.name = path
                 self.__open = GzipFile(path)
                 self.seq_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('>'))
                 self.__open.seek(0)
             else:
-                self.name = path
                 self.__open = open(path)
                 self.seq_num = sum(1 for line in open(path) if line.startswith('>'))
         else:
@@ -32,13 +32,12 @@ class Fasta:
                 self.__open = open_file('-').readlines()
                 self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
             else:
+                self.name = abspath(path.name)
                 if path.name.endswith('gz'):
-                    self.name = path.name
                     self.__open = GzipFile(path.name)
                     self.seq_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('>'))
                     self.__open.seek(0)
                 else:
-                    self.name = path.name
                     self.__open = path
                     self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
                     self.__open.seek(0)

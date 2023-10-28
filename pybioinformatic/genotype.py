@@ -1,3 +1,10 @@
+"""
+File: genotype.py
+Description: Instantiate a GT file object.
+CreateDate: 2023/10/26
+Author: xuwenlin
+E-mail: wenlinxu.njfu@outlook.com
+"""
 from typing import Union, List
 from io import TextIOWrapper
 from os.path import abspath
@@ -93,7 +100,16 @@ class GenoType:
 
     def __init__(self, path: Union[str, TextIOWrapper]):
         self.name = abspath(path) if isinstance(path, str) else abspath(path.name.replace('<', '').replace('>', ''))
-        self.__open = path
+        self.__open = open(path) if isinstance(path, str) else path
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
 
     @staticmethod
     def __allele_sort(allele: str) -> str:
