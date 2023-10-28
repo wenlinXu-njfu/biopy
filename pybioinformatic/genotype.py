@@ -63,7 +63,7 @@ def stat_MHM(df: DataFrame) -> DataFrame:
     The top 4 columns of DataFrame must be SNP ID, chromosome, position, and reference sequence info respectively,
     and the header of DataFrame is not None.
     """
-    snp_ref = df.copy().iloc[:, :4]
+    snp_ref = df.iloc[:, :4]
     # Calculate MissRate
     sample_num = len(df.columns.tolist()) - 4
     df['MissRate(%)'] = df.isnull().sum(axis=1) / sample_num * 100
@@ -120,33 +120,39 @@ class GenoType:
                 df = self.allele_sort(df)
             return df
         except UnicodeDecodeError:  # read from Excel file
-            df = read_excel(self.__open, sheet, index_col=index_col)
+            df = read_excel(self.name, sheet, index_col=index_col)
             if sort_allele:
                 df = self.allele_sort(df)
             return df
 
     def to_dataframes(self,
-                      sheet: Union[str, int, List[Union[str, int]]] = None,
+                      sheet: Union[str, int, List[Union[str, int]]] = 0,
                       index_col: int = None,
                       chunk_size: int = 10000) -> DataFrame:
         if 'stdin' in self.name:  # read from stdin
             dfs = read_file_as_dataframe_from_stdin(chunk_size=chunk_size, index_col=index_col)
+        elif self.name.endswith('gz'):  # read from compressed text (xx.gz) file
+            dfs = read_table(self.name, chunksize=chunk_size, index_col=index_col)
         else:
             try:  # read from text file
                 dfs = read_table(self.__open, chunksize=chunk_size, index_col=index_col)
             except UnicodeDecodeError:  # read from Excel file
-                dfs = read_excel(self.__open, sheet, index_col=index_col)
-        yield from dfs
+                echo('\033[33mWarning: Excel file cannot be processed in chunks.\033[0m')
+                return self.to_dataframe(sheet, index_col)
+        return dfs
 
     def parallel_stat_MHM(self, processing_num: int):
         """Calculate the MissRate, HetRate and MAF (MHM) of SNP sites from GT files parallely."""
-        # Calculate with multiprocessing
-        params = ((df,) for df in self.to_dataframes())  # Index of DataFrame is None
-        tkm = TaskManager(processing_num=processing_num, params=params)
-        ret = tkm.parallel_run_func(stat_MHM)
-        stat_dfs = [i.get() for i in ret]
-        # Merge results of each multiprocessing
-        stat_df = concat(stat_dfs)
+        dfs = self.to_dataframes()
+        if not isinstance(dfs, DataFrame):  # Calculate with multiprocessing
+            params = ((df,) for df in dfs)  # Index of DataFrame is 0, 1, 2, ...
+            tkm = TaskManager(processing_num=processing_num, params=params)
+            ret = tkm.parallel_run_func(stat_MHM)
+            stat_dfs = [i.get() for i in ret]
+            # Merge results of each multiprocessing
+            stat_df = concat(stat_dfs)
+        else:
+            stat_df = stat_MHM(dfs)
         stat_df.sort_index(inplace=True, key=natsort_key)
         return stat_df
 
