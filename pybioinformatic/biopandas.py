@@ -1,5 +1,5 @@
 """
-File: statistics.py
+File: biopandas.py
 Description: Common functions to handle dataframe.
 CreateDate: 2022/1/10
 Author: xuwenlin
@@ -9,14 +9,14 @@ from typing import Union, List
 from io import StringIO
 from warnings import filterwarnings
 from click import echo, open_file
-import pandas as pd
+from pandas import set_option, read_table, read_excel, read_csv, DataFrame
 
 
 def display_set(decimal: int = 2) -> None:
     filterwarnings("ignore")
-    pd.set_option('display.float_format', lambda x: f'%.{decimal}f' % x)
-    pd.set_option('display.width', 1000)
-    pd.set_option('display.max_columns', None)
+    set_option('display.float_format', lambda x: f'%.{decimal}f' % x)
+    set_option('display.width', 1000)
+    set_option('display.max_columns', None)
     # pd.set_option('display.max_rows', None)
 
 
@@ -28,14 +28,14 @@ def read_file_as_dataframe_from_stdin(sep: str = '\t',
                                       use_cols: List[Union[str, int]] = None,
                                       names: List[str] = None,
                                       chunk_size: int = None):
-    df = pd.read_table(StringIO(''.join(open_file('-').readlines())),
-                       sep=sep, header=header, names=names, index_col=index_col, usecols=use_cols,
-                       lineterminator=line_terminator, skiprows=skip_rows, chunksize=chunk_size)
+    df = read_table(StringIO(''.join(open_file('-').readlines())),
+                    sep=sep, header=header, names=names, index_col=index_col, usecols=use_cols,
+                    lineterminator=line_terminator, skiprows=skip_rows, chunksize=chunk_size)
     return df
 
 
-def read_in_gene_expression_as_dataframe(gene_exp_file: str) -> Union[str, pd.DataFrame]:
-    function_dict = {'txt': pd.read_table, 'xlsx': pd.read_excel, 'xls': pd.read_excel, 'csv': pd.read_csv}
+def read_in_gene_expression_as_dataframe(gene_exp_file: str) -> Union[str, DataFrame]:
+    function_dict = {'txt': read_table, 'xlsx': read_excel, 'xls': read_excel, 'csv': read_csv}
     try:
         df = function_dict[gene_exp_file.split('.')[-1]](gene_exp_file, index_col=0)
     except KeyError:
@@ -44,29 +44,29 @@ def read_in_gene_expression_as_dataframe(gene_exp_file: str) -> Union[str, pd.Da
         return df
 
 
-def merge_duplicate_indexes(data_frame: pd.DataFrame) -> pd.DataFrame:
+def merge_duplicate_indexes(df: DataFrame) -> DataFrame:
     """Sums the column values of rows with the same index"""
-    index_name = data_frame.index.name
-    data_frame = data_frame.groupby(index_name).sum()
+    index_name = df.index.name
+    data_frame = df.groupby(index_name).sum()
     return data_frame
 
 
-def filter_by_min_value(data_frame: pd.DataFrame, min_value: float, start_column_num: int = 1,
-                        end_column_num: int = None) -> pd.DataFrame:
+def filter_by_min_value(df: DataFrame, min_value: float, start_column_num: int = 1,
+                        end_column_num: int = None) -> DataFrame:
     """Delete rows where all column values are less than the specified value"""
     if end_column_num is None:
-        data_frame = data_frame[~(data_frame.iloc[:, start_column_num - 1:] <= min_value).all(axis=1)]
+        data_frame = df[~(df.iloc[:, start_column_num - 1:] <= min_value).all(axis=1)]
         return data_frame
     else:
-        data_frame = data_frame[~(data_frame.iloc[:, start_column_num - 1:end_column_num - 1] <= min_value).all(axis=1)]
+        data_frame = df[~(df.iloc[:, start_column_num - 1:end_column_num - 1] <= min_value).all(axis=1)]
         return data_frame
 
 
-def get_FPKM(read_count_DataFrame: pd.DataFrame,
-             min_value: float = None) -> pd.DataFrame:
+def get_FPKM(read_count: DataFrame,
+             min_value: float = None) -> DataFrame:
     """
     Standardize gene expression with FPKM.
-    :param read_count_DataFrame: read count DataFrame. (type=pd.DataFrame)
+    :param read_count: read count DataFrame. (type=pd.DataFrame)
 
             Geneid     Length   Sample1   Sample2   Sample3
             gene1      200         1         0         0
@@ -78,7 +78,7 @@ def get_FPKM(read_count_DataFrame: pd.DataFrame,
                       are filtered out).
     :return: FPKM matrix. (type=pd.DataFrame)
     """
-    read_count_DataFrame = merge_duplicate_indexes(read_count_DataFrame)
+    read_count_DataFrame = merge_duplicate_indexes(read_count)
     div_gene_length = read_count_DataFrame.div(read_count_DataFrame.iloc[:, 0], axis=0)
     div_gene_length.loc['sum'] = read_count_DataFrame.sum(axis=0)
     div_read_num = div_gene_length.div(div_gene_length.loc['sum'].T, axis=1) * 10 ** 9
@@ -91,11 +91,11 @@ def get_FPKM(read_count_DataFrame: pd.DataFrame,
     return FPKM
 
 
-def get_TPM(read_count_DataFrame: pd.DataFrame,
-            min_value: float = None) -> pd.DataFrame:
+def get_TPM(read_count: DataFrame,
+            min_value: float = None) -> DataFrame:
     """
     Standardize gene expression with TPM.
-    :param read_count_DataFrame: read count DataFrame. (type=pd.DataFrame)
+    :param read_count: read count DataFrame. (type=pd.DataFrame)
 
             Geneid     Length   Sample1   Sample2   Sample3
             gene1      200         1         0         0
@@ -107,7 +107,7 @@ def get_TPM(read_count_DataFrame: pd.DataFrame,
                       are filtered out).
     :return: TPM matrix. (type=pd.DataFrame)
     """
-    read_count_DataFrame = merge_duplicate_indexes(read_count_DataFrame)
+    read_count_DataFrame = merge_duplicate_indexes(read_count)
     read_count_DataFrame = read_count_DataFrame.div(read_count_DataFrame.iloc[:, 0], axis=0)
     read_count_DataFrame.loc['sum'] = read_count_DataFrame.sum(axis=0)
     read_count_DataFrame = read_count_DataFrame.div(read_count_DataFrame.iloc[-1], axis=1)
