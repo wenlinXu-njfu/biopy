@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 File: vcf.py
 Description: Instantiate a VCF file object.
@@ -7,7 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
-from io import TextIOWrapper
+from io import TextIOWrapper, StringIO
 from os.path import abspath
 from gzip import GzipFile
 from natsort import natsort_key
@@ -16,6 +15,10 @@ from pybioinformatic import TaskManager
 
 
 def __record_to_genotype(row: Series):
+    """
+    Convert record to GenoType.
+    The Series values are REF, ALT, and record respectively.
+    """
     ref, alt, record = row[0], row[1], row[2]
     gt = record.split(':')[0]
     if gt == '0/0':
@@ -30,6 +33,11 @@ def __record_to_genotype(row: Series):
 
 
 def vcf_to_genotype(df: DataFrame):
+    """
+    Convert VCF to GenoType.
+    The top 5 columns of DataFrame must be #CHROM, POS, ID, REF, and ALT.
+    The header of DataFrame is not None.
+    """
     new_col = ['Chrom', 'Position', 'Ref', 'Alt']
     for sample in df.columns[5:]:
         new_col.append(sample)
@@ -43,8 +51,19 @@ def vcf_to_genotype(df: DataFrame):
 
 class VCF:
     def __init__(self, path: Union[str, TextIOWrapper]):
-        self.name = abspath(path) if isinstance(path, str) else abspath(path.name.replace('<', '').replace('>', ''))
-        self.__open = open(path) if isinstance(path, str) else path
+        self.name = abspath(path) if isinstance(path, str) else \
+            abspath(path.name.replace('<', '').replace('>', ''))
+        if isinstance(path, str):
+            self.__open = open(path)
+        else:
+            if path.name == '<stdin>':
+                string_io = StringIO()
+                for line in path:
+                    string_io.write(line)
+                string_io.seek(0)
+                self.__open = string_io
+            else:
+                self.__open = path
 
     def __enter__(self):
         return self
@@ -63,7 +82,8 @@ class VCF:
     def to_dataframe(self):
         if 'gz' in self.name:  # read xxx.vcf.gz file
             df = read_table(self.name, usecols=self.__use_col, dtype=str,
-                            skiprows=sum(1 for line in GzipFile(self.name) if str(line, 'utf8').startswith('##')))
+                            skiprows=sum(1 for line in GzipFile(self.name)
+                                         if str(line, 'utf8').startswith('##')))
         else:
             skip_rows = sum(1 for line in self.__open if line.startswith('##'))
             self.__open.seek(0)
@@ -73,14 +93,17 @@ class VCF:
     def to_dataframes(self, chunk_size: int = 10000):
         if 'gz' in self.name:  # read xxx.vcf.gz file
             dfs = read_table(self.name, usecols=self.__use_col, dtype=str, chunksize=chunk_size,
-                             skiprows=sum(1 for line in GzipFile(self.name) if str(line, 'utf8').startswith('##')))
+                             skiprows=sum(1 for line in GzipFile(self.name)
+                                          if str(line, 'utf8').startswith('##')))
         else:
             skip_rows = sum(1 for line in self.__open if line.startswith('##'))
             self.__open.seek(0)
-            dfs = read_table(self.__open, usecols=self.__use_col, dtype=str, skiprows=skip_rows, chunksize=chunk_size)
+            dfs = read_table(self.__open, usecols=self.__use_col, dtype=str, chunksize=chunk_size,
+                             skiprows=skip_rows)
         return dfs
 
     def to_genotype(self, num_processing: int):
+        """Convert VCF to GenoType."""
         params = [(df,) for df in self.to_dataframes()]
         tkm = TaskManager(processing_num=num_processing, params=params)
         results = tkm.parallel_run_func(vcf_to_genotype)
