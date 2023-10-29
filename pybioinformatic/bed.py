@@ -7,6 +7,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
 from io import TextIOWrapper
+from os.path import abspath
 from click import open_file
 from pybioinformatic.sequence import Nucleotide
 from pybioinformatic.fasta import Fasta
@@ -15,17 +16,16 @@ from pybioinformatic.fasta import Fasta
 class Bed:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.name = path
+            self.name = abspath(path)
             self.__open = open(path)
             self.line_num = sum(1 for _ in self.__open)
             self.__open.seek(0)
         else:
+            self.name = abspath(path.name)
             if path.name == '<stdin>':
-                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
                 self.line_num = sum(1 for _ in self.__open)
             else:
-                self.name = path.name
                 self.__open = path
                 self.line_num = sum(1 for _ in self.__open)
                 self.__open.seek(0)
