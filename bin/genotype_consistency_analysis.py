@@ -17,12 +17,12 @@ def main(gt_file1: Union[str, TextIOWrapper],
          gt_file2: Union[str, TextIOWrapper],
          database_compare: bool,
          output_path: str):
-    gt1 = GenoType(gt_file1)
-    gt2 = GenoType(gt_file2)
-    if database_compare:
-        gt1.compare(gt2, output_path=output_path)
-    else:
-        gt1.self_compare(gt2, output_path=output_path)
+    with GenoType(gt_file1) as gt1:
+        with GenoType(gt_file2) as gt2:
+            if database_compare:
+                gt1.compare(gt2, output_path=output_path)
+            else:
+                gt1.self_compare(gt2, output_path=output_path)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

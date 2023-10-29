@@ -19,8 +19,8 @@ def main(gt_file: Union[str, TextIOWrapper],
          num_processing: int,
          output_path: str):
     # stat MHM
-    gt = GenoType(gt_file)
-    stat_df = gt.parallel_stat_MHM(num_processing)
+    with GenoType(gt_file) as gt:
+        stat_df = gt.parallel_stat_MHM(num_processing)
     # plot figure
     style.use('ggplot')
     rcParams['font.family'] = 'Arial'

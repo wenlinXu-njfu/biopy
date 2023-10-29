@@ -14,7 +14,7 @@ from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat, cut
 from click import echo
 from pybioinformatic.task_manager import TaskManager
-from pybioinformatic.statistics import read_file_as_dataframe_from_stdin
+from pybioinformatic.biopandas import read_file_as_dataframe_from_stdin
 filterwarnings("ignore")
 
 
@@ -131,7 +131,10 @@ class GenoType:
                      index_col: int = None,
                      sort_allele: bool = True) -> DataFrame:
         try:  # read from text file
-            df = read_table(self.__open, index_col=index_col)
+            if 'gz' in self.name:
+                df = read_table(self.name, index_col=index_col)
+            else:
+                df = read_table(self.__open, index_col=index_col)
             if sort_allele:
                 df = self.allele_sort(df)
             return df
@@ -190,9 +193,8 @@ class GenoType:
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
             exit()
         total_loci_num = len(df1)
-        # Calculate genotype consistency.
+        # Calculate genotype consistency of each sample under different test batches.
         bins = range(0, 110, 10)  # Set the consistency statistics interval.
-        # Calculate the consistency of each sample under different test batches.
         sample_count = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
         bins_count = cut(sample_count, bins).value_counts(sort=False).to_string()
         sample_count = sample_count.to_string()
