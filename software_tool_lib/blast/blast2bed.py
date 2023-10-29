@@ -15,17 +15,17 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 def main(blast_file: Union[str, TextIOWrapper],
          ref_seq: click.Choice(['query', 'sbject']),
-         out_file: TextIOWrapper):
+         out_file: TextIOWrapper = None):
     query_is_ref = True if ref_seq == 'query' else False
-    blast_file_obj = Blast(blast_file)
-    content = blast_file_obj.to_bed(query_is_ref)
-    click.echo(content, out_file)
+    with Blast(blast_file) as blast:
+        content = blast.to_bed(query_is_ref)
+        click.echo(content, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--blast_result', 'blast_result_file',
-              metavar='<blast file>', required=True,
-              help='Input blast result file with format 6.')
+              metavar='<blast file>', type=click.File('r'), required=True,
+              help='Input blast format 6 result file.')
 @click.option('-r', '--ref_seq', 'ref_seq',
               metavar='<query|sbject>', type=click.Choice(['query', 'sbject']),
               default='sbject', show_default=True,
