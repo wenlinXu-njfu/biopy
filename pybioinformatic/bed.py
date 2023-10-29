@@ -30,6 +30,15 @@ class Bed:
                 self.line_num = sum(1 for _ in self.__open)
                 self.__open.seek(0)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
+
 # Basic method==========================================================================================================
     def get_bed_dict(self) -> dict:
         bed_dict = {}  # {Chr1: [{start: int, end: int, id: str, frame: str, strand: str}, ...], ...}
@@ -43,15 +52,6 @@ class Bed:
                 else:
                     bed_dict[split[0]] = [item]
         return bed_dict
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            self.__open.close()
-        except AttributeError:
-            pass
 
 # Sequence extraction method============================================================================================
     @staticmethod
@@ -75,12 +75,12 @@ class Bed:
                 return start, end
 
     def extract_seq(self,
-                        fasta_file: Union[str, TextIOWrapper],
-                        use_id: bool = True,
-                        up: int = 0,
-                        down: int = 0,
-                        both: int = 0,
-                        extension: bool = True) -> Nucleotide:
+                    fasta_file: Union[str, TextIOWrapper],
+                    use_id: bool = True,
+                    up: int = 0,
+                    down: int = 0,
+                    both: int = 0,
+                    extension: bool = True) -> Nucleotide:
         """
         Extract the sequence in the BED file from the reference sequence file
         :param fasta_file: Reference sequence FASTA file

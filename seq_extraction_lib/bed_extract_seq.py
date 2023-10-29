@@ -6,23 +6,24 @@ CreateDate: 2022/3/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Bed, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(bed_file: TextIOWrapper,
-         fa_file: TextIOWrapper,
-         use_id: bool,
-         up: int,
-         down: int,
-         both: int,
-         extension: bool,
+def main(bed_file: Union[str, TextIOWrapper],
+         fa_file: Union[str, TextIOWrapper],
+         use_id: bool = True,
+         up: int = 0,
+         down: int = 0,
+         both: int = 0,
+         extension: bool = True,
          out_file: TextIOWrapper = None):
-    bed = Bed(bed_file)
-    for nucl_obj in bed.extract_seq(fa_file, use_id, up, down, both, extension):
-        click.echo(nucl_obj, out_file)
+    with Bed(bed_file) as bed:
+        for nucl_obj in bed.extract_seq(fa_file, use_id, up, down, both, extension):
+            click.echo(nucl_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
