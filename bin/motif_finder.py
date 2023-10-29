@@ -20,13 +20,14 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          output_file: TextIOWrapper = None):
     click.echo('# Seq_id\tStart\tEnd\tMotif', output_file)
     for fasta_file in fasta_files:
-        for seq_obj in Fasta(fasta_file).parse():
-            ret = seq_obj.find_motif(motif)
-            if 'not found' not in ret:
-                click.echo(ret, output_file)
-            else:
-                if not quiet:
-                    click.echo(f"\033[33m{ret}\033[0m", err=True, file=log_file)
+        with Fasta(fasta_file) as fa:
+            for seq_obj in fa.parse():
+                ret = seq_obj.find_motif(motif)
+                if 'not found' not in ret:
+                    click.echo(ret, output_file)
+                else:
+                    if not quiet:
+                        click.echo(f"\033[33m{ret}\033[0m", err=True, file=log_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

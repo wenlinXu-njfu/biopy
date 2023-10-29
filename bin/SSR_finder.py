@@ -23,11 +23,12 @@ def main(fasta_file: Union[str, TextIOWrapper],
          processing_num: int,
          output_file: TextIOWrapper = None):
     click.echo('# Seq_id\tStart\tEnd\tSSR_unit\tSSR_seq', output_file)
-    nucl_obj_generator = ((nucl,) for nucl in Fasta(fasta_file).parse(parse_seqids))
-    tkm = TaskManager(processing_num=processing_num, params=nucl_obj_generator)
-    tkm.parallel_run_func(sub_processing,
-                          lambda i: click.echo(i.strip(), err=True) if not quiet and 'not found' in i else
-                          click.echo(i.strip(), output_file))
+    with Fasta(fasta_file) as fa:
+        params = ((nucl,) for nucl in fa.parse(parse_seqids))
+        tkm = TaskManager(processing_num=processing_num, params=params)
+        tkm.parallel_run_func(sub_processing,
+                              lambda i: click.echo(i.strip(), err=True) if not quiet and 'not found' in i else
+                              click.echo(i.strip(), output_file))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
