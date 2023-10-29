@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 """
 File: blast2bed.py
-Description: Convert balst result to BED format
+Description: Convert blast format 6 result to BED format.
 CreateDate: 2022/4/2
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Blast, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(blast_file: TextIOWrapper, out_file: TextIOWrapper):
+def main(blast_file: Union[str, TextIOWrapper],
+         ref_seq: click.Choice(['query', 'sbject']),
+         out_file: TextIOWrapper):
+    query_is_ref = True if ref_seq == 'query' else False
     blast_file_obj = Blast(blast_file)
-    content = blast_file_obj.to_bed()
+    content = blast_file_obj.to_bed(query_is_ref)
     click.echo(content, out_file)
 
 
@@ -21,14 +26,18 @@ def main(blast_file: TextIOWrapper, out_file: TextIOWrapper):
 @click.option('-i', '--blast_result', 'blast_result_file',
               metavar='<blast file>', required=True,
               help='Input blast result file with format 6.')
+@click.option('-r', '--ref_seq', 'ref_seq',
+              metavar='<query|sbject>', type=click.Choice(['query', 'sbject']),
+              default='sbject', show_default=True,
+              help='Specify query sequence or sbject sequence as the reference sequence.')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<bed file>', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
-def run(blast_result_file, output_file):
-    """Convert balst result to BED format."""
-    main(blast_result_file, output_file)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
+def run(blast_result_file, ref_seq, output_file):
+    """Convert blast format 6 result to BED format."""
+    main(blast_result_file, ref_seq, output_file)
 
 
 if __name__ == '__main__':

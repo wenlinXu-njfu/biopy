@@ -6,13 +6,15 @@ CreateDate: 2022/4/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Blast, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(blast1: TextIOWrapper,
-         blast2: TextIOWrapper,
+def main(blast1: Union[str, TextIOWrapper],
+         blast2: Union[str, TextIOWrapper],
          top: int,
          out_file: TextIOWrapper):
     pair_dict1 = Blast(blast1).get_pair_dict(top)  # {query1: {sbject1: [], sbject2: [], ...}, query2: {}, ...}
@@ -42,7 +44,7 @@ def main(blast1: TextIOWrapper,
               metavar='<out file>', type=click.File('w'),
               help='Output file, if not specified, print result to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(blast_result1, blast_result2, top, output_file):
     """By reciprocal blast, obtain sequence pair that best match each other."""
     main(blast_result1, blast_result2, top, output_file)
