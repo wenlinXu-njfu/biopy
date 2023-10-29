@@ -6,18 +6,19 @@ CreateDate: 2023/10/14
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Fasta, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(fasta_file: TextIOWrapper,
-         parse_seqids: bool,
-         output_file: TextIOWrapper):
-    fa = Fasta(fasta_file)
-    for ret in fa.fa2tab(parse_seqids):
-        click.echo(ret, output_file)
+def main(fasta_file: Union[str, TextIOWrapper],
+         parse_seqids: bool = True,
+         output_file: TextIOWrapper = None):
+    with Fasta(fasta_file) as fa:
+        for ret in fa.fa2tab(parse_seqids):
+            click.echo(ret, output_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

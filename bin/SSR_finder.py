@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from typing import Union
 import click
 from pybioinformatic import Fasta, Nucleotide, TaskManager, Displayer
-displayer = Displayer(__file__.split('/')[-1])
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def sub_processing(nucl: Nucleotide):
@@ -22,24 +22,19 @@ def main(fasta_file: Union[str, TextIOWrapper],
          quiet: bool,
          processing_num: int,
          output_file: TextIOWrapper = None):
+    click.echo('# Seq_id\tStart\tEnd\tSSR_unit\tSSR_seq', output_file)
     nucl_obj_generator = ((nucl,) for nucl in Fasta(fasta_file).parse(parse_seqids))
     tkm = TaskManager(processing_num=processing_num, params=nucl_obj_generator)
-    results = tkm.parallel_run_func(sub_processing)
-    results = [result.get() for result in results]
-    click.echo('# Seq_id\tStart\tEnd\tSSR_unit\tSSR_seq', output_file)
-    for result in results:
-        result = result.strip()
-        if quiet and 'not found' not in result:
-            click.echo(result, output_file)
-        elif not quiet:
-            click.echo(result, output_file) if 'not found' not in result else click.echo(result, err=True)
+    tkm.parallel_run_func(sub_processing,
+                          lambda i: click.echo(i.strip(), err=True) if not quiet and 'not found' in i else
+                          click.echo(i.strip(), output_file))
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file',
               metavar='<fasta file>', type=click.File('r'), required=True,
               help='Input FASTA file.')
-@click.option('-P', '--parse_seqids', 'parse_seqids',
+@click.option('-p', '--parse_seqids', 'parse_seqids',
               is_flag=True, flag_value=True,
               help='Parse sequence IDs.')
 @click.option('-q', '--quiet', 'quiet',

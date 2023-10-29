@@ -6,18 +6,20 @@ CreateDate: 2022/3/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
-from pybioinformatic import Fasta, Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Fasta, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(fasta_file: TextIOWrapper,
+def main(fasta_file: Union[str, TextIOWrapper],
          regula_exp: str,
-         inplace_id: bool,
+         inplace_id: bool = False,
          out_file: TextIOWrapper = None):
-    for seq_obj in Fasta(fasta_file).get_longest_seq(regula_exp, inplace_id):
-        click.echo(seq_obj, out_file)
+    with Fasta(fasta_file) as fa:
+        for seq_obj in fa.get_longest_seq(regula_exp, inplace_id):
+            click.echo(seq_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

@@ -27,12 +27,11 @@ class Fasta:
                 self.__open = open(path)
                 self.seq_num = sum(1 for line in open(path) if line.startswith('>'))
         else:
+            self.name = abspath(path.name)
             if path.name == '<stdin>':
-                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
                 self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
             else:
-                self.name = abspath(path.name)
                 if path.name.endswith('gz'):
                     self.__open = GzipFile(path.name)
                     self.seq_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('>'))
@@ -42,7 +41,22 @@ class Fasta:
                     self.seq_num = sum(1 for line in self.__open if line.startswith('>'))
                     self.__open.seek(0)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
+
 # Basic method==========================================================================================================
+    def __seek_zero(self):
+        try:
+            self.__open.seek(0)
+        except AttributeError:
+            pass
+
     def parse(self, parse_id: bool = True) -> Nucleotide:  # return Nucleotide generator
         """A FASTA file generator that returns one Nucleotide or Protein object at one time."""
         if self.name.endswith('gz'):
@@ -67,6 +81,7 @@ class Fasta:
                 yield Nucleotide(seq_id, seq)
             else:
                 yield Protein(seq_id, seq)
+        self.__seek_zero()
 
     def to_dict(self, parse_id: bool = False) -> dict:
         """Get sequence dict from FASTA file."""
@@ -76,17 +91,10 @@ class Fasta:
                 seq_dict[nucl_obj.id] = nucl_obj.seq
             else:
                 echo(f'\033[31mError: FASTA file has repeat id {nucl_obj.id}.', err=True)
+                self.__seek_zero()
                 exit()
+        self.__seek_zero()
         return seq_dict
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            self.__open.close()
-        except AttributeError:
-            pass
 
 # File format conversion method=========================================================================================
     def merge_sequence(self, parse_id: bool = False) -> Union[Nucleotide, Protein]:
@@ -131,7 +139,7 @@ class Fasta:
             for locus, longest_seq_id in id_map_dict.items():
                 longest_seq_dict[longest_seq_id] = all_seq_dict[longest_seq_id]
         for seq_id, seq in longest_seq_dict.items():
-            yield Nucleotide(seq_id, seq) if 'M' not in seq and '*' not in seq else Protein(seq_id, seq)
+            yield Nucleotide(seq_id, seq) if ('M' not in seq) and ('*' not in seq) else Protein(seq_id, seq)
 
     def filter_n(self, max_num=1) -> Nucleotide:
         for nucl_obj in self.parse():

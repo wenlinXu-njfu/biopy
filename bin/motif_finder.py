@@ -7,15 +7,15 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import Tuple
+from typing import Tuple, Union
 import click
-from pybioinformatic import Fasta, Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Fasta, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(fasta_files: Tuple[TextIOWrapper],
+def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          motif: str,
-         quiet: bool,
+         quiet: bool = False,
          log_file: TextIOWrapper = None,
          output_file: TextIOWrapper = None):
     click.echo('# Seq_id\tStart\tEnd\tMotif', output_file)

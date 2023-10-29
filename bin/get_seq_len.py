@@ -7,22 +7,24 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import Tuple
-from os.path import abspath
+from typing import Tuple, Union
 import click
-from pybioinformatic import Fasta, Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Fasta, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(fasta_files: Tuple[TextIOWrapper], parse_seqids: bool, out_file: TextIOWrapper):
+def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
+         parse_seqids: bool = True,
+         out_file: TextIOWrapper = None):
     for fasta_file in fasta_files:
-        for nucl_obj in Fasta(fasta_file).parse(parse_seqids):
-            click.echo(f'{nucl_obj.get_seq_len_info()}\t{abspath(fasta_file.name)}', out_file)
+        with Fasta(fasta_file) as fa:
+            for nucl_obj in fa.parse(parse_seqids):
+                click.echo(f'{nucl_obj.get_seq_len_info()}\t{fa.name}', out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('fasta_files', nargs=-1, metavar='<fasta files>', type=click.File('r'), required=True)
-@click.option('-P', '--parse_seqids', 'parse_seqids',
+@click.option('-p', '--parse_seqids', 'parse_seqids',
               is_flag=True, flag_value=True,
               help='Parse sequence id.')
 @click.option('-o', '--output_file', 'outfile',
