@@ -6,6 +6,7 @@ CreateDate: 2022/10/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Gff, Displayer
@@ -13,13 +14,15 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(chr_len_file: TextIOWrapper,
-         gff_file: TextIOWrapper,
+         gff_file: Union[str, TextIOWrapper],
          feature: str,
          span: int,
-         output_file: TextIOWrapper):
-    chr_len_dict = {line.split('\t')[0]: int(line.strip().split('\t')[1]) for line in chr_len_file}
-    for line in Gff(gff_file).get_feature_density(chr_len_dict, feature, span):
-        click.echo(line, output_file)
+         output_file: TextIOWrapper = None):
+    chr_len_dict = {line.split('\t')[0]: int(line.strip().split('\t')[1])
+                    for line in chr_len_file if line.strip()}
+    with Gff(gff_file) as gff:
+        for line in gff.get_feature_density(chr_len_dict, feature, span):
+            click.echo(line, output_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

@@ -5,11 +5,13 @@ CreateDate: 2021/11/27
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from io import TextIOWrapper
+from io import TextIOWrapper, StringIO
 from typing import Union, List, Dict, Tuple, Generator
+from os.path import abspath
 from re import findall
-from click import echo, open_file
-from pandas import DataFrame
+from gzip import GzipFile
+from click import echo
+from pandas import DataFrame, read_table
 from pybioinformatic.fasta import Fasta
 from pybioinformatic.sequence import Nucleotide
 
@@ -17,30 +19,65 @@ from pybioinformatic.sequence import Nucleotide
 class Gff:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.name = path
-            self.__open = open(path)
-            self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
-            self.__open.seek(0)
-            self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
-            self.__open.seek(0)
-        else:
-            if path.name == '<stdin>':
-                self.name = 'stdin'
-                self.__open = open_file('-').readlines()
-                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
-                self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+            self.name = abspath(path)
+            if path.endswith('gz'):
+                self.__open = GzipFile(self.name, 'rb')
+                self.line_num = sum(1 for line in self.__open if not str(line, 'utf8').startswith('#'))
+                self.__open.seek(0)
+                self.anno_line_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('#'))
+                self.__open.seek(0)
             else:
-                self.name = path.name.split('/')[-1]
-                self.__open = path
+                self.__open = open(path)
                 self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
                 self.__open.seek(0)
                 self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
                 self.__open.seek(0)
+        else:
+            self.name = abspath(path.name)
+            if path.name == '<stdin>':
+                string_io = StringIO()
+                for line in path:
+                    string_io.write(line)
+                string_io.seek(0)
+                self.__open = string_io
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                self.__open.seek(0)
+                self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+                self.__open.seek(0)
+            else:
+                if self.name.endswith('gz'):
+                    self.__open = GzipFile(self.name, 'rb')
+                    self.line_num = sum(1 for line in self.__open if not str(line, 'utf8').startswith('#'))
+                    self.__open.seek(0)
+                    self.anno_line_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('#'))
+                    self.__open.seek(0)
+                else:
+                    self.__open = path
+                    self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                    self.__open.seek(0)
+                    self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+                    self.__open.seek(0)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            self.__open.close()
+        except AttributeError:
+            pass
+
+    def __seek_zero(self):
+        try:
+            self.__open.seek(0)
+        except AttributeError:
+            pass
 
 # Basic method==========================================================================================================
     def parse(self) -> Generator[Tuple[str, str, str, str, str, str, str, str, Dict[str, str]], None, None]:
         """Parse information of each column of GFF file line by line."""
         for line in self.__open:
+            line = str(line, 'utf8') if isinstance(line, bytes) else line
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
@@ -48,16 +85,18 @@ class Gff:
                 attr_list = [attr for attr in split[8].split(';') if '=' in attr]
                 attr_dict: Dict[str, str] = {attr.split('=')[0]: attr.split('=')[1] for attr in attr_list if attr}
                 yield chr_num, source, feature, start, end, score, strand, frame, attr_dict
-        if not isinstance(self.__open, list):
-            self.__open.seek(0)
+        self.__seek_zero()
 
     def to_dataframe(self) -> DataFrame:
         names = ['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
-        data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
-        df = DataFrame(data, columns=names, dtype=str)
+        # data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
+        # df = DataFrame(data, columns=names, dtype=str)
+        if self.name.endswith('gz'):
+            df = read_table(self.name, header=None, names=names, skiprows=self.anno_line_num, dtype=str)
+        else:
+            df = read_table(self.__open, header=None, names=names, skiprows=self.anno_line_num, dtype=str)
         df[['Start', 'End']] = df[['Start', 'End']].astype(int)
-        if not isinstance(self.__open, list):
-            self.__open.seek(0)
+        self.__seek_zero()
         return df
 
     def __check_feature(self, feature: str) -> Tuple[bool, str]:
@@ -135,15 +174,6 @@ class Gff:
         content = ''.join(content)
         return content
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            self.__open.close()
-        except AttributeError:
-            pass
-
 # GFF file sorted by id method==========================================================================================
     @staticmethod
     def __gff_sort(line: str) -> tuple:
@@ -172,7 +202,11 @@ class Gff:
 
     def sort(self) -> Generator[str, None, None]:
         """Sort the GFF file by sequence ID."""
-        l = [line.strip() for line in self.__open if not line.startswith('#') and line.strip()]
+        if self.name.endswith('gz'):
+            l = [str(line, 'utf8').strip() for line in self.__open
+                 if not str(line, 'utf8').startswith('#') and line.strip()]
+        else:
+            l = [line.strip() for line in self.__open if not line.startswith('#') and line.strip()]
         l.sort(key=lambda line: self.__gff_sort(line))
         if not isinstance(self.__open, list):
             self.__open.seek(0)
@@ -180,30 +214,31 @@ class Gff:
 
 # Sequence extraction method============================================================================================
     def extract_seq(self,
-                        fasta_file: Union[str, TextIOWrapper],
-                        feature_type: str = 'gene',
-                        feature_id_set: set = None) -> Nucleotide:
+                    fasta_file: Union[str, TextIOWrapper],
+                    feature_type: str = 'gene',
+                    feature_id_set: set = None) -> Nucleotide:
         """Extract sequences of specified feature type from GFF file."""
         is_in_gff, msg = self.__check_feature(feature_type)
         if not is_in_gff:
             echo(f'\033[31mError: {msg}\033[0m', err=True)
             exit()
         gff_dict = self.to_dict(feature_type)
-        for nucl_obj in Fasta(fasta_file).parse():
-            try:
-                features = gff_dict[nucl_obj.id]  # features = [{feature1}, {feature2}, ...]
-            except KeyError:
-                pass  # Some sequences (eg. scaffold, contig) may not have annotation
-            else:
-                for feature in features:  # feature = {id: str, start: int, end: int, strand: str}
-                    if feature_id_set and feature['id'] in feature_id_set:
-                        sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
-                        sub_seq_obj.id = feature['id']
-                        yield sub_seq_obj
-                    elif not feature_id_set:
-                        sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
-                        sub_seq_obj.id = feature['id']
-                        yield sub_seq_obj
+        with Fasta(fasta_file) as fa:
+            for nucl_obj in fa.parse():
+                try:
+                    features = gff_dict[nucl_obj.id]  # features = [{feature1}, {feature2}, ...]
+                except KeyError:
+                    pass  # Some sequences (eg. scaffold, contig) may not have annotation
+                else:
+                    for feature in features:  # feature = {id: str, start: int, end: int, strand: str}
+                        if feature_id_set and feature['id'] in feature_id_set:
+                            sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
+                            sub_seq_obj.id = feature['id']
+                            yield sub_seq_obj
+                        elif not feature_id_set:
+                            sub_seq_obj = nucl_obj[feature['start'] - 1:feature['end']]
+                            sub_seq_obj.id = feature['id']
+                            yield sub_seq_obj
 
     def miRNA_extraction(self) -> Nucleotide:
         """Extract miRNA sequence from GFF file."""
@@ -279,7 +314,6 @@ class Gff:
 
     def to_gsds(self) -> str:
         """Convert the file format from GFF to GSDS."""
-        content = []
         transcript_id, transcript_start = None, 0
         for line in self.parse():
             line = list(line)
@@ -290,12 +324,10 @@ class Gff:
                 if line[8]['Parent'] == transcript_id:
                     line[3] = str(int(line[3]) - transcript_start)
                     line[4] = (int(line[4]) - transcript_start)
-                    content.append(f"{transcript_id}\t{line[3]}\t{line[4]}\t{line[2]}\t{line[7]}\n")
+                    yield f"{transcript_id}\t{line[3]}\t{line[4]}\t{line[2]}\t{line[7]}"
                 else:
                     echo(f'\033[33mWarning: The order of GFF file is wrong, '
                                f'this will cause some information to be lost.\033[0m', err=True)
-        content = ''.join(content)
-        return content
 
 # Feature density count=================================================================================================
     def get_feature_density(self,

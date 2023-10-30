@@ -6,39 +6,37 @@ CreateDate: 2022/3/7
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from _io import TextIOWrapper
+from typing import Union
+from io import TextIOWrapper
 import click
-from pybioinformatic import Gff, Gtf, Displayer, __version__
-displayer = Displayer(__file__.split('/')[-1], version=__version__)
+from pybioinformatic import Gff, Gtf, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(in_file, file_format, feature_type, out_file: TextIOWrapper):
+def main(anno_file: Union[str, TextIOWrapper],
+         file_format: click.Choice(['gff', 'gtf']),
+         feature_type: click.Choice(['gene', 'transcript']),
+         out_file: TextIOWrapper = None):
     if file_format == 'gff':
-        gff_file_obj = Gff(in_file)
-        content = gff_file_obj.to_gsds()
-        if out_file:
-            with out_file as o:
-                o.write(content)
-        else:
-            print(content)
+        with Gff(anno_file) as gff:
+            for line in gff.to_gsds():
+                click.echo(line, out_file)
     else:
-        gtf_file_obj = Gtf(in_file)
-        content = gtf_file_obj.to_gsds(feature_type)
-        if out_file:
-            with out_file as o:
-                o.write(content)
-        else:
-            print(content)
+        with Gtf(anno_file) as gtf:
+            for line in gtf.to_gsds(feature_type):
+                click.echo(line, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--anno_file', 'anno_file', type=click.File('r'), required=True, help='Input GFF or GTF file.')
-@click.option('-f', '--format', 'file_format', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
+@click.option('-i', '--anno_file', 'anno_file', metavar='<file>',
+              type=click.File('r'), required=True, help='Input GFF or GTF file.')
+@click.option('-f', '--format', 'file_format', metavar='<gff|gtf>',
+              type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
               help='Specify input annotation file format.')
-@click.option('-t', '--feature_type', 'feature_type',
+@click.option('-t', '--feature_type', 'feature_type', metavar='<gene|transcript>',
               type=click.Choice(['gene', 'transcript']), default='transcript', show_default=True,
               help='If input file is GTF, specify feature type.')
-@click.option('-o', '--output_file', 'outfile', type=click.File('w'),
+@click.option('-o', '--output_file', 'outfile', metavar='<file>', type=click.File('w'),
               help='Output file (ID\\tStart\\tEnd\\tFeature\\tFrame), '
                    'if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

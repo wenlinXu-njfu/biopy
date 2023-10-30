@@ -6,16 +6,18 @@ CreateDate: 2022/3/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Gff, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(gff_file: TextIOWrapper, gtf_file: TextIOWrapper = None):
-    gff = Gff(gff_file)
-    for line in gff.to_gtf():
-        click.echo(line, gtf_file)
+def main(gff_file: Union[str, TextIOWrapper],
+         gtf_file: TextIOWrapper = None):
+    with Gff(gff_file) as gff:
+        for line in gff.to_gtf():
+            click.echo(line, gtf_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

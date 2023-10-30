@@ -6,25 +6,26 @@ CreateDate: 2022/3/24
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
+from typing import Union
 from io import TextIOWrapper
 import click
 from pybioinformatic import Gff, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(gff_file: TextIOWrapper,
-         fa_file: TextIOWrapper,
+def main(gff_file: Union[str, TextIOWrapper],
+         fa_file: Union[str, TextIOWrapper],
          feature_type: str,
          id_file: TextIOWrapper = None,
          out_file: TextIOWrapper = None):
-    content = []
-    if id_file:
-        id_list = set(i.strip() for i in id_file.readlines() if i.strip())
-        for nucl_obj in Gff(gff_file).extract_seq(fa_file, feature_type, id_list):
-            click.echo(nucl_obj, out_file)
-    else:
-        for nucl_obj in Gff(gff_file).extract_seq(fa_file, feature_type):
-            click.echo(nucl_obj, out_file)
+    with Gff(gff_file) as gff:
+        if id_file:
+            id_list = set(i.strip() for i in id_file if i.strip())
+            for nucl_obj in gff.extract_seq(fa_file, feature_type, id_list):
+                click.echo(nucl_obj, out_file)
+        else:
+            for nucl_obj in gff.extract_seq(fa_file, feature_type):
+                click.echo(nucl_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
