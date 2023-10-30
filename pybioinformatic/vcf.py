@@ -32,7 +32,7 @@ def __record_to_genotype(row: Series):
     return allele
 
 
-def vcf_to_genotype(df: DataFrame):
+def vcf_to_genotype(df: DataFrame) -> DataFrame:
     """
     Convert VCF to GenoType.
     The top 5 columns of DataFrame must be #CHROM, POS, ID, REF, and ALT.
@@ -102,7 +102,7 @@ class VCF:
                              skiprows=skip_rows)
         return dfs
 
-    def to_genotype(self, num_processing: int):
+    def to_genotype(self, num_processing: int) -> DataFrame:
         """Convert VCF to GenoType."""
         params = [(df,) for df in self.to_dataframes()]
         tkm = TaskManager(processing_num=num_processing, params=params)

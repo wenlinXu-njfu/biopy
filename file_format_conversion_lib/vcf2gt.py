@@ -29,7 +29,7 @@ def main(vcf_file: Union[str, TextIOWrapper],
               metavar='<int>', type=int, default=1, show_default=True,
               help='Number of processing.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file>', type=click.File('w'), default='GT.xls', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
