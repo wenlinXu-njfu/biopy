@@ -241,7 +241,7 @@ class GenoType:
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
         consistency_df = DataFrame()
         sample_pair = set()
-        with open(f'{output_path}/TestSample.consistency.xls', 'w') as o:
+        with open(f'{output_path}/TestSample.consistency.fmt1.xls', 'w') as o:
             echo('Database_sample\tTest_sample\tConsensus_number\tTotal_number\tRatio(%)', o)
             with tqdm(total=len(left_sample_range), unit='sample') as pbar:  # Show process bar
                 for index1 in left_sample_range:
@@ -264,9 +264,9 @@ class GenoType:
                             consistency_df.loc[gt1.name, gt2.name] = ''
                     pbar.update(1)
         # Step4: Draw consistency heatmap.
-        consistency_df.to_csv(f'{output_path}/TestSample.Consistency.xls', sep='\t', na_rep='')
+        consistency_df.to_csv(f'{output_path}/TestSample.consistency.fmt2.xls', sep='\t', na_rep='')
         if len(consistency_df) <= 80:
-            self.__draw_consistency_heatmap(read_table(f'{output_path}/TestSample.Consistency.xls', index_col=0),
+            self.__draw_consistency_heatmap(read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
                                             output_path)
         # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
