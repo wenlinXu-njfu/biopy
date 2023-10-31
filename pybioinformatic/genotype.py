@@ -12,6 +12,8 @@ from warnings import filterwarnings
 from tqdm import tqdm
 from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat, cut
+from matplotlib.pyplot import rcParams, figure, tick_params, savefig
+from seaborn import heatmap
 from click import echo
 from pybioinformatic.task_manager import TaskManager
 from pybioinformatic.biopandas import read_file_as_dataframe_from_stdin
@@ -175,6 +177,19 @@ class GenoType:
         stat_df.sort_index(inplace=True, key=natsort_key)
         return stat_df
 
+    @staticmethod
+    def __draw_consistency_heatmap(consistency_df: DataFrame, output_path: str = './'):
+        if len(consistency_df) >= 40:
+            rcParams['font.size'] = 6
+        rcParams['font.family'] = 'DejaVu Sans'
+        figure(figsize=(15, 10), dpi=300)
+        heatmap(consistency_df, cmap="PiYG",
+                linecolor='w', linewidths=0.5,
+                xticklabels=True, yticklabels=True,
+                cbar_kws={'shrink': 0.4})
+        tick_params('both', length=0)
+        savefig(f'{output_path}/Consistency.heatmap.png', bbox_inches='tight')
+
     def self_compare(self, other,
                      sheet1: Union[str, int, List[Union[str, int]]] = None,
                      sheet2: Union[str, int, List[Union[str, int]]] = None,
@@ -195,18 +210,21 @@ class GenoType:
         total_loci_num = len(df1)
         # Calculate genotype consistency of each sample under different test batches.
         bins = range(0, 110, 10)  # Set the consistency statistics interval.
-        sample_count = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
-        bins_count = cut(sample_count, bins).value_counts(sort=False).to_string()
-        sample_count = sample_count.to_string()
+        sample_consistency = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
+        interval_stat = cut(sample_consistency, bins).value_counts(sort=False).to_string()
+        sample_consistency = sample_consistency.to_string()
         # Write results to output file.
-        echo(sample_count, open(f'{output_path}/Sample.consistency.xls', 'w'))
-        echo(bins_count, open(f'{output_path}/Interval.stat.xls', 'w'))
+        echo(sample_consistency, open(f'{output_path}/Sample.consistency.xls', 'w'))
+        echo(interval_stat, open(f'{output_path}/Interval.stat.xls', 'w'))
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
                 output_path: str = './') -> None:
-        """Calculate genotype consistency."""
+        """
+        Calculate genotype consistency.
+        Output TestSample.consistency.xls, TestSample.Consistency.xls and TestSample.GT.xls three files.
+        """
         # Step1: Read GT file as DataFrame.
         df1 = self.to_dataframe(sheet1)  # index = 0, 1, 2, ...
         df2 = other.to_dataframe(sheet2)  # index = 0, 1, 2, ...
@@ -221,6 +239,8 @@ class GenoType:
         df1_sample_num = len(df1.columns.tolist()) - 4
         left_sample_range = list(range(4, 4 + df1_sample_num))
         right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
+        consistency_df = DataFrame()
+        sample_pair = set()
         with open(f'{output_path}/TestSample.consistency.xls', 'w') as o:
             echo('Database_sample\tTest_sample\tConsensus_number\tTotal_number\tRatio(%)', o)
             with tqdm(total=len(left_sample_range), unit='sample') as pbar:  # Show process bar
@@ -234,8 +254,21 @@ class GenoType:
                         consistency_count = gt1.eq(gt2).sum()
                         ratio = '%.2f' % (consistency_count / loci_num * 100)
                         echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
+                        if gt1.name != gt2.name:
+                            if (f'{gt1.name}-{gt2.name}' not in sample_pair) and \
+                                    (f'{gt2.name}-{gt1.name}' not in sample_pair):
+                                consistency_df.loc[gt2.name, gt1.name] = ratio
+                                sample_pair.add(f'{gt1.name}-{gt2.name}')
+                                sample_pair.add(f'{gt2.name}-{gt1.name}')
+                        else:
+                            consistency_df.loc[gt1.name, gt2.name] = ''
                     pbar.update(1)
-        # Step4: Output GT file of test sample.
+        # Step4: Draw consistency heatmap.
+        consistency_df.to_csv(f'{output_path}/TestSample.Consistency.xls', sep='\t', na_rep='')
+        if len(consistency_df) <= 80:
+            self.__draw_consistency_heatmap(read_table(f'{output_path}/TestSample.Consistency.xls', index_col=0),
+                                            output_path)
+        # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
