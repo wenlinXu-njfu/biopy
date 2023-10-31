@@ -272,4 +272,4 @@ class GenoType:
         right_sample_range.insert(0, 0)  # Only output site ID
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
-        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False)
+        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False, na_rep='NA')
