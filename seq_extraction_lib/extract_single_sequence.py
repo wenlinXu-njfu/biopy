@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 import click
 from pybioinformatic import Fasta, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.1.1')
 
 
 def main(fasta_file: TextIOWrapper,
@@ -18,14 +18,17 @@ def main(fasta_file: TextIOWrapper,
          end: int,
          strand: click.Choice(['+', '-']),
          output_file: TextIOWrapper = None):
-    for nucl in Fasta(fasta_file).parse():
-        if nucl.id == chr_num:
-            sub_seq = nucl[start - 1:end]
-            if strand == '-':
-                sub_seq = sub_seq.get_reverse_complementary_seq()
-            sub_seq.id = f'{chr_num}:{start}-{end}({strand})'
-            click.echo(sub_seq, output_file)
-            break
+    with Fasta(fasta_file) as fa:
+        for nucl in fa.parse():
+            if nucl.id == chr_num:
+                sub_seq = nucl[start - 1:end]
+                if strand == '-':
+                    sub_seq = sub_seq.get_reverse_complementary_seq()
+                if len(nucl) < end:
+                    end = len(sub_seq)
+                sub_seq.id = f'{chr_num}:{start}-{end}({strand})'
+                click.echo(sub_seq, output_file)
+                break
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
