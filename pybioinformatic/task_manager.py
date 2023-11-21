@@ -19,7 +19,7 @@ from click import echo
 class TaskManager:
     def __init__(self,
                  commands: Iterable[str] = None,
-                 processing_num: int = None,
+                 num_processing: int = None,
                  params: Iterable[tuple] = None,
                  log_file: Union[str, TextIOWrapper] = None):
         try:
@@ -27,7 +27,7 @@ class TaskManager:
         except TypeError:
             self.task = []
         self.params = params
-        self.processing_num = processing_num
+        self.num_processing = num_processing
         if isinstance(log_file, str):
             self.loger = open(log_file, 'w')
         else:
@@ -71,7 +71,7 @@ class TaskManager:
         if not self.task:
             echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
             exit()
-        pool = Pool(self.processing_num)
+        pool = Pool(self.num_processing)
         for cmd in self.task:
             pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
         pool.close()
@@ -79,7 +79,7 @@ class TaskManager:
 
     def parallel_run_func(self, func: Callable, call_back_func: Callable = None):
         results = []
-        with Pool(self.processing_num) as pool:
+        with Pool(self.num_processing) as pool:
             for param in self.params:
                 ret = pool.apply_async(func, args=param, callback=call_back_func)
                 results.append(ret)

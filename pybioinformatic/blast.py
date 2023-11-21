@@ -42,13 +42,13 @@ class Blast:
         """Parse information of each column of BLAST format 6 result file line by line."""
         for line in self.__open:
             split = line.strip().split('\t')
-            querry_id, sbject_id, align_rate = split[0], split[1], split[2]
+            query_id, sbject_id, align_rate = split[0], split[1], split[2]
             align_len, mismatch, gap = split[3], split[4], split[5]
-            querry_start, querry_end = split[6], split[7]
+            query_start, query_end = split[6], split[7]
             sbject_start, sbject_end = split[8], split[9]
             e_value, score = split[10], split[11]
-            yield querry_id, sbject_id, align_rate, align_len, mismatch, gap, \
-                querry_start, querry_end, sbject_start, sbject_end, e_value, score
+            yield query_id, sbject_id, align_rate, align_len, mismatch, gap, \
+                query_start, query_end, sbject_start, sbject_end, e_value, score
 
     def get_pair_dict(self, top: int = 3):
         pair_dict = {}  # {query1: {sbject1: [], sbject2: [], ...}, query2: {}, ...}
