@@ -24,8 +24,12 @@ def main(fasta_file: TextIOWrapper,
                 sub_seq = nucl[start - 1:end]
                 if strand == '-':
                     sub_seq = sub_seq.get_reverse_complementary_seq()
-                if len(nucl) < end:
-                    end = len(sub_seq)
+                if start > len(nucl):
+                    click.echo(f'\033[31mError: The interval "{chr_num}:{start}-{end}" is out of {chr_num} sequence range.\033[0m',
+                               err=True)
+                    exit()
+                elif start < len(nucl) < end:
+                    end = len(nucl)
                 sub_seq.id = f'{chr_num}:{start}-{end}({strand})'
                 click.echo(sub_seq, output_file)
                 break

@@ -162,19 +162,19 @@ class GenoType:
                 return self.to_dataframe(sheet, index_col)
         return dfs
 
-    def parallel_stat_MHM(self, processing_num: int):
+    def parallel_stat_MHM(self, num_processing: int):
         """Calculate the MissRate, HetRate and MAF (MHM) of SNP sites from GT files parallely."""
         dfs = self.to_dataframes()
         if not isinstance(dfs, DataFrame):  # Calculate with multiprocessing
             params = ((df,) for df in dfs)  # Index of DataFrame is 0, 1, 2, ...
-            tkm = TaskManager(processing_num=processing_num, params=params)
+            tkm = TaskManager(num_processing=num_processing, params=params)
             ret = tkm.parallel_run_func(stat_MHM)
             stat_dfs = [i.get() for i in ret]
             # Merge results of each multiprocessing
             stat_df = concat(stat_dfs)
         else:
             stat_df = stat_MHM(dfs)
-        stat_df.sort_index(inplace=True, key=natsort_key)
+        stat_df.sort_values(stat_df.columns[0], inplace=True, key=natsort_key)
         return stat_df
 
     @staticmethod
