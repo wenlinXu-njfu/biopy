@@ -46,7 +46,7 @@ def main(gt_file: Union[str, TextIOWrapper],
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-gt', '--gt-file', 'gt_file',
               type=click.File('r'), metavar='<GT file>', required=True,
-              help='Input GT file.')
+              help=r'Input GT file (ID\tChrom\tPos\tRef\tSample1\tSample2\tEtc).')
 @click.option('-n', '--num-processing', 'num_processing',
               type=int, metavar='<int>', default=1, show_default=True, help='Number of Processing.')
 @click.option('-o', '--output-path', 'output_path',
