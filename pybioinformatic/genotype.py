@@ -9,6 +9,7 @@ from typing import Union, List
 from io import TextIOWrapper
 from os.path import abspath
 from warnings import filterwarnings
+from re import sub
 from tqdm import tqdm
 from natsort import natsort_key
 from pandas import Series, DataFrame, read_table, read_excel, concat, cut
@@ -197,9 +198,6 @@ class GenoType:
         """Genotype consistency of different test batches in a single sample."""
         df1 = self.to_dataframe(sheet1, index_col=0)
         df2 = other.to_dataframe(sheet2, index_col=0)
-        # Fill NA.
-        df1.fillna('', inplace=True)
-        df2.fillna('', inplace=True)
         # Sort by SNP ID (index of DataFrame).
         df1.sort_index(key=natsort_key, inplace=True)
         df2.sort_index(key=natsort_key, inplace=True)
@@ -207,12 +205,25 @@ class GenoType:
         if df1.index.tolist() != df2.index.tolist():
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
             exit()
-        total_loci_num = len(df1)
         # Calculate genotype consistency of each sample under different test batches.
+        data = []
+        for sample in df1.columns[3:]:
+            NA_site = set(df1[sample][df1[sample].isnull()].index) | set(df2[sample][df2[sample].isnull()].index)
+            NA_num = len(NA_site)
+            series1 = df1[sample][~df1[sample].isnull()]
+            series2 = df2[sample][~df2[sample].isnull()]
+            IdenticalCount = series1.eq(series2).sum()
+            TotalCount = len(df1) - NA_num
+            GS = IdenticalCount / TotalCount * 100
+            data.append([sample, IdenticalCount, NA_num, TotalCount, GS])
         bins = range(0, 110, 10)  # Set the consistency statistics interval.
-        sample_consistency = df1.iloc[:, 3:].eq(df2.iloc[:, 3:]).sum(axis=0) / total_loci_num * 100
-        interval_stat = cut(sample_consistency, bins).value_counts(sort=False).to_string()
-        sample_consistency = sample_consistency.to_string()
+        sample_consistency = DataFrame(data, columns=['SampleName', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)'])
+        sample_consistency.sort_values('SampleName', key=natsort_key, inplace=True)
+        interval_stat = cut(sample_consistency['GS(%)'], bins).value_counts(sort=False)
+        interval_stat.index.name = None
+        interval_stat = interval_stat.to_string()
+        sample_consistency = sub(r'\n +', '\n', sample_consistency.to_string(index=False).strip())
+        sample_consistency = sub(r' +', '\t', sample_consistency)
         # Write results to output file.
         echo(sample_consistency, open(f'{output_path}/Sample.consistency.xls', 'w'))
         echo(interval_stat, open(f'{output_path}/Interval.stat.xls', 'w'))
@@ -233,44 +244,54 @@ class GenoType:
         right_on = df2.columns[0]
         merge = df1.merge(df2, left_on=left_on,  # index = 0, 1, 2, ...
                           right_on=right_on)  # Avoid inconsistency between the two GT file ID fields
-        merge.fillna('', inplace=True)  # fill NA
         # Step3: Calculate genotype consistency.
-        loci_num = len(merge)
         df1_sample_num = len(df1.columns.tolist()) - 4
         left_sample_range = list(range(4, 4 + df1_sample_num))
-        right_sample_range = list(range(len(df1.columns.tolist()) + 3, len(merge.columns.tolist())))
+        right_sample_range = list(range(len(df1.columns) + 3, len(merge.columns)))
         consistency_df = DataFrame()
         sample_pair = set()
-        with open(f'{output_path}/TestSample.consistency.fmt1.xls', 'w') as o:
-            echo('Database_sample\tTest_sample\tConsensus_number\tTotal_number\tRatio(%)', o)
-            with tqdm(total=len(left_sample_range), unit='sample') as pbar:  # Show process bar
-                for index1 in left_sample_range:
-                    gt1 = merge.iloc[:, index1]
-                    gt1.name = gt1.name.replace('_x', '')
-                    pbar.set_description(f'Processing {gt1.name}')
-                    for index2 in right_sample_range:
-                        gt2 = merge.iloc[:, index2]
-                        gt2.name = gt2.name.replace('_y', '')
-                        consistency_count = gt1.eq(gt2).sum()
-                        ratio = '%.2f' % (consistency_count / loci_num * 100)
-                        echo(f'{gt1.name}\t{gt2.name}\t{consistency_count}\t{loci_num}\t{ratio}', o)
-                        if gt1.name != gt2.name:
-                            if (f'{gt1.name}-{gt2.name}' not in sample_pair) and \
-                                    (f'{gt2.name}-{gt1.name}' not in sample_pair):
-                                consistency_df.loc[gt2.name, gt1.name] = ratio
-                                sample_pair.add(f'{gt1.name}-{gt2.name}')
-                                sample_pair.add(f'{gt2.name}-{gt1.name}')
-                        else:
-                            consistency_df.loc[gt1.name, gt2.name] = ''
-                    pbar.update(1)
+        data = []
+        with tqdm(total=len(left_sample_range), unit='sample') as pbar:  # Show process bar
+            for index1 in left_sample_range:
+                gt1 = merge.iloc[:, index1]
+                gt1_NA = set(gt1[gt1.isnull()].index)
+                gt1.name = gt1.name.replace('_x', '')
+                pbar.set_description(f'Processing {gt1.name}')
+                for index2 in right_sample_range:
+                    gt2 = merge.iloc[:, index2]
+                    gt2_NA = set(gt1[gt2.isnull()].index)
+                    NA_site_index = gt1_NA | gt2_NA
+                    NA_num = len(NA_site_index)
+                    TotalCount = len(merge) - NA_num
+                    gt2.name = gt2.name.replace('_y', '')
+                    gt1 = gt1[~gt1.isnull()]
+                    gt2 = gt2[~gt2.isnull()]
+                    IdenticalCount = gt1.eq(gt2).sum()
+                    GS = '%.2f' % (IdenticalCount / TotalCount * 100)
+                    data.append([gt1.name, gt2.name, IdenticalCount, NA_num, TotalCount, GS])
+                    if gt1.name != gt2.name:
+                        if (f'{gt1.name}-{gt2.name}' not in sample_pair) and \
+                                (f'{gt2.name}-{gt1.name}' not in sample_pair):
+                            consistency_df.loc[gt2.name, gt1.name] = GS
+                            sample_pair.add(f'{gt1.name}-{gt2.name}')
+                            sample_pair.add(f'{gt2.name}-{gt1.name}')
+                    else:
+                        consistency_df.loc[gt1.name, gt2.name] = ''
+                pbar.update(1)
+        header = ['Database_sample', 'Test_sample', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)']
+        fmt1 = DataFrame(data, columns=header)
+        fmt1.sort_values(['Test_sample', 'GS(%)'], key=natsort_key, inplace=True, ascending=[True, False])
+        fmt1.to_csv(f'{output_path}/TestSample.consistency.fmt1.xls', sep='\t', index=False)
         # Step4: Draw consistency heatmap.
         consistency_df.to_csv(f'{output_path}/TestSample.consistency.fmt2.xls', sep='\t', na_rep='')
         if len(consistency_df) <= 80:
-            self.__draw_consistency_heatmap(read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
-                                            output_path)
+            self.__draw_consistency_heatmap(
+                read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
+                output_path)
         # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
+        right_sample_range.insert(1, len(df1.columns) + 2)
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: str(i).replace('_y', '').replace('_x', ''), inplace=True)
-        test_sample_gt_df = test_sample_gt_df.applymap(lambda value: 'NA' if not value else value)
-        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False)
+        test_sample_gt_df.sort_values(merge.columns[0], key=natsort_key, inplace=True)
+        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False, na_rep='NA')
