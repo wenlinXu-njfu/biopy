@@ -138,14 +138,15 @@ class GenoType:
                 df = read_table(self.name, index_col=index_col)
             else:
                 df = read_table(self.__open, index_col=index_col)
-            if sort_allele:
-                df = self.allele_sort(df)
-            return df
         except UnicodeDecodeError:  # read from Excel file
             df = read_excel(self.name, sheet, index_col=index_col)
-            if sort_allele:
-                df = self.allele_sort(df)
-            return df
+        if index_col:
+            df.sort_index(key=natsort_key, inplace=True)  # sort by index
+        else:
+            df.sort_values([df.columns[1], df.columns[2]], key=natsort_key, inplace=True)  # sort by values
+        if sort_allele:
+            df = self.allele_sort(df)
+        return df
 
     def to_dataframes(self,
                       sheet: Union[str, int, List[Union[str, int]]] = 0,
@@ -184,7 +185,7 @@ class GenoType:
             rcParams['font.size'] = 6
         rcParams['font.family'] = 'DejaVu Sans'
         figure(figsize=(15, 10), dpi=300)
-        heatmap(consistency_df, cmap="PiYG",
+        heatmap(consistency_df, cmap="crest",
                 linecolor='w', linewidths=0.5,
                 xticklabels=True, yticklabels=True,
                 cbar_kws={'shrink': 0.4})
@@ -196,11 +197,8 @@ class GenoType:
                      sheet2: Union[str, int, List[Union[str, int]]] = None,
                      output_path: str = './') -> None:
         """Genotype consistency of different test batches in a single sample."""
-        df1 = self.to_dataframe(sheet1, index_col=0)
-        df2 = other.to_dataframe(sheet2, index_col=0)
-        # Sort by SNP ID (index of DataFrame).
-        df1.sort_index(key=natsort_key, inplace=True)
-        df2.sort_index(key=natsort_key, inplace=True)
+        df1 = self.to_dataframe(sheet1, index_col=0, sort_allele=False)
+        df2 = other.to_dataframe(sheet2, index_col=0, sort_allele=False)
         # Check whether the two GT files contain the same loci.
         if df1.index.tolist() != df2.index.tolist():
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
@@ -278,9 +276,9 @@ class GenoType:
                     else:
                         consistency_df.loc[gt1.name, gt2.name] = ''
                 pbar.update(1)
-        header = ['Database_sample', 'Test_sample', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)']
+        header = ['DatabaseSample', 'TestSample', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)']
         fmt1 = DataFrame(data, columns=header)
-        fmt1.sort_values(['Test_sample', 'GS(%)'], key=natsort_key, inplace=True, ascending=[True, False])
+        fmt1.sort_values(['TestSample', 'GS(%)'], key=natsort_key, inplace=True, ascending=[True, False])
         fmt1.to_csv(f'{output_path}/TestSample.consistency.fmt1.xls', sep='\t', index=False)
         # Step4: Draw consistency heatmap.
         consistency_df.to_csv(f'{output_path}/TestSample.consistency.fmt2.xls', sep='\t', na_rep='')

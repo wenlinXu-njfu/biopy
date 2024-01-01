@@ -5,7 +5,7 @@ CreateDate: 2021/11/26
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from re import findall
+from re import findall, sub
 from typing import Tuple, Union
 
 
@@ -22,7 +22,11 @@ class Sequence:
             self.len = len(sequence.replace('\n', ''))
 
     def __str__(self) -> str:
-        return f'>{self.id} length={len(self)}\n{self.seq.strip()}'
+        if 'length' not in self.id:
+            return f'>{self.id} length={len(self)}\n{self.seq.strip()}'
+        else:
+            self.id = sub(r'length=\d+', f'length={len(self)}', self.id)
+            return f'>{self.id}\n{self.seq.strip()}'
 
     def __contains__(self, item) -> bool:
         """
