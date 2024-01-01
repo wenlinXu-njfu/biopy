@@ -7,6 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
+from re import sub
 import click
 from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
@@ -18,16 +19,17 @@ def main(bait_file: TextIOWrapper,
          fish_column: int,
          match: bool,
          output_file: TextIOWrapper):
-    baits = set(line.split('\t')[bait_column - 1].strip() for line in bait_file)
+    baits = set(sub(r' {2,}', '\t', line).split('\t')[bait_column - 1].strip()
+                for line in bait_file if line.strip())
     for line in fish_file:
-        split = line.split('\t')
-        fish = split[fish_column - 1].strip()
-        if match and (fish == baits):
-            click.echo(line.strip(), output_file)
-        elif not match:
-            for bait in baits:
-                if (bait in fish) or (fish in bait):
-                    click.echo(line.strip(), output_file)
+        if line.strip():
+            fish = sub(r' {2,}', '\t', line).split('\t')[fish_column - 1].strip()
+            if match and (fish in baits):
+                click.echo(line.strip(), output_file)
+            elif not match:
+                for bait in baits:
+                    if (bait in fish) or (fish in bait):
+                        click.echo(line.strip(), output_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
