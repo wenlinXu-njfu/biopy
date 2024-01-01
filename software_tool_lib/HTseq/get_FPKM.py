@@ -45,13 +45,13 @@ def main(header_file: TextIOWrapper,
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--header_info', 'header_info_file',
-              metavar='<header file>', type=click.File('r'), required=True,
+              metavar='<header file|stdin>', type=click.File('r'), required=True,
               help='Input header file. (eg. Gene_id\\nSample1\\nSample2\\netc\\n)')
 @click.option('-I', '--htseq_result', 'htseq_result_file',
-              metavar='<htseq file>', type=click.File('r'), required=True,
+              metavar='<htseq file|stdin>', type=click.File('r'), required=True,
               help='Input Htseq results file.')
 @click.option('-a', '--anno_file', 'anno_file',
-              metavar='<anno file>', type=click.File('r'), required=True,
+              metavar='<anno file|stdin>', type=click.File('r'), required=True,
               help='Input genome annotation GFF or GTF file, must contain exon information.')
 @click.option('-f', '--format', 'anno_format',
               metavar='<gff|gtf>', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,

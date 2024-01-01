@@ -31,10 +31,10 @@ def main(hmmseqrch_result_file: TextIOWrapper, out_file: TextIOWrapper):
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--hmmsearch_result', 'hmmsearch_result_file',
-              metavar='<hmm file>', type=click.File('r'), required=True,
+              metavar='<hmm file|stdin>', type=click.File('r'), required=True,
               help='Input hmmsearch results file.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<out file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file, if not specified, print sequences id to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=Displayer(__file__.split('/')[-1]).version_info)

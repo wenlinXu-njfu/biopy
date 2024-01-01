@@ -24,14 +24,14 @@ def main(blast_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--blast_result', 'blast_result_file',
-              metavar='<blast file>', type=click.File('r'), required=True,
+              metavar='<blast file|stdin>', type=click.File('r'), required=True,
               help='Input blast format 6 result file.')
 @click.option('-r', '--ref_seq', 'ref_seq',
               metavar='<query|sbject>', type=click.Choice(['query', 'sbject']),
               default='sbject', show_default=True,
               help='Specify query sequence or sbject sequence as the reference sequence.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<bed file>', type=click.File('w'),
+              metavar='<bed file|stdout>', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

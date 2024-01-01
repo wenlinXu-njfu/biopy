@@ -34,16 +34,16 @@ def main(blast1: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--blast_result1', 'blast_result1',
-              metavar='<blast file>', type=click.File('r'), required=True,
+              metavar='<blast file|stdin>', type=click.File('r'), required=True,
               help='Input blast result file.')
 @click.option('-I', '--blast_result2', 'blast_result2',
-              metavar='<blast file>', type=click.File('r'), required=True,
+              metavar='<blast file|stdin>', type=click.File('r'), required=True,
               help='Input another blast result file.')
 @click.option('-t', '--top', 'top',
               metavar='<int>', type=int, default=3, show_default=True,
               help='Specify max alignment num of each sequence.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<out file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file, if not specified, print result to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

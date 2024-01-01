@@ -45,13 +45,13 @@ def main(header_file: TextIOWrapper,
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--header_infor', 'header_infor_file',
-              metavar='<header file>', type=click.File('r'), required=True,
+              metavar='<header file|stdin>', type=click.File('r'), required=True,
               help='Input header file. (eg. Gene_id\\nSample1\\nSample2\\netc\\n)')
 @click.option('-I', '--htseq_result', 'htseq_result_file',
-              metavar='<htseq file>', type=click.File('r'), required=True,
+              metavar='<htseq file|stdin>', type=click.File('r'), required=True,
               help='Input Htseq results file.')
 @click.option('-a', '--anno_file', 'anno_file',
-              metavar='<anno file>', type=click.File('r'), required=True,
+              metavar='<anno file|stdin>', type=click.File('r'), required=True,
               help='Input genome annotation GFF or GTF file, must contain exon information.')
 @click.option('-f', '--format', 'anno_format',
               metavar='<gff|gtf>', type=click.Choice(['gff', 'gtf']), default='gff', show_default=True,
@@ -60,7 +60,7 @@ def main(header_file: TextIOWrapper,
               metavar='<float>', type=float, default=0, show_default=True,
               help='Gene minimum expression threshold in all samples.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<str>', default='htseq_TPM.xls', show_default=True,
+              metavar='<file>', default='htseq_TPM.xls', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
