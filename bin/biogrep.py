@@ -46,7 +46,7 @@ def main(bait_file: TextIOWrapper,
 @click.option('--match/--contain', default=True, show_default=True,
               help='Match mode.')
 @click.option('-o', '--output-file', 'output_file',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file, print results to terminal as stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
