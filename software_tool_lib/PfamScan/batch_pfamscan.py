@@ -40,7 +40,8 @@ def main(input_dir: str,
               metavar='<dir>', default='./', show_default=True,
               help='Output directory, if not exits, create automatically.')
 @click.option('-n', '--num_processing', 'num_processing',
-              )
+              metavar='<int>', type=int, default=1, show_default=True,
+              help='Number of processing.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_dir, pfam_database, num_processing, output_dir):
