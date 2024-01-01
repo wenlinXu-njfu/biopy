@@ -19,7 +19,7 @@ def main(command_file: TextIOWrapper, processing_num: int):
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-f', '--command_file', 'command_file',
-              metavar='<file>', type=click.File('r'), required=True,
+              metavar='<file|stdin>', type=click.File('r'), required=True,
               help='Input file including command (one command per line).')
 @click.option('-n', '--processing_num', 'processing_num',
               metavar='<int>', type=int, default=1, show_default=True,

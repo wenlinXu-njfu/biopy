@@ -25,12 +25,12 @@ def main(gff_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-g', '--gff_file', 'gff_file',
-              metavar='<gff file>', type=click.File('r'), required=True,
+              metavar='<gff file|stdin>', type=click.File('r'), required=True,
               help='Input GFF file.')
 @click.option('-t', '--feature_type', 'feature_type', metavar='<str>',
               help='Specify the type of feature to convert to BED format, multiple types are separated by commas. [default: all]')
 @click.option('-o', '--output_bed_file', 'output_bed_file',
-              metavar='<bed file>', type=click.File('w'),
+              metavar='<bed file|stdout>', type=click.File('w'),
               help='Output BED file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

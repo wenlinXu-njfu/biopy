@@ -20,12 +20,12 @@ def sub_processing(nucl: Nucleotide):
 def main(fasta_file: Union[str, TextIOWrapper],
          parse_seqids: bool,
          quiet: bool,
-         processing_num: int,
+         num_processing: int,
          output_file: TextIOWrapper = None):
     click.echo('# Seq_id\tStart\tEnd\tSSR_unit\tSSR_seq', output_file)
     with Fasta(fasta_file) as fa:
         params = ((nucl,) for nucl in fa.parse(parse_seqids))
-        tkm = TaskManager(processing_num=processing_num, params=params)
+        tkm = TaskManager(num_processing=num_processing, params=params)
         tkm.parallel_run_func(sub_processing,
                               lambda i: click.echo(i.strip(), err=True) if not quiet and 'not found' in i else
                               click.echo(i.strip(), output_file))
@@ -33,7 +33,7 @@ def main(fasta_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--fasta_file', 'fasta_file',
-              metavar='<fasta file>', type=click.File('r'), required=True,
+              metavar='<fasta file|stdin>', type=click.File('r'), required=True,
               help='Input FASTA file.')
 @click.option('-p', '--parse_seqids', 'parse_seqids',
               is_flag=True, flag_value=True,
@@ -41,17 +41,17 @@ def main(fasta_file: Union[str, TextIOWrapper],
 @click.option('-q', '--quiet', 'quiet',
               is_flag=True, flag_value=True,
               help='Do not report sequence that not found SSR motif.')
-@click.option('-n', '--processing_num', 'processing_num',
+@click.option('-n', '--num_processing', 'num_processing',
               metavar='<int>', type=int, default=1, show_default=True,
               help='Number of processing.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file path and name.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(fasta_file, parse_seqids, quiet, processing_num, output_file):
+def run(fasta_file, parse_seqids, quiet, num_processing, output_file):
     """Find simple sequence repeat (SSR) in the DNA sequences."""
-    main(fasta_file, parse_seqids, quiet, processing_num, output_file)
+    main(fasta_file, parse_seqids, quiet, num_processing, output_file)
 
 
 if __name__ == '__main__':

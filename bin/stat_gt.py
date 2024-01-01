@@ -8,6 +8,8 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
 from io import TextIOWrapper
+from os import mkdir
+from os.path import exists
 from matplotlib.pyplot import rcParams, style, figure, subplots_adjust, savefig
 from seaborn import histplot
 import click
@@ -18,6 +20,8 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 def main(gt_file: Union[str, TextIOWrapper],
          num_processing: int,
          output_path: str):
+    if not exists(output_path):
+        mkdir(output_path)
     # stat MHM
     with GenoType(gt_file) as gt:
         stat_df = gt.parallel_stat_MHM(num_processing)
@@ -45,13 +49,13 @@ def main(gt_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-gt', '--gt-file', 'gt_file',
-              type=click.File('r'), metavar='<GT file>', required=True,
-              help=r'Input GT file (ID\tChrom\tPos\tRef\tSample1\tSample2\tEtc).')
+              metavar='<GT file|stdin>', type=click.File('r'), required=True,
+              help=r'Input GT file (header=ID\tChrom\tPos\tRef\tSample1\tSample2\tEtc).')
 @click.option('-n', '--num-processing', 'num_processing',
               type=int, metavar='<int>', default=1, show_default=True, help='Number of Processing.')
 @click.option('-o', '--output-path', 'output_path',
               metavar='<path>', default='./', show_default=True,
-              help='Output file path.')
+              help='Output file path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Calculating MissRate, HetRate, and MAF.')

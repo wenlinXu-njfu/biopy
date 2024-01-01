@@ -20,10 +20,10 @@ def main(gff_file: TextIOWrapper, out_file: TextIOWrapper = None):
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--gff_file', 'gff_file',
-              metavar='<gff file>', type=click.File('r'), required=True,
+              metavar='<gff file|stdin>', type=click.File('r'), required=True,
               help='Input unsorted GFF file.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<gff file>', type=click.File('w'),
+              metavar='<gff file|stdout>', type=click.File('w'),
               help='Output sorted GFF file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

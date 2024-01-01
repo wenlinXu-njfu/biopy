@@ -22,10 +22,10 @@ def main(vcf_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--vcf_file', 'vcf_file',
-              metavar='<vcf file>', type=click.File('r'), required=True,
+              metavar='<vcf file|stdin>', type=click.File('r'), required=True,
               help='Input VCF file.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<file>', type=click.File('w'),
+              metavar='<gt file|stdout>', type=click.File('w'),
               help='Output file, print results to terminal by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

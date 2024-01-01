@@ -22,10 +22,10 @@ def main(gtf_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--gtf_file', 'gtf_file',
-              metavar='<gtf file>', type=click.File('r'), required=True,
+              metavar='<gtf file|stdin>', type=click.File('r'), required=True,
               help='Input GTF file.')
 @click.option('-o', '--output_bed_file', 'output_bed_file',
-              metavar='<bed file>', type=click.File('w'),
+              metavar='<bed file|stdout>', type=click.File('w'),
               help='Output BED file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

@@ -12,53 +12,44 @@ from pybioinformatic import read_in_gene_expression_as_dataframe, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(exp_matrix_file, out_prefix):
-    df = read_in_gene_expression_as_dataframe(exp_matrix_file)
-    if isinstance(df, str):
-        click.echo(df, err=True)
-        exit()
-    else:
-        i = 0
-        j = 1
-        content = 'Query\tSubject\tPCC\tP_value\n'
-        if not out_prefix:
-            print(content)
-        while i < len(df.index.tolist()):
-            while j < len(df.index.tolist()):
-                x = df.iloc[i]
-                y = df.iloc[j]
-                r, p = pearsonr(x, y)
-                if out_prefix:
-                    content += f'{x.name}\t{y.name}\t{r}\t{p}\n'
-                else:
-                    print(f'{x.name}\t{y.name}\t{r}\t{p}')
-                j += 1
-            i += 1
-            j = i + 1
-        if out_prefix:
-            with open(f'{out_prefix}.txt', 'w') as o:
-                o.write(content)
-        df = df.T
-        df.columns.name = None
-        df = df.corr()
-        if out_prefix:
-            df.to_csv(f'./{out_prefix}.csv')
+def main(exp_matrix_file: str, output_prefix: str):
+    with open(f'./{output_prefix}.fmt1.xls', 'w') as fmt1:
+        df = read_in_gene_expression_as_dataframe(exp_matrix_file)
+        if isinstance(df, str):
+            click.echo(df, err=True)
+            exit()
         else:
-            print(df)
+            df2 = df.T
+            df2.columns.name = None
+            df2 = df2.corr()
+            i = 0
+            j = 1
+            click.echo('Gene1\tGene2\tPCC\tP_value', fmt1)
+            while i < len(df.index.tolist()):
+                while j < len(df.index.tolist()):
+                    x = df.iloc[i]
+                    y = df.iloc[j]
+                    r, p = pearsonr(x, y)
+                    click.echo(f'{x.name}\t{y.name}\t{r}\t{p}', fmt1)
+                    df2.iloc[i, j] = ''
+                    j += 1
+                i += 1
+                j = i + 1
+            df2.to_csv(f'./{output_prefix}.fmt2.xls', sep='\t')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-i', '--input_file', 'input_file',
+@click.option('-i', '--exp_file', 'input_file',
               metavar='<exp file>', required=True,
               help='Input gene expression matrix file (including header). Supported formats: txt, xls, xlsx, csv')
-@click.option('-o', '--output_file', 'outfile',
-              metavar='<file>',
-              help='Output file prefix, if not specified, print results to terminal as stdout.')
+@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<str>', default='PCC', show_default=True,
+              help='Output file prefix.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(input_file, outfile):
+def run(input_file, output_prefix):
     """Calculation of Pearson correlation coefficient from gene expression."""
-    main(input_file, outfile)
+    main(input_file, output_prefix)
 
 
 if __name__ == '__main__':

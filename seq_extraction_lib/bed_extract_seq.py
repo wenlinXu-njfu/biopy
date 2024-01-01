@@ -28,10 +28,10 @@ def main(bed_file: Union[str, TextIOWrapper],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--bed_file', 'bed_file',
-              metavar='<bed file>', type=click.File('r'), required=True,
+              metavar='<bed file|stdin>', type=click.File('r'), required=True,
               help='Input BED file.\n(Chr_num\\tStart\\tEnd\\tFrame\\tName\\tStrand\\tetc)')
 @click.option('-r', '--ref_fasta', 'ref_fasta_file',
-              metavar='<fasta file>', type=click.File('r'), required=True,
+              metavar='<fasta file|stdin>', type=click.File('r'), required=True,
               help='Input reference sequence FASTA file.')
 @click.option('-up', '--upstream', 'upstream',
               metavar='<int>', type=int, default=0, show_default=True,
@@ -53,7 +53,7 @@ def main(bed_file: Union[str, TextIOWrapper],
               help='If "-u --upstream", "-d --downstream" or "-b --both_end" is specified, '
                    'specify whether extension (including sequence self in BED file).')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<fasta file>', type=click.File('w'),
+              metavar='<fasta file|stdout>', type=click.File('w'),
               help='Output FASTA file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

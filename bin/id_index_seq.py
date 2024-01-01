@@ -46,12 +46,12 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, metavar='<fasta files>', required=True, type=click.File('r'))
+@click.argument('fasta_files', nargs=-1, metavar='<fasta files|stdin>', required=True, type=click.File('r'))
 @click.option('-p', '--parse_seqids', 'parse_seqids',
               is_flag=True, flag_value=True,
               help='Parse sequence id in FASTA file.')
 @click.option('-id', '--id_file', 'id_file',
-              metavar='<file>', type=click.File('r'), required=True,
+              metavar='<file|stdin>', type=click.File('r'), required=True,
               help='Input id file (one id per line).')
 @click.option('--match/--contain',
               default=True, show_default=True,
@@ -60,10 +60,10 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
               is_flag=True, flag_value=True,
               help='Record the source of sequence to sequence ID.')
 @click.option('-log', '--log_file', 'log_file',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file|stderr>', type=click.File('w'),
               help='Output log file, if not specified, the log will print to terminal as stderr.')
 @click.option('-o', '--output_file', 'outfile',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file, if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

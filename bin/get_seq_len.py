@@ -23,12 +23,12 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fasta_files', nargs=-1, metavar='<fasta files>', type=click.File('r'), required=True)
+@click.argument('fasta_files', nargs=-1, metavar='<fasta files|stdin>', type=click.File('r'), required=True)
 @click.option('-p', '--parse_seqids', 'parse_seqids',
               is_flag=True, flag_value=True,
               help='Parse sequence id.')
 @click.option('-o', '--output_file', 'outfile',
-              metavar='<file>', type=click.File('w'),
+              metavar='<file|stdout>', type=click.File('w'),
               help='Output file (Seq_id\\tSeq_len\\n), if not specified, print results to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

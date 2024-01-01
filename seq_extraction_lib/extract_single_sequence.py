@@ -37,7 +37,7 @@ def main(fasta_file: TextIOWrapper,
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-r', '--ref_fasta', 'ref_fasta_file',
-              metavar='<fasta file>', type=click.File('r'), required=True,
+              metavar='<fasta file|stdin>', type=click.File('r'), required=True,
               help='Input reference sequenceFASTA file.')
 @click.option('-c', '--chr_name', 'chr_name',
               metavar='<str>', required=True,
@@ -52,7 +52,7 @@ def main(fasta_file: TextIOWrapper,
               metavar='<+|->', type=click.Choice(['+', '-']), required=True,
               help='Direction of the chain.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<fasta file>', type=click.File('w'),
+              metavar='<fasta file|stdout>', type=click.File('w'),
               help='Output file, if not specified, print result to terminal as stdout.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
