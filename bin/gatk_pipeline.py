@@ -135,7 +135,7 @@ def main(genome_fasta_file: str,
          sorted_bam_files: List[str],
          record_command: TextIOWrapper = None):
     """Variation analysis pipeline of GATK."""
-    tkm = TaskManager(processing_num=1, log_file=record_command)
+    tkm = TaskManager(num_processing=1, log_file=record_command)
     build_genome_index(genome_fasta_file, tkm)
     merge_bam_file = merge_bam_files(sorted_bam_files, output_prefix, tkm)
     markdup_bam_file = MarkDuplicates(merge_bam_file, tkm)
