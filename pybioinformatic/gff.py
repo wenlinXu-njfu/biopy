@@ -92,9 +92,9 @@ class Gff:
         # data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
         # df = DataFrame(data, columns=names, dtype=str)
         if self.name.endswith('gz'):
-            df = read_table(self.name, header=None, names=names, skiprows=self.anno_line_num, dtype=str)
+            df = read_table(self.name, header=None, names=names, dtype=str, comment='#')
         else:
-            df = read_table(self.__open, header=None, names=names, skiprows=self.anno_line_num, dtype=str)
+            df = read_table(self.__open, header=None, names=names, dtype=str, comment='#')
         df[['Start', 'End']] = df[['Start', 'End']].astype(int)
         self.__seek_zero()
         return df
