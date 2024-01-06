@@ -245,7 +245,10 @@ class GenoType:
         # Step3: Calculate genotype consistency.
         df1_sample_num = len(df1.columns.tolist()) - 4
         left_sample_range = list(range(4, 4 + df1_sample_num))
-        right_sample_range = list(range(len(df1.columns) + 3, len(merge.columns)))
+        if df1.columns[0] == df2.columns[0]:
+            right_sample_range = list(range(len(df1.columns) + 3, len(merge.columns)))
+        else:
+            right_sample_range = list(range(len(df1.columns) + 4, len(merge.columns)))
         consistency_df = DataFrame()
         sample_pair = set()
         data = []
