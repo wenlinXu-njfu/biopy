@@ -265,7 +265,7 @@ class Gff:
                 else:
                     gene_id = current_line[8]['ID']
                 yield '\t'.join(current_line[:8]) + f'''\tgene_id "{gene_id}";'''
-            elif current_line[2] == 'mRNA':
+            elif current_line[2] == 'mRNA' or current_line[2] == 'transcript':
                 current_line[2] = 'transcript'
                 if last_line:
                     if gene_id is not None:
