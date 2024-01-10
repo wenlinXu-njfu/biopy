@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union, Iterable, Callable
 from io import TextIOWrapper
-from os import system
+from subprocess import run
 from datetime import datetime
 from getpass import getuser
 from socket import gethostname
@@ -59,13 +59,13 @@ class TaskManager:
         echo(f'\033[33m[{getuser()}@{gethostname()}: '
              f'{datetime.now().replace(microsecond=0)}]\n$ '
              f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
-        system(cmd)
+        run(cmd, shell=True, executable="/bin/bash")
 
     def serial_run_cmd(self):
         for cmd in self.task:
             echo(f'\033[33m[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n'
                  f'$ \033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
-            system(cmd)
+            run(cmd, shell=True, executable="/bin/bash")
 
     def parallel_run_cmd(self):
         if not self.task:
