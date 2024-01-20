@@ -42,7 +42,8 @@ class VCF:
                 line = str(line, 'utf8')
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
-                chr_name, position, ID, ref, alt, = split[:5]
+                chr_name, position, ID, ref, alts, = split[:5]
+                alts = alts.split(',')
                 ID = f'{chr_name}_{position}'
                 samples = split[9:]
                 samples_gt = []
@@ -50,12 +51,15 @@ class VCF:
                     gt = sample.split(':')[0]
                     if gt == './.':
                         gt = 'NA'
-                    elif gt == '0/0':
-                        gt = ref * 2
-                    elif gt == '0/1':
-                        gt = ''.join(sorted(ref + alt))
-                    elif gt == '1/1':
-                        gt = alt * 2
+                    else:
+                        alts.insert(0, ref)
+                        alleles_index = gt.replace('|', '/').split('/')
+                        # SNP
+                        if len(alts[int(alleles_index[0])]) == len(alts[int(alleles_index[1])]) == 1:
+                            gt = alts[int(alleles_index[0])] + alts[int(alleles_index[1])]
+                        # INDEL
+                        else:
+                            gt = alts[int(alleles_index[0])] + '/' + alts[int(alleles_index[1])]
                     samples_gt.append(gt)
                 samples_gt = '\t'.join(samples_gt)
                 yield f'{ID}\t{chr_name}\t{position}\t{ref}\t{samples_gt}'
