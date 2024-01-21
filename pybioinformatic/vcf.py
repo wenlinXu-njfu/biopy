@@ -35,7 +35,7 @@ class VCF:
             pass
 
 # Format conversion method==============================================================================================
-    def to_genotype(self):
+    def to_genotype(self) -> str:
         """Convert VCF to GenoType."""
         for line in self.__open:
             if not isinstance(line, str):
@@ -55,7 +55,7 @@ class VCF:
                     else:
                         alleles_index = gt.replace('|', '/').split('/')
                         # SNP
-                        if len(alts[int(alleles_index[0])]) == len(alts[int(alleles_index[1])]) == 1:
+                        if len(alts[int(alleles_index[0])]) == len(alts[int(alleles_index[1])]) == len(ref) == 1:
                             gt = alts[int(alleles_index[0])] + alts[int(alleles_index[1])]
                         # INDEL
                         else:
@@ -74,7 +74,7 @@ class VCF:
                                 alt2 = f'del{ref.replace(alts[int(alleles_index[1])], "", 1)}' \
                                     if len(ref) > len(alts[int(alleles_index[1])]) else \
                                     f'ins{alts[int(alleles_index[1])].replace(ref, "", 1)}'
-                                gt = f'{alt1}/{alt2}'
+                                gt = f'{alt1}/{alt2}' if alt1 != alt2 else alt1
                     samples_gt.append(gt)
                 samples_gt = '\t'.join(samples_gt)
                 yield f'{ID}\t{chr_name}\t{position}\t{ref}\t{samples_gt}'

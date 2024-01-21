@@ -71,11 +71,11 @@ class TaskManager:
         if not self.task:
             echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
             exit()
-        pool = Pool(self.num_processing)
-        for cmd in self.task:
-            pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
-        pool.close()
-        pool.join()
+        with Pool(self.num_processing) as pool:
+            for cmd in self.task:
+                pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
+            pool.close()
+            pool.join()
 
     def parallel_run_func(self, func: Callable, call_back_func: Callable = None):
         results = []
