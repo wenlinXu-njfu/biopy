@@ -9,7 +9,7 @@ from typing import Union, List
 from io import StringIO
 from warnings import filterwarnings
 from click import echo, open_file
-from pandas import set_option, read_table, read_excel, read_csv, DataFrame
+from pandas import set_option, read_table, read_excel, read_csv, DataFrame, ExcelWriter
 
 
 def display_set(decimal: int = 2) -> None:
@@ -120,3 +120,24 @@ def get_TPM(read_count: DataFrame,
         new_gene_num = len(TPM.index.tolist())
         echo(f"{raw_gene_num - new_gene_num} genes have been filtered out", err=True)
     return TPM
+
+
+def dfs_to_excel(df_list: list, output_file: str, sheets_name: list = None):
+    with ExcelWriter(output_file, engine='xlsxwriter') as writer:
+        if not sheets_name:
+            sheets_name = [f'Sheet {i}' for i in range(1, len(df_list) + 1)]
+        workbook = writer.book
+        workbook.nan_inf_to_errors = True  # 添加 'nan_inf_to_errors' 选项
+        default_cell_format = workbook.add_format({'bold': False, 'border': 0, 'align': 'left'})
+        for df, sheet_name in zip(df_list, sheets_name):
+            df.fillna('NA', inplace=True)
+            df = df.reset_index()
+            df.to_excel(writer, sheet_name=sheet_name, na_rep='NA', startrow=1, header=False, index=False)
+            worksheet = writer.sheets[sheet_name]  # 获取工作表对象
+            # 将标题写入工作表，并应用默认的单元格格式
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, default_cell_format)
+            # 将数据写入工作表，并应用默认的单元格格式
+            for row_num, row_data in enumerate(df.values):
+                for col_num, col_data in enumerate(row_data):
+                    worksheet.write(row_num + 1, col_num, col_data, default_cell_format)
