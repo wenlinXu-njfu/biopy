@@ -6,8 +6,10 @@ CreateDate: 2022/4/28
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from os import listdir, mkdir
-from os.path import exists
+from os import listdir, makedirs
+from re import sub
+from natsort import natsort_key
+from pandas import DataFrame, concat
 import click
 from pybioinformatic import TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
@@ -17,16 +19,32 @@ def main(input_dir: str,
          pfamscan_database: str,
          num_processing: int,
          out_dir: str):
-    if not exists(out_dir):
-        mkdir(out_dir)
+    # Run PfamScan
+    makedirs(f'{out_dir}/results', exist_ok=True)
     files = listdir(input_dir)
     cmds = []
     for file in files:
         cmds.append(f"pfam_scan.pl -fasta {input_dir}/{file} "
                     f"-dir {pfamscan_database} "
-                    f"-outfile {out_dir}/{file}_pfamsacn_out.txt")
+                    f"-outfile {out_dir}/results/{file}_pfamsacn_out.txt")
     tkm = TaskManager(commands=cmds, num_processing=num_processing)
     tkm.parallel_run_cmd()
+    dfs = []
+    # Merge results
+    for file in listdir(f'{out_dir}/results'):
+        data = []
+        header = None
+        for line in open(f'{out_dir}/results/{file}'):
+            if not line.startswith('#') and line.strip():
+                line = sub(r' +', '\t', line.strip()).split('\t')
+                data.append(line)
+            elif line.startswith('# <seq id>'):
+                header = sub(r'[><]', '', line.strip().replace('> <', '\t').replace('# ', '')).replace(' ', '_').split('\t')
+        df = DataFrame(data, columns=header)
+        dfs.append(df)
+    result = concat(dfs)
+    result.sort_values('seq_id', key=natsort_key, inplace=True)
+    result.to_csv(f'{out_dir}/all_results.xls', sep='\t', index=False)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
