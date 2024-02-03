@@ -8,6 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union, Tuple
 from os.path import abspath
+from pandas import read_table
 from click import open_file
 
 
@@ -49,6 +50,16 @@ class Blast:
             e_value, score = split[10], split[11]
             yield query_id, sbject_id, align_rate, align_len, mismatch, gap, \
                 query_start, query_end, sbject_start, sbject_end, e_value, score
+
+    def to_dataframe(self):
+        names = ['Query', 'Sbject', 'AlignRate', 'AlignLength', 'Missmatch', 'GapOpen',
+                 'QueryStart', 'QueryEnd', 'SbjectStart', 'SbjectEnd', 'Evalue', 'Score']
+        dtype = {'Query': str, 'Sbject': str, 'AlignRate': float, 'AlignLength': int, 'Missmatch': int, 'GapOpen': int,
+                 'QueryStart': int, 'QueryEnd': int, 'SbjectStart': int, 'SbjectEnd': int, 'Evalue': float, 'Score': float}
+        df = read_table(self.__open, header=None, names=names, dtype=dtype)
+        df['Evalue'] = df['Evalue'].map('{:.2e}'.format)
+        df['Score'] = df['Score'].map('{:.0f}'.format)
+        return df
 
     def get_pair_dict(self, top: int = 3):
         pair_dict = {}  # {query1: {sbject1: [], sbject2: [], ...}, query2: {}, ...}
