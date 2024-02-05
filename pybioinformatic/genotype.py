@@ -176,7 +176,7 @@ class GenoType:
             stat_df = concat(stat_dfs)
         else:
             stat_df = stat_MHM(dfs)
-        stat_df.sort_values(stat_df.columns[0], inplace=True, key=natsort_key)
+        stat_df.sort_values(stat_df.columns.tolist()[1:3], inplace=True, key=natsort_key)
         return stat_df
 
     @staticmethod
@@ -256,7 +256,7 @@ class GenoType:
             for index1 in left_sample_range:
                 gt1 = merge.iloc[:, index1]
                 gt1_NA = set(gt1[gt1.isnull()].index)
-                gt1.name = gt1.name.replace('_x', '')
+                gt1.name = sub(r'_x\b', '', gt1.name)
                 pbar.set_description(f'Processing {gt1.name}')
                 for index2 in right_sample_range:
                     gt2 = merge.iloc[:, index2]
@@ -264,7 +264,7 @@ class GenoType:
                     NA_site_index = gt1_NA | gt2_NA
                     NA_num = len(NA_site_index)
                     TotalCount = len(merge) - NA_num
-                    gt2.name = gt2.name.replace('_y', '')
+                    gt2.name = sub(r'_y\b', '', gt2.name)
                     gt1 = gt1[~gt1.isnull()]
                     gt2 = gt2[~gt2.isnull()]
                     IdenticalCount = gt1.eq(gt2).sum()
