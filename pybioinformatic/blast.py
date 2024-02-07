@@ -57,8 +57,6 @@ class Blast:
         dtype = {'Query': str, 'Sbject': str, 'AlignRate': float, 'AlignLength': int, 'Missmatch': int, 'GapOpen': int,
                  'QueryStart': int, 'QueryEnd': int, 'SbjectStart': int, 'SbjectEnd': int, 'Evalue': float, 'Score': float}
         df = read_table(self.__open, header=None, names=names, dtype=dtype)
-        df['Evalue'] = df['Evalue'].map('{:.2e}'.format)
-        df['Score'] = df['Score'].map('{:.0f}'.format)
         return df
 
     def get_pair_dict(self, top: int = 3):

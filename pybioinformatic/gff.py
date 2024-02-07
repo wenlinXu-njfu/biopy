@@ -89,8 +89,6 @@ class Gff:
 
     def to_dataframe(self) -> DataFrame:
         names = ['Chromosome', 'Source', 'Feature', 'Start', 'End', 'Score', 'Strand', 'Frame', 'Attribute']
-        # data = [line.strip().split('\t') for line in self.__open if not line.startswith('#')]
-        # df = DataFrame(data, columns=names, dtype=str)
         if self.name.endswith('gz'):
             df = read_table(self.name, header=None, names=names, dtype=str, comment='#')
         else:
