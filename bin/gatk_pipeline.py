@@ -7,192 +7,152 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import List
+from os import makedirs, system
 import click
-from pybioinformatic import Timer, TaskManager, Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-@Timer('Build genome index.')
-def build_genome_index(genome_fasta_file: str,
-                       tkm: TaskManager):
-    command = f'samtools faidx {genome_fasta_file}'
-    tkm.echo_and_exec_cmd(command)
-    command = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
-    tkm.echo_and_exec_cmd(command)
+def build_genome_index(genome_fasta_file: str):
+    from pybioinformatic import TaskManager
+    bwa_index = f'bwa index {genome_fasta_file}'
+    samtools_index = f'samtools faidx {genome_fasta_file}'
+    gatk_index = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
+    cmds = [bwa_index, samtools_index, gatk_index]
+    tkm = TaskManager(cmds, 3)
+    tkm.parallel_run_cmd()
 
 
-@Timer('Merge bam files.')
-def merge_bam_files(sorted_bam_files: list,
-                    output_file_prefix: str,
-                    tkm: TaskManager):
-    bam_files = ' '.join(sorted_bam_files)
-    command = f'samtools merge {output_file_prefix}.merge.bam {bam_files}'
-    tkm.echo_and_exec_cmd(command)
-    return f'{output_file_prefix}.merge.bam'
+def fastp(sample_name: str, fq1: str, fq2: str, output_path: str):
+    cmd = (f'fastp -i {fq1} -I {fq2} '
+           f'-o {output_path}/{sample_name}_clean_1.fq.gz '
+           f'-O {output_path}/{sample_name}_clean_2.fq.gz '
+           f'-h {output_path}/{sample_name}.fastp.html '
+           f'-j {output_path}/{sample_name}.fastp.json '
+           f'-n 10 -q 20 -u 40 2> {output_path}/{sample_name}.fastp.log')
+    return cmd
 
 
-@Timer('Mark duplicates.')
-def MarkDuplicates(sorted_bam_file: str,
-                   tkm: TaskManager):
-    markdup_bam_file = sorted_bam_file.replace('bam', 'markdup.bam')
-    command = f'gatk MarkDuplicates ' \
-              f'-I {sorted_bam_file} ' \
-              f'-M {sorted_bam_file}.metrics ' \
-              f'-O {markdup_bam_file}'
-    tkm.echo_and_exec_cmd(command)
-    command = f'samtools index {markdup_bam_file}'
-    tkm.echo_and_exec_cmd(command)
-    return markdup_bam_file
+def align(sample_name: str, genome_fasta_file: str, fastq_1: str, fastq_2: str, output_path: str):
+    cmds = []
+    # Align command
+    cmd1 = fr'bwa mem -t 5 -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fastq_1} {fastq_2} \
+    | samtools view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.bam'
+    cmds.append(cmd1)
+    # map=30 filter
+    awk = r'''awk '{if($1~/@/){print}else{if( $7 =="=" &&  $5>=30 ){print $0}}}' '''
+    cmd2 = (fr'samtools view -h {output_path}/{sample_name}.bam | {awk} | '
+            fr'samtools view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.map30.bf.bam')
+    cmds.append(cmd2)
+    # Sort bam file
+    cmd3 = f'samtools sort -@ 5 -o {output_path}/{sample_name}.map30.sort.bam {output_path}/{sample_name}.map30.bf.bam'
+    cmds.append(cmd3)
+    cmd4 = f'samtools index {output_path}/{sample_name}.map30.sort.bam'
+    cmds.append(cmd4)
+    cmd5 = f'rm -rf {output_path}/{sample_name}.map30.bf.bam'
+    cmds.append(cmd5)
+    # MarkDuplicates reads
+    cmd6 = (f'gatk MarkDuplicates '
+            f'-I {output_path}/{sample_name}.map30.sort.bam '
+            f'-M {output_path}/{sample_name}.map30.sort.bam.metrics '
+            f'-O {output_path}/{sample_name}.map30.sort.markdup.bam')
+    cmds.append(cmd6)
+    cmd7 = f'samtools index {output_path}/{sample_name}.map30.sort.markdup.bam'
+    cmds.append(cmd7)
+    return cmds
 
 
-@Timer('Variation detection.')
-def HaplottypeCaller(genome_fasta_file: str,
+def HaplotypeCaller(genome_fasta_file: str,
                      bam_file: str,
                      sample_name: str,
-                     tkm: TaskManager):
-    command = f'gatk HaplotypeCaller ' \
-              f'--emit-ref-confidence GVCF ' \
-              f'-R {genome_fasta_file} ' \
-              f'-I {bam_file} ' \
-              f'--sample-name {sample_name} ' \
-              f'-O {sample_name}.HC.gvcf.gz'
-    tkm.echo_and_exec_cmd(command)
-    command = f'gatk IndexFeatureFile -F {sample_name}.HC.gvcf.gz'
-    tkm.echo_and_exec_cmd(command)
-    return f'{sample_name}.HC.gvcf.gz'
+                     output_path: str):
+    cmds = []
+    cmd1 = (f'gatk HaplotypeCaller '
+             f'-I {bam_file} '
+             f'-R {genome_fasta_file} -ERC GVCF '
+             f'-O {output_path}/{sample_name}.map30.gvcf')
+    cmds.append(cmd1)
+    cmd2 = (f'gatk GenotypeGVCFs -R {genome_fasta_file} '
+             f'-V {output_path}/{sample_name}.map30.gvcf '
+             f'-O {output_path}/{sample_name}.map30.vcf')
+    cmds.append(cmd2)
+    cmd3 = (f'gatk VariantFiltration '
+             f'--filter-name  "HARD_TO_VALIDATE" '
+             f'--filter-expression "QD < 2.0 || MQ < 40.0 || FS > 60.0 || SOR > 3.0" '
+             f'-R {genome_fasta_file} '
+             f'-V {output_path}/{sample_name}.map30.vcf '
+             f'-O {output_path}/{sample_name}.map30.filt.vcf')
+    cmds.append(cmd3)
+    return cmds
 
 
-@Timer('SNP calling.')
-def SNP_calling(genome_fasta_file: str,
-                vcf_file: str,
-                sample_name: str,
-                tkm: TaskManager):
-    command = f'gatk SelectVariants ' \
-              f'-R {genome_fasta_file} ' \
-              f'--select-type-to-include SNP ' \
-              f'-V {vcf_file} ' \
-              f'-O {sample_name}.HC.snp.vcf.gz'
-    tkm.echo_and_exec_cmd(command)
-    return f'{sample_name}.HC.snp.vcf.gz'
-
-
-@Timer('SNP filtering.')
-def SNP_filter(snp_vcf_file: str,
-               filter_expression: str,
-               sample_name: str,
-               tkm: TaskManager):
-    command = f'gatk SelectVariantsFilteration ' \
-              f'-V {snp_vcf_file} ' \
-              f'-O {sample_name}.HC.snp.filter.vcf.gz ' \
-              f'--filter-expression {filter_expression} ' \
-              f'--filter-name PASS'
-    tkm.echo_and_exec_cmd(command)
-    return f'{sample_name}.HC.snp.filter.vcf.gz'
-
-
-@Timer('INDEL calling.')
-def INDEL_calling(genome_fasta_file: str,
-                  vcf_file: str,
-                  sample_name: str,
-                  tkm: TaskManager):
-    command = f'gatk SelectVariants ' \
-              f'-R {genome_fasta_file} ' \
-              f'--select-type-to-include INDEL ' \
-              f'-V {vcf_file} ' \
-              f'-O {sample_name}.HC.indel.vcf.gz'
-    tkm.echo_and_exec_cmd(command)
-    return f'{sample_name}.HC.indel.vcf.gz'
-
-
-@Timer('INDEL filtering.')
-def INDEL_filter(indel_vcf_file: str,
-                 filter_expression: str,
-                 sample_name: str,
-                 tkm: TaskManager):
-    command = f'gatk SelectVariantsFilteration ' \
-              f'-V {indel_vcf_file} ' \
-              f'-O {sample_name}.HC.indel.filter.vcf.gz ' \
-              f'--filter-expression {filter_expression} ' \
-              f'--filter-name PASS'
-    tkm.echo_and_exec_cmd(command)
-    return f'{sample_name}.HC.indel.filter.vcf.gz'
-
-
-def merge_variant(snp_vcf_file: str,
-                  indel_vcf_file: str,
-                  sample_name: str,
-                  tkm: TaskManager):
-    command = f'gatk mergeVcfs -I {snp_vcf_file} -I {indel_vcf_file} -O {sample_name}.HC.filter.vcf.gz'
-    tkm.echo_and_exec_cmd(command)
-
-
-def main(genome_fasta_file: str,
-         sample_list: List[str],
-         snp_filter_expression: str,
-         indel_filter_expression: str,
-         output_prefix: str,
-         sorted_bam_files: List[str],
-         record_command: TextIOWrapper = None):
+def main(fq_path: str,
+         genome_fasta_file: str,
+         build_index: bool,
+         sample_list: TextIOWrapper,
+         num_processing: int,
+         output_path: str):
     """Variation analysis pipeline of GATK."""
-    tkm = TaskManager(num_processing=1, log_file=record_command)
-    build_genome_index(genome_fasta_file, tkm)
-    merge_bam_file = merge_bam_files(sorted_bam_files, output_prefix, tkm)
-    markdup_bam_file = MarkDuplicates(merge_bam_file, tkm)
-    for sample_name in sample_list:
-        gvcf_file = HaplottypeCaller(genome_fasta_file, markdup_bam_file, sample_name, tkm)
-        snp_vcf_file = SNP_calling(genome_fasta_file, gvcf_file, sample_name, tkm)
-        snp_vcf_file = SNP_filter(snp_vcf_file, snp_filter_expression, sample_name, tkm)
-        indel_vcf_file = INDEL_calling(genome_fasta_file, gvcf_file, sample_name, tkm)
-        indel_vcf_file = INDEL_filter(indel_vcf_file, indel_filter_expression, sample_name, tkm)
-        merge_variant(snp_vcf_file, indel_vcf_file, sample_name, tkm)
+    if build_index:
+        build_genome_index(genome_fasta_file)
+    makedirs(f'{output_path}/shell', exist_ok=True)
+    for line in sample_list:
+        fq_prefix = line.strip().split('\t')[0]
+        sample_name = line.strip().split('\t')[1]
+        makedirs(f'{output_path}/QC/{sample_name}', exist_ok=True)
+        makedirs(f'{output_path}/align/{sample_name}', exist_ok=True)
+        makedirs(f'{output_path}/variant/{sample_name}', exist_ok=True)
+        fq1 = f'{fq_path}/{fq_prefix}_1.fq.gz'
+        fq2 = f'{fq_path}/{fq_prefix}_2.fq.gz'
+        with open(f'{output_path}/shell/{sample_name}.sh', 'w') as o:
+            cmds = []
+            cmd = fastp(sample_name, fq1, fq2, f'{output_path}/QC/{sample_name}')
+            cmds.append(cmd)
+            cmds.extend(align(sample_name,
+                              genome_fasta_file,
+                              fq1,
+                              fq2,
+                              f'{output_path}/align/{sample_name}'))
+            cmds.extend(HaplotypeCaller(genome_fasta_file,
+                                         f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
+                                         sample_name,
+                                         f'{output_path}/variant/{sample_name}'))
+            o.write('\n'.join(cmds))
+    system(f'for i in `ls {output_path}/shell`; do echo "sh {output_path}/shell/$i"; done > {output_path}/All.sh')
+    system(f'exec_cmds -f {output_path}/All.sh -n {num_processing}')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('-fq', '--fq-path', 'fq_path',
+              metavar='<dir>', required=True,
+              help='Input fastq path.')
 @click.option('-r', '--ref_genome_file', 'genome_fasta_file',
-              metavar='<fasta file>', type=click.File('r'), required=True,
+              metavar='<fasta file>', required=True,
               help='Reference sequence file.')
+@click.option('--build-index', 'build_index',
+              is_flag=True, flag_value=True,
+              help='Build genome index.')
 @click.option('-samples', '--sample_list', 'sample_list',
-              metavar='<file>', type=click.File('r'), required=True,
-              help='Sample name list. (One sample name per line, eg. Sample1\\nSample2\\n)')
-@click.option('-snp', '--snp_filter', 'snp_filter_expression',
-              metavar='<str>',
-              help='SNP filter expression.')
-@click.option('-indel', '--indel_filter', 'indel_filter_expression',
-              metavar='<str>',
-              help='INDEL filter expression.')
-@click.option('-o', '--output_prefix', 'output_prefix',
+              metavar='<file|stdin>', type=click.File('r'), required=True,
+              help=r'Input sample list file. (FastqPrefix\tSampleName)')
+@click.option('-p', '--num-processing', 'num_processing',
+              metavar='<int>', type=int, default=5, show_default=True,
+              help='Number of processing.')
+@click.option('-o', '--output-path', 'output_path',
               metavar='<str>', required=True,
-              help='Output file prefix.')
-@click.option('-O', '--record_command', 'record_command',
-              metavar='<file>', type=click.File('w'),
-              help='Record all commands used by the pipeline into the specified file.')
+              help='Output path.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@click.argument('sorted_bam_files', metavar='<sorted bam files>', nargs=-1, type=click.File('r'), required=True)
-def run(genome_fasta_file,
-        sample_list,
-        snp_filter_expression,
-        indel_filter_expression,
-        output_prefix,
-        sorted_bam_files,
-        record_command):
+def run(fq_path: str,
+        genome_fasta_file: str,
+        build_index: bool,
+        sample_list: TextIOWrapper,
+        num_processing: int,
+        output_path: str):
     """Variation analysis pipeline of GATK."""
     from datetime import datetime
     start_time = datetime.now().replace(microsecond=0)
-    if sample_list.name == '<stdin>':
-        sample_list = [line.strip() for line in click.open_file('-').readlines()]
-    else:
-        sample_list = [line.strip() for line in sample_list]
-    genome_fasta_file = genome_fasta_file.name
-    sorted_bam_files = [bam_file.name for bam_file in sorted_bam_files]
-    main(genome_fasta_file,
-         sample_list,
-         snp_filter_expression,
-         indel_filter_expression,
-         output_prefix,
-         sorted_bam_files,
-         record_command)
+    main(fq_path, genome_fasta_file, build_index, sample_list, num_processing, output_path)
     end_time = datetime.now().replace(microsecond=0)
     click.echo(f'[{datetime.now().replace(microsecond=0)}] Total time spent {end_time - start_time}.', err=True)
 
