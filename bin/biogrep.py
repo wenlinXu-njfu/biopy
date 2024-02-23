@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 File: biogrep.py
 Description: This program works just like fishing, it helps you to get things that you wanted from a target file.
@@ -18,17 +18,24 @@ def main(bait_file: TextIOWrapper,
          bait_column: int,
          fish_column: int,
          match: bool,
+         invert_match: bool,
          output_file: TextIOWrapper):
     baits = set(sub(r' {2,}', '\t', line).split('\t')[bait_column - 1].strip()
                 for line in bait_file if line.strip())
     for line in fish_file:
         if line.strip():
             fish = sub(r' {2,}', '\t', line).split('\t')[fish_column - 1].strip()
-            if match and (fish in baits):
+            if match and not invert_match and (fish in baits):
                 click.echo(line.strip(), output_file)
-            elif not match:
+            elif match and invert_match and (fish not in baits):
+                click.echo(line.strip(), output_file)
+            elif not match and not invert_match:
                 for bait in baits:
                     if (bait in fish) or (fish in bait):
+                        click.echo(line.strip(), output_file)
+            elif not match and invert_match:
+                for bait in baits:
+                    if (bait not in fish) and (fish not in bait):
                         click.echo(line.strip(), output_file)
 
 
@@ -47,14 +54,17 @@ def main(bait_file: TextIOWrapper,
               help='Column of fish file that used to match the bait file.')
 @click.option('--match/--contain', default=True, show_default=True,
               help='Match mode.')
+@click.option('-v', '--invert-match', 'invert_match',
+              is_flag=True, flag_value=True,
+              help='Select non-matching lines.')
 @click.option('-o', '--output-file', 'output_file',
               metavar='<file|stdout>', type=click.File('w'),
               help='Output file, print results to terminal as stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(bait_file, fish_file, bait_column, fish_column, match, output_file):
+def run(bait_file, fish_file, bait_column, fish_column, match, invert_match, output_file):
     """This program works just like fishing, it helps you to get things that you wanted from a target file."""
-    main(bait_file, fish_file, bait_column, fish_column, match, output_file)
+    main(bait_file, fish_file, bait_column, fish_column, match, invert_match, output_file)
 
 
 if __name__ == '__main__':
