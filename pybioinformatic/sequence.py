@@ -92,7 +92,7 @@ class Sequence:
         if item.start is None or item.start == 0:
             start = 1
         else:
-            start = item.start
+            start = item.start + 1
         if item.stop is None or item.stop > self.len:
             stop = self.len
         else:
@@ -108,6 +108,10 @@ class Sequence:
 
     def __len__(self) -> int:
         return len(self.seq.replace('*', '').replace('\n', ''))
+
+    def k_mer(self, k_mer: int):
+        for i in range(0, len(self) - k_mer - 1):
+            yield self[i:i+k_mer]
 
     def get_seq_len_info(self) -> str:
         """Get sequence length information."""
