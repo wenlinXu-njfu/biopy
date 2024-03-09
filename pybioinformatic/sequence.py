@@ -110,6 +110,7 @@ class Sequence:
         return len(self.seq.replace('*', '').replace('\n', ''))
 
     def k_mer(self, k_mer: int):
+        """Get K-mer sequence."""
         for i in range(0, len(self) - k_mer - 1):
             yield self[i:i+k_mer]
 

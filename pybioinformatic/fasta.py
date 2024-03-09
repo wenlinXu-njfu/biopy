@@ -10,6 +10,7 @@ from io import TextIOWrapper
 from typing import Union
 from os.path import abspath
 from gzip import GzipFile
+from pandas import DataFrame
 from click import echo, open_file
 from itertools import groupby
 from pybioinformatic.sequence import Nucleotide, Protein
@@ -84,7 +85,7 @@ class Fasta:
         self.__seek_zero()
 
     def to_dict(self, parse_id: bool = False) -> dict:
-        """Get sequence dict from FASTA file."""
+        """Parse fasta as dict."""
         seq_dict = {}
         for nucl_obj in self.parse(parse_id):
             if nucl_obj.id not in seq_dict:
@@ -95,6 +96,13 @@ class Fasta:
                 exit()
         self.__seek_zero()
         return seq_dict
+
+    def to_dataframe(self, parse_id: bool = True) -> DataFrame:
+        """Parse fasta as pandas.DataFrame"""
+        seq_dict = self.to_dict(parse_id)
+        for k, v in seq_dict.items():
+            seq_dict[k] = list(v)
+        return DataFrame(seq_dict)
 
 # File format conversion method=========================================================================================
     def merge_sequence(self, parse_id: bool = False) -> Union[Nucleotide, Protein]:
@@ -109,6 +117,7 @@ class Fasta:
             yield seq_obj
 
     def fa2tab(self, parse_id: bool = False):
+        """Convert fasta to tab delimited txt text files."""
         for seq_obj in self.parse(parse_id):
             yield f'{seq_obj.id}\t{seq_obj.seq}'
 
@@ -147,3 +156,8 @@ class Fasta:
                 yield nucl_obj
             else:
                 echo(f'{nucl_obj.id} has been filtered out.', err=True)
+
+    def k_mer(self, k: int, parse_id: bool = True):
+        """Get K-mer sequence for each sequence from fasta file."""
+        for nucl in self.parse(parse_id):
+            yield from nucl.k_mer(k)
