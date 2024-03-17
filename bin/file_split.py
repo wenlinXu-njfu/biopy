@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from os import mkdir
 from os.path import exists
 from typing import Union
-from _io import TextIOWrapper
+from io import TextIOWrapper
 import click
 from click._compat import _NonClosingTextIOWrapper
 from pybioinformatic import Displayer

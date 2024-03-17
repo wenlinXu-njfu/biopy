@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 File: biogrep.py
 Description: This program works just like fishing, it helps you to get things that you wanted from a target file.
