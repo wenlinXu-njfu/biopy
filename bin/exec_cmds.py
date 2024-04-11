@@ -13,8 +13,8 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(command_file: TextIOWrapper, processing_num: int):
-    task_manager = TaskManager([line.strip() for line in command_file], processing_num)
-    task_manager.parallel_run_cmd()
+    tkm = TaskManager([line.strip() for line in command_file], processing_num)
+    tkm.parallel_run_cmd()
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

@@ -33,10 +33,10 @@ def fastp(sample_name: str, fq1: str, fq2: str, output_path: str):
     return cmd
 
 
-def align(sample_name: str, genome_fasta_file: str, fastq_1: str, fastq_2: str, output_path: str):
+def align(sample_name: str, genome_fasta_file: str, fq1: str, fq2: str, output_path: str):
     cmds = []
     # Align command
-    cmd1 = fr'bwa mem -t 5 -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fastq_1} {fastq_2} \
+    cmd1 = fr'bwa mem -t 5 -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fq1} {fq2} \
     | samtools view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.bam'
     cmds.append(cmd1)
     # map=30 filter
@@ -106,17 +106,18 @@ def main(fq_path: str,
         fq2 = f'{fq_path}/{fq_prefix}_2.fq.gz'
         with open(f'{output_path}/shell/{sample_name}.sh', 'w') as o:
             cmds = []
-            cmd = fastp(sample_name, fq1, fq2, f'{output_path}/QC/{sample_name}')
+            cmd = fastp(sample_name=sample_name,
+                        fq1=fq1, fq2=fq2,
+                        output_path=f'{output_path}/QC/{sample_name}')
             cmds.append(cmd)
-            cmds.extend(align(sample_name,
-                              genome_fasta_file,
-                              fq1,
-                              fq2,
-                              f'{output_path}/align/{sample_name}'))
-            cmds.extend(HaplotypeCaller(genome_fasta_file,
-                                         f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
-                                         sample_name,
-                                         f'{output_path}/variant/{sample_name}'))
+            cmds.extend(align(sample_name=sample_name,
+                              genome_fasta_file=genome_fasta_file,
+                              fq1=fq1, fq2=fq2,
+                              output_path=f'{output_path}/align/{sample_name}'))
+            cmds.extend(HaplotypeCaller(genome_fasta_file=genome_fasta_file,
+                                        bam_file=f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
+                                        sample_name=sample_name,
+                                        output_path=f'{output_path}/variant/{sample_name}'))
             o.write('\n'.join(cmds))
     system(f'for i in `ls {output_path}/shell`; do echo "sh {output_path}/shell/$i"; done > {output_path}/All.sh')
     system(f'exec_cmds -f {output_path}/All.sh -n {num_processing}')

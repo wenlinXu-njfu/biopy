@@ -28,10 +28,10 @@ def main(in_dir, old, new):
               metavar='<dir>', required=True,
               help='The directory where the file to be renamed resides.')
 @click.option('-old', '--old_name', 'old',
-              metavar='<str>',
+              metavar='<str>', required=True,
               help='The string to be replaced, it supports for regular expressions')
 @click.option('-new', '--new_name', 'new',
-              metavar='<str>',
+              metavar='<str>', required=True,
               help='Replacement string, it supports for regular expressions')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
