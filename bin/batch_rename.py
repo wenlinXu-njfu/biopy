@@ -16,10 +16,7 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 def main(in_dir, old, new):
     files = listdir(in_dir)
     for file in files:
-        if new:
-            s = sub(old, new, file)
-        else:
-            s = sub(old, '', file)
+        s = sub(old, new, file) if new else sub(old, '', file)
         rename(f'{in_dir}/{file}', f'{in_dir}/{s}')
 
 

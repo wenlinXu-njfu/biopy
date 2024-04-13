@@ -26,7 +26,7 @@ def main(gff_file: Union[str, TextIOWrapper],
               help='Input GFF file.')
 @click.option('-o', '--gtf_file', 'gtf_file',
               metavar='<gtf file|stdout>', type=click.File('w'),
-              help='Output GTF file, if not specified, print results to terminal as stdout.')
+              help='Output GTF file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, gtf_file):

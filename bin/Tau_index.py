@@ -11,7 +11,7 @@ from pybioinformatic import read_in_gene_expression_as_dataframe, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(exp_file, out_file_prefix):
+def main(exp_file: str, out_file_prefix: str):
     gene_exp_matrix = read_in_gene_expression_as_dataframe(exp_file)
     if isinstance(gene_exp_matrix, str):
         click.echo(gene_exp_matrix, err=True)

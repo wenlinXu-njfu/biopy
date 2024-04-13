@@ -24,7 +24,7 @@ def main(gff_file: TextIOWrapper, out_file: TextIOWrapper = None):
               help='Input unsorted GFF file.')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<gff file|stdout>', type=click.File('w'),
-              help='Output sorted GFF file, if not specified, print results to terminal as stdout.')
+              help='Output sorted GFF file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, output_file):

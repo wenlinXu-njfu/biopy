@@ -29,7 +29,7 @@ def main(bed_file: Union[str, TextIOWrapper],
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--bed_file', 'bed_file',
               metavar='<bed file|stdin>', type=click.File('r'), required=True,
-              help='Input BED file.\n(Chr_num\\tStart\\tEnd\\tFrame\\tName\\tStrand\\tetc)')
+              help=r'Input BED file (Chr_num\tStart\tEnd\tFrame\tName\tStrand\tEtc).')
 @click.option('-r', '--ref_fasta', 'ref_fasta_file',
               metavar='<fasta file|stdin>', type=click.File('r'), required=True,
               help='Input reference sequence FASTA file.')
@@ -54,7 +54,7 @@ def main(bed_file: Union[str, TextIOWrapper],
                    'specify whether extension (including sequence self in BED file).')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<fasta file|stdout>', type=click.File('w'),
-              help='Output FASTA file, if not specified, print results to terminal as stdout.')
+              help='Output FASTA file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(bed_file, ref_fasta_file, use_id, upstream, downstream, both_end, extension, output_file):

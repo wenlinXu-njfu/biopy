@@ -41,10 +41,10 @@ def main(fq_files: Tuple, out_file: TextIOWrapper):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('fastq_files', nargs=-1, metavar='<fasta files>', required=True)
+@click.argument('fastq_files', nargs=-1, metavar='<fastq files>', required=True)
 @click.option('-o', '--output_fasta', 'fasta_file',
               metavar='<fasta file|stdout>', type=click.File('w'),
-              help='Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fastq_files, fasta_file):

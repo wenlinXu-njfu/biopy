@@ -53,7 +53,7 @@ def main(fasta_file: TextIOWrapper,
               help='Direction of the chain.')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<fasta file|stdout>', type=click.File('w'),
-              help='Output file, if not specified, print result to terminal as stdout.')
+              help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(ref_fasta_file, chr_name, start_site, end_site, strand, output_file):

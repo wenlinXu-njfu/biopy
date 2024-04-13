@@ -8,8 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union
 from io import TextIOWrapper
-from os import mkdir
-from os.path import exists
+from os import makedirs, getcwd
 import click
 from pybioinformatic import GenoType, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
@@ -19,14 +18,10 @@ def main(gt_file1: Union[str, TextIOWrapper],
          gt_file2: Union[str, TextIOWrapper],
          database_compare: bool,
          output_path: str):
-    if not exists(output_path):
-        mkdir(output_path)
-    with GenoType(gt_file1) as gt1:
-        with GenoType(gt_file2) as gt2:
-            if database_compare:
-                gt1.compare(gt2, output_path=output_path)
-            else:
-                gt1.self_compare(gt2, output_path=output_path)
+    makedirs(output_path, exist_ok=True)
+    with GenoType(gt_file1) as gt1, GenoType(gt_file2) as gt2:
+        gt1.compare(gt2, output_path=output_path) if database_compare else \
+            gt1.self_compare(gt2, output_path=output_path)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -41,7 +36,7 @@ def main(gt_file1: Union[str, TextIOWrapper],
               help='Specify comparison mode. Database compare means test sample compare with database sample. '
                    'Self compare means each sample compares with its different test batch.')
 @click.option('-o', '--output-path', 'output_path',
-              metavar='<path>', default='./', show_default=True,
+              metavar='<path>', default=getcwd(), show_default=True,
               help='Output file path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)

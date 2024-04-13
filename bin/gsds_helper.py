@@ -37,8 +37,7 @@ def main(anno_file: Union[str, TextIOWrapper],
               type=click.Choice(['gene', 'transcript']), default='transcript', show_default=True,
               help='If input file is GTF, specify feature type.')
 @click.option('-o', '--output_file', 'outfile', metavar='<file>', type=click.File('w'),
-              help='Output file (ID\\tStart\\tEnd\\tFeature\\tFrame), '
-                   'if not specified, print results to terminal as stdout.')
+              help=r'Output file (ID\tStart\tEnd\tFeature\tFrame), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(anno_file, file_format, feature_type, outfile):

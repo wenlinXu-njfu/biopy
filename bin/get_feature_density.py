@@ -28,7 +28,7 @@ def main(chr_len_file: TextIOWrapper,
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-l', '--chr_len_file', 'chr_len_file',
               metavar='<file|stdin>', type=click.File('r'), required=True,
-              help='Input chromosome length file. (Chr_num\\tLength\\n)')
+              help=r'Input chromosome length file. (Chr_num\tLength)')
 @click.option('-g', '--gff_file', 'gff_file',
               metavar='<gff file|stdin>', type=click.File('r'), required=True,
               help='Input genome annotation GFF file.')
@@ -40,7 +40,7 @@ def main(chr_len_file: TextIOWrapper,
               help='Density statistical span.')
 @click.option('-o', '--output_file', 'out',
               metavar='<file|stdout>', type=click.File('w'),
-              help='Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, if not specified, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(chr_len_file, gff_file, feature_type, span, out):

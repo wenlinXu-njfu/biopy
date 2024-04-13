@@ -55,7 +55,7 @@ def main(fasta_file: Union[str, TextIOWrapper],
                    'sort by length first then id by default.')
 @click.option('-o', '--output_file', 'outfile',
               metavar='<fasta file|stdout>', type=click.File('w'),
-              help='Output file, if not specified, print results to terminal as stdout.')
+              help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_file, parse_seqids, char_num, sort_by_len, sort_by_id, outfile):

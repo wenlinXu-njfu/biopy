@@ -247,8 +247,6 @@ class Gtf:
 
     def to_gsds(self, feature_type: Choice(['gene', 'transcript']) = 'transcript') -> str:
         """Convert the file format from GTF to GSDS."""
-        content = []
-        append = content.append
         if feature_type == 'gene':
             exon_dict = self.get_non_redundant_exon()
         else:
@@ -260,13 +258,11 @@ class Gtf:
                 if not parent_id:
                     parent_id = exon['id']
                     parent_start = exon['start']
-                    append(f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t.")
+                    yield f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t."
                 else:
                     if parent_id == exon['id']:
-                        append(f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t.")
+                        yield f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t."
                     else:
                         parent_id = exon['id']
                         parent_start = exon['start']
-                        append(f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t.")
-        content = '\n'.join(content) + '\n'
-        return content
+                        yield f"{exon['id']}\t{exon['start'] - parent_start}\t{exon['end'] - parent_start}\texon\t."

@@ -41,11 +41,11 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
                    'takes precedence over the "-l --log_file" option.')
 @click.option('-log', '--log_file', 'log_file',
               metavar='<file|stderr>', type=click.File('w'),
-              help='Write the sequence that not found motif to logfile. This conflicts with the "-q --quiet" option and '
-                   'has a lower priority than the "-q --quiet" option.')
+              help='Write the sequence that not found motif to logfile, stderr by default. '
+                   'This conflicts with the "-q --quiet" option and has a lower priority than the "-q --quiet" option.')
 @click.option('-o', '--output_file', 'outfile',
               metavar='<file|stdout>', type=click.File('w'),
-              help='Output file (Seq_id\\tStart\\tEnd\\tMotif), if not specified, print results to terminal as stdout.')
+              help=r'Output file (Seq_id\tStart\tEnd\tMotif), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_files, motif, quiet, log_file, outfile):

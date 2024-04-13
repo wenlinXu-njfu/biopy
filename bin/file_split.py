@@ -6,8 +6,7 @@ CreateDate: 2022/1/23
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from os import mkdir
-from os.path import exists
+from os import makedirs
 from typing import Union
 from io import TextIOWrapper
 import click
@@ -21,8 +20,7 @@ def main(input_file: Union[TextIOWrapper, list],
          output_dir: str,
          header: bool,
          header_line_num: int):
-    if not exists(output_dir):
-        mkdir(output_dir)
+    makedirs(output_dir, exist_ok=True)
     line_count, subfile_num = 0, 1
     line_num = sum(1 for _ in input_file)
     header_content = content = ''
@@ -68,7 +66,7 @@ def main(input_file: Union[TextIOWrapper, list],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-i', '--input_file', 'input_file',
-              metavar='<file>', type=click.File('r'), required=True,
+              metavar='<file|stdin>', type=click.File('r'), required=True,
               help='Input file.')
 @click.option('-n', '--line_num', 'line_num',
               metavar='<int>', type=int,  required=True,

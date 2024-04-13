@@ -59,7 +59,7 @@ def main(bait_file: TextIOWrapper,
               help='Select non-matching lines.')
 @click.option('-o', '--output-file', 'output_file',
               metavar='<file|stdout>', type=click.File('w'),
-              help='Output file, print results to terminal as stdout by default.')
+              help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(bait_file, fish_file, bait_column, fish_column, match, invert_match, output_file):

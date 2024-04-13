@@ -70,9 +70,9 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
 @click.option('-P', '--only_plus', 'only_plus', is_flag=True, flag_value=True,
               help='Only predict plus chain.')
 @click.option('-log', '--log_file', 'log_file', metavar='<file|stderr>', type=click.File('w'),
-              help='Write the sequence that not found ORF to logfile rather than print to terminal as stderr.')
+              help='Write the sequence that not found ORF to logfile, stderr by default.')
 @click.option('-o', '--output_path', 'output_path', metavar='<path|stdout>',
-              help='Output path, if not specified, print ORFs to terminal as stdout.')
+              help='Output path, stdout by default.')
 @click.option('-n', '--num_processes', 'num_processes', metavar='<int>', type=int, default=1, show_default=True,
               help='Number of processes.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

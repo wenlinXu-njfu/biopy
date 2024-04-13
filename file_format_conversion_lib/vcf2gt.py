@@ -37,7 +37,7 @@ def main(vcf_files: Union[str, TextIOWrapper],
 @click.argument('vcf_files', nargs=-1, metavar='<vcf files|stdin>', type=click.File('r'), required=True)
 @click.option('-o', '--output_file', 'output_file',
               metavar='<gt file|stdout>', type=click.File('w'),
-              help='Output file, print results to terminal by default.')
+              help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Converting the vcf file to gt format.')

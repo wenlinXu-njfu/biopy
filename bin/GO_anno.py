@@ -60,8 +60,7 @@ def main(go_basic_obo_file, out_file):
               help='Input GO annotation file (go-basic.obo).')
 @click.option('-o', '--output_file', 'outfile',
               metavar='<file>',
-              help='Output file (ID\\tChild_id\\tName\\tNamespace\\tDefinition), '
-                   'if not specified, print results to terminal as stdout.')
+              help=r'Output file (ID\tChild_id\tName\tNamespace\tDefinition), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(obo_file, outfile):

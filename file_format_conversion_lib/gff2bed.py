@@ -31,7 +31,7 @@ def main(gff_file: Union[str, TextIOWrapper],
               help='Specify the type of feature to convert to BED format, multiple types are separated by commas. [default: all]')
 @click.option('-o', '--output_bed_file', 'output_bed_file',
               metavar='<bed file|stdout>', type=click.File('w'),
-              help='Output BED file, if not specified, print results to terminal as stdout.')
+              help='Output BED file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, feature_type, output_bed_file):

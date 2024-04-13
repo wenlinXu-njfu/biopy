@@ -12,9 +12,12 @@ from pybioinformatic import Gtf, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(gtf_file: TextIOWrapper, fasta_file: TextIOWrapper, out_file: TextIOWrapper):
-    for cDNA_nucl_obj in Gtf(gtf_file).get_cDNA(fasta_file):
-        click.echo(cDNA_nucl_obj, out_file)
+def main(gtf_file: TextIOWrapper,
+         fasta_file: TextIOWrapper,
+         out_file: TextIOWrapper):
+    with Gtf(gtf_file) as gtf:
+        for cDNA_nucl_obj in gtf.get_cDNA(fasta_file):
+            click.echo(cDNA_nucl_obj, out_file)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -26,7 +29,7 @@ def main(gtf_file: TextIOWrapper, fasta_file: TextIOWrapper, out_file: TextIOWra
               help='Input reference sequence FASTA file.')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<fasta file|stdout>', type=click.File('w'),
-              help='Output FASTA file, if not specified, print results to terminal as stdout.')
+              help='Output FASTA file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gtf_file, ref_fasta_file, output_file):

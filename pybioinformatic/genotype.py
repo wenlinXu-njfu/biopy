@@ -268,7 +268,7 @@ class GenoType:
                     gt1 = gt1[~gt1.isnull()]
                     gt2 = gt2[~gt2.isnull()]
                     IdenticalCount = gt1.eq(gt2).sum()
-                    GS = '%.2f' % (IdenticalCount / TotalCount * 100)
+                    GS = 0.00 if TotalCount == 0 else '%.2f' % (IdenticalCount / TotalCount * 100)
                     data.append([gt1.name, gt2.name, IdenticalCount, NA_num, TotalCount, GS])
                     if gt1.name != gt2.name:
                         if (f'{gt1.name}-{gt2.name}' not in sample_pair) and \
@@ -287,8 +287,9 @@ class GenoType:
         consistency_df.to_csv(f'{output_path}/TestSample.consistency.fmt2.xls', sep='\t', na_rep='')
         if len(consistency_df) <= 80:
             self.__draw_consistency_heatmap(
-                read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
-                output_path)
+                consistency_df=read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
+                output_path=output_path
+            )
         # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
         right_sample_range.insert(1, len(df1.columns) + 2)
