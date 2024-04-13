@@ -45,7 +45,7 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
                     with tqdm(total=fa.seq_num, unit=' sequence', desc=f'[Processing {fa.name}]') as pbar:
                         results = tkm.parallel_run_func(sub_processing, lambda _: pbar.update(1))
                     results = [i.get() for i in results]
-                    log = '\n'.join([i for i in results if isinstance(i, str)]) + '\n'
+                    log = '\n'.join([i for i in results if isinstance(i, str)])
                     click.echo(log, log_file, err=True)
                     ORFs = [ORF for ORF in results if not isinstance(ORF, str)]
                     ORFs.sort(key=lambda i: natsort_key(i.id))
