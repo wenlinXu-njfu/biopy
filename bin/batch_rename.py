@@ -13,7 +13,7 @@ from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
-def main(in_dir, old, new):
+def main(in_dir: str, old: str, new: str = ''):
     files = listdir(in_dir)
     for file in files:
         s = sub(old, new, file) if new else sub(old, '', file)
@@ -28,7 +28,7 @@ def main(in_dir, old, new):
               metavar='<str>', required=True,
               help='The string to be replaced, it supports for regular expressions')
 @click.option('-new', '--new_name', 'new',
-              metavar='<str>', required=True,
+              metavar='<str>',
               help='Replacement string, it supports for regular expressions')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
