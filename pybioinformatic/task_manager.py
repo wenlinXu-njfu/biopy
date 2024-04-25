@@ -8,7 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union, Iterable, Callable
 from io import TextIOWrapper
-from subprocess import run
+from subprocess import run, PIPE
 from datetime import datetime
 from getpass import getuser
 from socket import gethostname
@@ -51,7 +51,7 @@ class TaskManager:
     def clear_task(self):
         self.task = []
 
-    def echo_and_exec_cmd(self, cmd: str):
+    def echo_and_exec_cmd(self, cmd: str) -> Union[None, str]:
         """
         NOTICE: This method cannot run normally when it is called by multiprocessing.
                 Because different subprocess will share same TaskManager.loger attribution.
@@ -59,23 +59,30 @@ class TaskManager:
         echo(f'\033[33m[{getuser()}@{gethostname()}: '
              f'{datetime.now().replace(microsecond=0)}]\n$ '
              f'\033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
-        run(cmd, shell=True, executable="/bin/bash")
+        stdout = run(cmd, shell=True, executable="/bin/bash", stdout=PIPE)
+        stdout = stdout.stdout.decode('utf-8')
+        return stdout
 
-    def serial_run_cmd(self):
+    def serial_run_cmd(self) -> Union[None, str]:
         for cmd in self.task:
             echo(f'\033[33m[{getuser()}@{gethostname()}: {datetime.now().replace(microsecond=0)}]\n'
                  f'$ \033[0m\033[36m{cmd}\033[0m', self.loger, err=True)
-            run(cmd, shell=True, executable="/bin/bash")
+            stdout = run(cmd, shell=True, executable="/bin/bash", stdout=PIPE)
+            stdout = stdout.stdout.decode('utf-8')
+            yield stdout
 
     def parallel_run_cmd(self):
         if not self.task:
             echo('\033[31mError: TaskManager has no task.\033[0m', err=True)
             exit()
+        results = []
         with Pool(self.num_processing) as pool:
             for cmd in self.task:
-                pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
+                ret = pool.apply_async(self.echo_and_exec_cmd, args=(cmd,))
+                results.append(ret)
             pool.close()
             pool.join()
+        return results
 
     def parallel_run_func(self, func: Callable, call_back_func: Callable = None):
         results = []

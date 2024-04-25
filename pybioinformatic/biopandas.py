@@ -8,6 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 from typing import Union, List
 from io import StringIO
 from warnings import filterwarnings
+from re import sub
 from click import echo, open_file
 from pandas import set_option, read_table, read_excel, read_csv, DataFrame, ExcelWriter
 
@@ -141,3 +142,11 @@ def dfs_to_excel(df_list: list, output_file: str, sheets_name: list = None):
             for row_num, row_data in enumerate(df.values):
                 for col_num, col_data in enumerate(row_data):
                     worksheet.write(row_num + 1, col_num, col_data, default_cell_format)
+
+
+def dataframe_to_str(df: DataFrame,
+                     index: bool = True,
+                     header: bool = True):
+    string_df = sub(r'\n +', '\n', df.to_string(index=index, header=header).strip())
+    string_df = sub(r' +', '\t', string_df)
+    return string_df

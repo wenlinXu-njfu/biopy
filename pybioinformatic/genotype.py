@@ -7,6 +7,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union, List
 from io import TextIOWrapper
+from os import getcwd
 from os.path import abspath
 from warnings import filterwarnings
 from re import sub
@@ -195,7 +196,7 @@ class GenoType:
     def self_compare(self, other,
                      sheet1: Union[str, int, List[Union[str, int]]] = None,
                      sheet2: Union[str, int, List[Union[str, int]]] = None,
-                     output_path: str = './') -> None:
+                     output_path: str = getcwd()) -> None:
         """Genotype consistency of different test batches in a single sample."""
         df1 = self.to_dataframe(sheet1, index_col=0, sort_allele=False)
         df2 = other.to_dataframe(sheet2, index_col=0, sort_allele=False)
@@ -219,17 +220,14 @@ class GenoType:
         sample_consistency.sort_values('SampleName', key=natsort_key, inplace=True)
         interval_stat = cut(sample_consistency['GS(%)'], bins).value_counts(sort=False)
         interval_stat.index.name = None
-        interval_stat = interval_stat.to_string()
-        sample_consistency = sub(r'\n +', '\n', sample_consistency.to_string(index=False).strip())
-        sample_consistency = sub(r' +', '\t', sample_consistency)
         # Write results to output file.
-        echo(sample_consistency, open(f'{output_path}/Sample.consistency.xls', 'w'))
-        echo(interval_stat, open(f'{output_path}/Interval.stat.xls', 'w'))
+        sample_consistency.to_csv(f'{output_path}/Sample.consistency.xls', sep='\t', index=False)
+        interval_stat.to_csv(f'{output_path}/Interval.stat.xls', sep='\t', header=False)
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
-                output_path: str = './') -> None:
+                output_path: str = getcwd()) -> None:
         """
         Calculate genotype consistency.
         Output TestSample.consistency.xls, TestSample.Consistency.xls and TestSample.GT.xls three files.
