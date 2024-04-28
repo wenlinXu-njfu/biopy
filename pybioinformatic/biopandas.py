@@ -52,7 +52,9 @@ def merge_duplicate_indexes(df: DataFrame) -> DataFrame:
     return data_frame
 
 
-def filter_by_min_value(df: DataFrame, min_value: float, start_column_num: int = 1,
+def filter_by_min_value(df: DataFrame,
+                        min_value: float,
+                        start_column_num: int = 1,
                         end_column_num: int = None) -> DataFrame:
     """Delete rows where all column values are less than the specified value"""
     if end_column_num is None:
@@ -147,6 +149,8 @@ def dfs_to_excel(df_list: list, output_file: str, sheets_name: list = None):
 def dataframe_to_str(df: DataFrame,
                      index: bool = True,
                      header: bool = True):
-    string_df = sub(r'\n +', '\n', df.to_string(index=index, header=header).strip())
+    if index:
+        df = df.reset_index()
+    string_df = sub(r'\n +', '\n', df.to_string(index=False, header=header).strip())
     string_df = sub(r' +', '\t', string_df)
     return string_df
