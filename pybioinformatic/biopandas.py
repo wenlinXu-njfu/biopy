@@ -5,12 +5,12 @@ CreateDate: 2022/1/10
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from typing import Union, List
+from typing import Union, List, Iterable
 from io import StringIO
 from warnings import filterwarnings
 from re import sub
 from click import echo, open_file
-from pandas import set_option, read_table, read_excel, read_csv, DataFrame, ExcelWriter
+from pandas import cut, set_option, read_table, read_excel, read_csv, Series, DataFrame, ExcelWriter
 
 
 def display_set(decimal: int = 2) -> None:
@@ -154,3 +154,9 @@ def dataframe_to_str(df: DataFrame,
     string_df = sub(r'\n +', '\n', df.to_string(index=False, header=header).strip())
     string_df = sub(r' +', '\t', string_df)
     return string_df
+
+
+def interval_stat(ser: Series, bins: Iterable, name: str = None):
+    ret = cut(x=ser, bins=bins).value_counts(sort=False).to_frame(name)
+    ret.index.name = ret.index.name + '_interval'
+    return ret

@@ -18,7 +18,7 @@ from matplotlib.pyplot import rcParams, figure, tick_params, savefig
 from seaborn import heatmap
 from click import echo
 from pybioinformatic.task_manager import TaskManager
-from pybioinformatic.biopandas import read_file_as_dataframe_from_stdin
+from pybioinformatic.biopandas import read_file_as_dataframe_from_stdin, interval_stat
 filterwarnings("ignore")
 
 
@@ -218,11 +218,10 @@ class GenoType:
         bins = range(0, 110, 10)  # Set the consistency statistics interval.
         sample_consistency = DataFrame(data, columns=['SampleName', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)'])
         sample_consistency.sort_values('SampleName', key=natsort_key, inplace=True)
-        interval_stat = cut(sample_consistency['GS(%)'], bins).value_counts(sort=False)
-        interval_stat.index.name = None
+        interval_stat_df = interval_stat(ser=sample_consistency['GS(%)'], bins=bins, name='Count')
         # Write results to output file.
         sample_consistency.to_csv(f'{output_path}/Sample.consistency.xls', sep='\t', index=False)
-        interval_stat.to_csv(f'{output_path}/Interval.stat.xls', sep='\t', header=False)
+        interval_stat_df.to_csv(f'{output_path}/Interval.stat.xls', sep='\t', header=False)
 
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
