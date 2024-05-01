@@ -60,6 +60,6 @@ def draw_chr(chr_len_file, height: float = 1, bottom: Union[float, list] = 9.0,
 
 # Test
 if __name__ == '__main__':
-    draw_chr('test_data/Ptc_chr_len.txt', bottom=[9, 9, 9, 9, 9, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10])
+    draw_chr('../../test_data/circos/Ptc_chr_len.txt', bottom=[9, 9, 9, 9, 9, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10])
     # plt.legend()
     plt.show()

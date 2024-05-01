@@ -67,8 +67,8 @@ def draw_outer_bar(chr_theta_dict: dict, chr_width_dict: dict, axes: matplotlib.
 
 # Test
 if __name__ == '__main__':
-    length, theta, width, ax, bar_container = draw_chr('test_data/Ptc_chr_len.txt')
-    ax, bars = draw_outer_bar(theta, width, ax, 'test_data/stat.txt')
+    length, theta, width, ax, bar_container = draw_chr('../../test_data/circos/Ptc_chr_len.txt')
+    ax, bars = draw_outer_bar(theta, width, ax, '../../test_data/circos/stat.txt')
     bars.insert(0, bar_container)
     plt.legend(bars, ['chromosome', 'exonic', 'intronic', 'intergenic', 'antisense'],
                fontsize=10, loc=10, bbox_to_anchor=(0.5, 0.5))

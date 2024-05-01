@@ -26,10 +26,10 @@ def plot_gene_structure(gtf_file: str, exon_color: str, intron_color: str = 'bla
         left = 0
         for exon_dict in l:
             width = exon_dict['end'] - exon_dict['start'] + 1
-            exon = plt.barh(i + 1, width, left=exon_dict['start'], color=exon_color, edgecolor=edge_color, hatch=exon_hatch)
+            exon = plt.barh(i + 1, width, left=exon_dict['start'], color=exon_color, edgecolor=edge_color, hatch=exon_hatch, linewidth=0.3)
             if left:
                 right = exon_dict['start'] - 1
-                intron, = plt.plot([left, right], [i + 1, i + 1], color=intron_color, linewidth=0.4)
+                intron, = plt.plot([left, right], [i + 1, i + 1], color=intron_color, linewidth=0.3)
                 left = exon_dict['end'] + 1
             else:
                 left = exon_dict['end'] + 1

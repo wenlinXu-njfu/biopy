@@ -58,14 +58,14 @@ if __name__ == '__main__':
     plt.rcParams['pdf.fonttype'] = 42
 
     # Draw chromosome bar.
-    len_dict, theta_dict, width_dict, ax, bar_container = draw_chr('test_data/Ptc_chr_len.txt')
+    len_dict, theta_dict, width_dict, ax, bar_container = draw_chr('../../test_data/circos/Ptc_chr_len.txt')
 
     # Draw outer bar.
-    ax, artist_list = draw_outer_bar(theta_dict, width_dict, ax, 'test_data/stat.txt', 7.8)
+    ax, artist_list = draw_outer_bar(theta_dict, width_dict, ax, '../../test_data/circos/stat.txt', 7.8)
 
     # Draw bezier curve.
     used_color = []
-    for line in open('test_data/link.txt'):
+    for line in open('../../test_data/circos/link.txt'):
         split = line.strip().split('\t')
         chr1, start1, end1 = split[0], int(split[1]), int(split[2])
         chr2, start2, end2 = split[3], int(split[4]), int(split[5])

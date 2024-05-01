@@ -21,11 +21,58 @@ xlsxwriter ≥ 3.1.9<br />**
 pfamscan for batch perform pfamscan.<br />**
 
 ## Getting started
-**git clone https://github.com/wenlinXu-njfu/biopy_v1.1.0.git <br />
-python biopy_v1.1.0/configure.py<br />
-export PYTHONPATH=$PATH:/home/user/software/biopy_v1.1.0<br />
-export PATH=$PATH:/home/user/software/biopy_v1.1.0/bin<br />**
+```shell
+git clone https://github.com/wenlinXu-njfu/biopy.git
+python biopy/configure.py
+export PYTHONPATH=$PATH:/home/user/software/biopy
+export PATH=$PATH:/home/user/software/biopy/bin
+```
 
-## example
-**plot circos \ <br /> -c biopy_v1.1.0/plot_lib/circos/test_data/Ptc_chr_len.txt \ <br /> -d biopy_v1.1.0/plot_lib/circos/test_data/gene_density.txt \ <br /> -s biopy_v1.1.0/plot_lib/circos/test_data/stat.txt \ <br /> -l biopy_v1.1.0/plot_lib/circos/test_data/link.txt \ <br /> -o biopy_v1.1.0/plot_lib/circos/test_data/circos.png**
-![image](plot_lib/circos/test_data/circos.png)
+## Example
+### Run commands concurrently.
+```shell
+for i in `ls dir`;
+do echo blastn -query dir/$i -db genome.fa -out "$i.blastn.xls";
+done | exec_cmds -f - -n 10
+```
+
+### Protein translation
+```shell
+ORF_finder \
+-l 30 \
+-n 10 \
+-pc \
+-log biopy/test_data/ORF_finder/ORF_finder.log \
+-o biopy/test_data/ORF_finder/ \
+biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
+```
+
+### Genotype consistency calculation.
+```shell
+genotype_consistency_analysis \
+-i biopy/test_data/GT/GT.xls.gz \
+-I biopy/test_data/GT/GT.xls.gz \
+--database-compare \
+-o biopy/test_data/GT/
+```
+![image](test_data/GT/Consistency.heatmap.png)
+
+### Plot gene structure.
+```shell
+plot gene_structure \
+-i biopy/test_data/gene_structure/Ptc.gff3.gz \
+-out biopy/test_data/gene_structure/ \
+-outfmt png
+```
+![image](test_data/gene_structure/mRNA_structure.png)
+
+### Plot circos figure.
+```shell
+plot circos \
+-c biopy/test_data/Ptc_chr_len.txt \
+-d biopy/test_data/gene_density.txt \
+-s biopy/test_data/stat.txt \
+-l biopy/test_data/link.txt \
+-o biopy/test_data/circos.png
+```
+![image](test_data/circos/circos.png)

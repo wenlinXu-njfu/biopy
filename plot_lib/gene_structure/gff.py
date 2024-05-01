@@ -30,29 +30,29 @@ def plot_mRNA_structure(gff_file: str, utr_color: str, cds_color: str, edge_colo
             width = feature_dict['end'] - feature_dict['start'] + 1
             if feature_dict['feature_type'] == 'three_prime_UTR':
                 if feature_dict == l[0]:
-                    utr = plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch)
+                    utr = plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch, linewidth=0.3)
                     right = feature_dict['start'] - 1
                 else:
                     left = feature_dict['end'] - 1
                     if left + 1 != right:
-                        intron, = plt.plot([right, left], [i + 1, i + 1], color='k', linewidth=0.4)
-                    plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch)
+                        intron, = plt.plot([right, left], [i + 1, i + 1], color='k', linewidth=0.3)
+                    plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch, linewidth=0.3)
                     right = feature_dict['start'] - 1
             elif feature_dict['feature_type'] == 'five_prime_UTR':
                 left = feature_dict['end'] - 1
                 if left + 1 != right:
-                    intron, = plt.plot([left, right], [i + 1, i + 1], color='k', linewidth=0.4)
-                plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch)
+                    intron, = plt.plot([left, right], [i + 1, i + 1], color='k', linewidth=0.3)
+                plt.barh(i + 1, width, left=feature_dict['start'], color=utr_color, edgecolor=edge_color, hatch=utr_hatch, linewidth=0.3)
                 right = feature_dict['start'] - 1
             elif feature_dict['feature_type'] == 'CDS':
                 if feature_dict == l[0]:
-                    cds = plt.barh(i + 1, width, left=feature_dict['start'], color=cds_color, edgecolor=edge_color, hatch=cds_hatch)
+                    cds = plt.barh(i + 1, width, left=feature_dict['start'], color=cds_color, edgecolor=edge_color, hatch=cds_hatch, linewidth=0.3)
                     right = feature_dict['start'] - 1
                 else:
                     left = feature_dict['end'] - 1
                     if left + 1 != right:
-                        intron, = plt.plot([left, right], [i + 1, i + 1], color='k', linewidth=0.4)
-                    cds = plt.barh(i + 1, width, left=feature_dict['start'], color=cds_color, edgecolor=edge_color, hatch=cds_hatch)
+                        intron, = plt.plot([left, right], [i + 1, i + 1], color='k', linewidth=0.3)
+                    cds = plt.barh(i + 1, width, left=feature_dict['start'], color=cds_color, edgecolor=edge_color, hatch=cds_hatch, linewidth=0.3)
                     right = feature_dict['start'] - 1
         i += 1
     # Set ticks and ticks label of y

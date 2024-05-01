@@ -78,23 +78,23 @@ if __name__ == '__main__':
 
     # Draw chromosome bar.
     # length, theta, width, ax, bar_container = draw_chr('test_data/Ptc_chr_len.txt')
-    length, theta, width, ax, bar_container = draw_chr('test_data/Ptc_chr_len.txt',
+    length, theta, width, ax, bar_container = draw_chr('../../test_data/circos/Ptc_chr_len.txt',
                                                        bottom=[9, 9, 9, 9, 9, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10])
 
     # Draw outer bar.
     # ax, artist_list = draw_outer_bar(theta, width, ax, 'test_data/stat.txt')
-    ax, artist_list = draw_outer_bar(theta, width, ax, 'test_data/stat.txt',
+    ax, artist_list = draw_outer_bar(theta, width, ax, '../../test_data/circos/stat.txt',
                                      bottom=[10.05, 10.05, 10.05, 10.05, 10.05, 11.05, 10.05, 10.05, 10.05, 10.05,
                                              10.05, 10.05, 10.05, 10.05, 10.05, 10.05, 10.05, 10.05, 11.05])
 
     # Draw gene density.
-    draw_gene_density('test_data/gene_density.txt', theta, width, ax,
+    draw_gene_density('../../test_data/circos/gene_density.txt', theta, width, ax,
                       [7.7, 7.7, 7.7, 7.7, 7.7, 8.7, 7.7, 7.7, 7.7, 7.7,
                        7.7, 7.7, 7.7, 7.7, 7.7, 7.7, 7.7, 7.7, 8.7])
 
     # Draw bezier curve.
     used_color = []
-    for line2 in open('test_data/link.txt'):
+    for line2 in open('../../test_data/circos/link.txt'):
         split2 = line2.strip().split('\t')
         chr1, start1, end1 = split2[0], int(split2[1]), int(split2[2])
         chr2, start2, end2 = split2[3], int(split2[4]), int(split2[5])
