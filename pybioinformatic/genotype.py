@@ -13,7 +13,7 @@ from warnings import filterwarnings
 from re import sub
 from tqdm import tqdm
 from natsort import natsort_key
-from pandas import Series, DataFrame, read_table, read_excel, concat, cut
+from pandas import Series, DataFrame, read_table, read_excel, concat
 from matplotlib.pyplot import rcParams, figure, tick_params, savefig
 from seaborn import heatmap
 from click import echo
@@ -181,17 +181,27 @@ class GenoType:
         return stat_df
 
     @staticmethod
-    def __draw_consistency_heatmap(consistency_df: DataFrame, output_path: str = './'):
+    def __draw_consistency_heatmap(consistency_df: DataFrame, output_path: str = getcwd(), font_name: str = 'Arial'):
+        # Set font and font size.
+        rcParams['pdf.fonttype'] = 42
+        rcParams['font.family'] = font_name
         if len(consistency_df) >= 40:
             rcParams['font.size'] = 6
-        rcParams['font.family'] = 'DejaVu Sans'
+        # Set figure attributions.
         figure(figsize=(15, 10), dpi=300)
-        heatmap(consistency_df, cmap="crest",
-                linecolor='w', linewidths=0.5,
-                xticklabels=True, yticklabels=True,
-                cbar_kws={'shrink': 0.4})
-        tick_params('both', length=0)
-        savefig(f'{output_path}/Consistency.heatmap.png', bbox_inches='tight')
+        # Plot heatmap.
+        ax = heatmap(consistency_df, cmap="crest",
+                     linecolor='w', linewidths=0.5,
+                     xticklabels=True, yticklabels=True,
+                     cbar_kws={'shrink': 0.4})
+        tick_params('both', length=0)  # # Set scale length.
+        # Set color bar ticks and ticks label.
+        cbar = ax.collections[0].colorbar
+        cbar.set_ticks(range(0, 105, 5))
+        cbar.set_ticklabels(range(0, 105, 5))
+        cbar.ax.tick_params(width=0.3)
+        # # Save figure.
+        savefig(f'{output_path}/Consistency.heatmap.pdf', bbox_inches='tight')
 
     def self_compare(self, other,
                      sheet1: Union[str, int, List[Union[str, int]]] = None,
@@ -226,7 +236,8 @@ class GenoType:
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
-                output_path: str = getcwd()) -> None:
+                output_path: str = getcwd(),
+                font_name: str = 'Arial') -> None:
         """
         Calculate genotype consistency.
         Output TestSample.consistency.xls, TestSample.Consistency.xls and TestSample.GT.xls three files.
@@ -285,7 +296,8 @@ class GenoType:
         if len(consistency_df) <= 80:
             self.__draw_consistency_heatmap(
                 consistency_df=read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
-                output_path=output_path
+                output_path=output_path,
+                font_name=font_name
             )
         # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
