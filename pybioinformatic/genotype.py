@@ -178,6 +178,7 @@ class GenoType:
         else:
             stat_df = stat_MHM(dfs)
         stat_df.sort_values(stat_df.columns.tolist()[1:3], inplace=True, key=natsort_key)
+        stat_df.fillna(0, inplace=True)
         return stat_df
 
     @staticmethod

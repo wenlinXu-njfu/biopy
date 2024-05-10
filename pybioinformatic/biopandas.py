@@ -156,7 +156,7 @@ def dataframe_to_str(df: DataFrame,
     return string_df
 
 
-def interval_stat(ser: Series, bins: Iterable, name: str = None):
+def interval_stat(ser: Series, bins: Iterable, name: str = 'Count'):
     ret = cut(x=ser, bins=bins).value_counts(sort=False).to_frame(name)
     ret.index.name = ret.index.name + '_interval'
     return ret
