@@ -156,7 +156,9 @@ def dataframe_to_str(df: DataFrame,
     return string_df
 
 
-def interval_stat(ser: Series, bins: Iterable, name: str = 'Count'):
-    ret = cut(x=ser, bins=bins).value_counts(sort=False).to_frame(name)
+def interval_stat(ser: Series, bins: Iterable, precision: int = 3, name: str = 'count'):
+    ret: DataFrame = cut(x=ser, bins=bins, precision=precision, include_lowest=True).value_counts(sort=False).to_frame(name)
     ret.index.name = ret.index.name + '_interval'
+    ret.rename(index={ret.index[0]: sub(r'.+,', '[0,', str(ret.index[0]))}, inplace=True)
+    ret.loc['total', name] = ret[name].sum()
     return ret

@@ -229,7 +229,7 @@ class GenoType:
         bins = range(0, 110, 10)  # Set the consistency statistics interval.
         sample_consistency = DataFrame(data, columns=['SampleName', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)'])
         sample_consistency.sort_values('SampleName', key=natsort_key, inplace=True)
-        interval_stat_df = interval_stat(ser=sample_consistency['GS(%)'], bins=bins, name='Count')
+        interval_stat_df = interval_stat(ser=sample_consistency['GS(%)'], bins=bins, precision=0, name='Count')
         # Write results to output file.
         sample_consistency.to_csv(f'{output_path}/Sample.consistency.xls', sep='\t', index=False)
         interval_stat_df.to_csv(f'{output_path}/Interval.stat.xls', sep='\t', header=False)
