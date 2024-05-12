@@ -7,8 +7,14 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 import click
-from plot_lib import plot_venn, plot_volcano, plot_heatmap, plot_cluster_heatmap, plot_gene_structure, plot_circos
 from pybioinformatic import Displayer
+from plot_lib import (plot_venn,
+                      plot_volcano,
+                      plot_heatmap,
+                      plot_cluster_heatmap,
+                      plot_gene_structure,
+                      plot_circos,
+                      draw_chr_distribution)
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
@@ -26,6 +32,7 @@ plot.add_command(plot_heatmap, name='heatmap')
 plot.add_command(plot_cluster_heatmap, name='cluster_heatmap')
 plot.add_command(plot_gene_structure, name='gene_structure')
 plot.add_command(plot_circos, name='circos')
+plot.add_command(draw_chr_distribution, name='chr_distribution')
 
 
 if __name__ == '__main__':

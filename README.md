@@ -69,10 +69,22 @@ plot gene_structure \
 ### Plot circos figure.
 ```shell
 plot circos \
--c biopy/test_data/Ptc_chr_len.txt \
--d biopy/test_data/gene_density.txt \
--s biopy/test_data/stat.txt \
--l biopy/test_data/link.txt \
--o biopy/test_data/circos.png
+-c biopy/test_data/circos/Ptc_chr_len.txt \
+-d biopy/test_data/circos/gene_density.txt \
+-s biopy/test_data/circos/stat.txt \
+-l biopy/test_data/circos/link.txt \
+-o biopy/test_data/circos/circos.png
 ```
 ![image](test_data/circos/circos.png)
+
+### Plot chromosome distribution.
+```shell
+plot chr_distribution \
+-i biopy/test_data/chr_distribution/snp.ref.xls \
+-l biopy/test_data/chr_distribution/chr_len.xls \
+-w 100000 \
+-n 4 \
+-cmap RdYlGn \
+-o biopy/test_data/chr_distribution/snp.distribution.png
+```
+![image](test_data/chr_distribution/snp.distribution.png)
