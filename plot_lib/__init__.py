@@ -8,4 +8,4 @@ from plot_lib.plot_volcano import run as plot_volcano
 from plot_lib.draw_chr_distribution import run as draw_chr_distribution
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'

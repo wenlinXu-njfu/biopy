@@ -8,10 +8,9 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from io import StringIO
 from pandas import read_table
-from natsort import natsort_key
 import matplotlib.pyplot as plt
 import click
-from pybioinformatic import TaskManager, Displayer
+from pybioinformatic import dict_sort_by_keys, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
@@ -27,7 +26,7 @@ def main(chr_len_file: str,
             line.strip().split('\t')[0]: int(line.strip().split('\t')[1])
             for line in len_file if line.strip()
         }
-    len_dict = {key: len_dict[key] for key in sorted(len_dict, key=natsort_key, reverse=False)}
+    len_dict = dict_sort_by_keys(d=len_dict)
 
     # Step3: stat snp for each window.
     tkm = TaskManager(num_processing=1)
@@ -48,6 +47,8 @@ def main(chr_len_file: str,
         y -= 1
 
     # Step4: draw snp distribution.
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['font.family'] = 'Arial'
     fig = plt.figure()
     ax = fig.add_subplot(111)
     # delete y ticks
@@ -84,7 +85,7 @@ def main(chr_len_file: str,
         colorbar_tickslabel.append(str(i)) if i < n else colorbar_tickslabel.append(f'>{n}')
     cbar = plt.colorbar(mappable=scatter, ticks=range(n + 1))
     cbar.ax.set_yticklabels(colorbar_tickslabel)
-    plt.savefig(output_file, bbox_inches='tight')
+    plt.savefig(output_file, bbox_inches='tight', dpi=300)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

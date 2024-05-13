@@ -61,8 +61,7 @@ genotype_consistency_analysis \
 ```shell
 plot gene_structure \
 -i biopy/test_data/gene_structure/Ptc.gff3.gz \
--out biopy/test_data/gene_structure/ \
--outfmt png
+-o biopy/test_data/gene_structure/mRNA_structure.png
 ```
 ![image](test_data/gene_structure/mRNA_structure.png)
 

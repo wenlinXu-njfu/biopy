@@ -11,9 +11,13 @@ import matplotlib.pyplot as plt
 from pybioinformatic.gtf import Gtf
 
 
-def plot_gene_structure(gtf_file: str, exon_color: str, intron_color: str = 'black', edge_color: str = None,
-                        figure_width: float = 20, figure_height: float = 10,
-                        out_path: str = './', out_prefix: str = 'gene_structure', out_suffix: str = 'pdf',
+def plot_gene_structure(gtf_file: str,
+                        exon_color: str,
+                        intron_color: str = 'black',
+                        edge_color: str = None,
+                        figure_width: float = 20,
+                        figure_height: float = 10,
+                        out_file: str = 'gene_structure.pdf',
                         exon_hatch: Choice(['/', '|', '\\', '+', '-', 'x', '*', 'o', 'O', '.']) = None):
     """Plot gene structure based on GTF annotation file."""
     plt.rcParams['pdf.fonttype'] = 42
@@ -26,7 +30,15 @@ def plot_gene_structure(gtf_file: str, exon_color: str, intron_color: str = 'bla
         left = 0
         for exon_dict in l:
             width = exon_dict['end'] - exon_dict['start'] + 1
-            exon = plt.barh(i + 1, width, left=exon_dict['start'], color=exon_color, edgecolor=edge_color, hatch=exon_hatch, linewidth=0.3)
+            exon = plt.barh(
+                y=i + 1,
+                width=width,
+                left=exon_dict['start'],
+                color=exon_color,
+                edgecolor=edge_color,
+                hatch=exon_hatch,
+                linewidth=0.3
+            )
             if left:
                 right = exon_dict['start'] - 1
                 intron, = plt.plot([left, right], [i + 1, i + 1], color=intron_color, linewidth=0.3)
@@ -38,16 +50,16 @@ def plot_gene_structure(gtf_file: str, exon_color: str, intron_color: str = 'bla
     label_list = list(d.keys())
     plt.yticks(range(1, len(label_list) + 1), label_list, size=8)
     # Hide y-axis and three frames
-    plt.tick_params('y', color='w')
+    plt.tick_params('y', length=0)
     ax = plt.gcf().gca()
     ax.spines['top'].set_color(None)
     ax.spines['right'].set_color(None)
     ax.spines['left'].set_color(None)
     ax.spines['bottom'].set_position(('data', 0))
     # Set ylim
-    if i <= 3:
+    if i <= 5:
         ax.set_ylim([0, len(label_list) * 10])
     # Set legend
     plt.legend([exon, intron], ['exon', 'intron'], labelcolor='g', shadow=True, loc=3, bbox_to_anchor=(0.99, 0.99))
     # Save figure
-    plt.savefig(f'{out_path}/{out_prefix}.{out_suffix}', bbox_inches='tight', dpi=300)
+    plt.savefig(out_file, bbox_inches='tight', dpi=300)

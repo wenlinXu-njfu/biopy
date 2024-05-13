@@ -7,6 +7,8 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
 from typing import Dict, List, Union, Generator
+from os.path import abspath
+from gzip import GzipFile
 from click import open_file, Choice
 from pybioinformatic.fasta import Fasta
 from pybioinformatic.sequence import Nucleotide
@@ -15,25 +17,43 @@ from pybioinformatic.sequence import Nucleotide
 class Gtf:
     def __init__(self, path: Union[str, TextIOWrapper]):
         if isinstance(path, str):
-            self.name = path
-            self.__open = open(path)
-            self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
-            self.__open.seek(0)
+            self.name = abspath(path)
+            if not path.endswith('gz'):
+                self.__open = open(path)
+                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                self.__open.seek(0)
+                self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+                self.__open.seek(0)
+            else:
+                self.__open = GzipFile(self.name, 'rb')
+                self.line_num = sum(1 for line in self.__open if not str(line, 'utf8').startswith('#'))
+                self.__open.seek(0)
+                self.anno_line_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('#'))
+                self.__open.seek(0)
         else:
+            self.name = abspath(path.name)
             if path.name == '<stdin>':
-                self.name = 'stdin'
                 self.__open = open_file('-').readlines()
                 self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
             else:
-                self.name = path.name
-                self.__open = path
-                self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
-                self.__open.seek(0)
+                if not self.name.endswith('gz'):
+                    self.__open = path
+                    self.line_num = sum(1 for line in self.__open if not line.startswith('#'))
+                    self.__open.seek(0)
+                    self.anno_line_num = sum(1 for line in self.__open if line.startswith('#'))
+                    self.__open.seek(0)
+                else:
+                    self.__open = GzipFile(self.name, 'rb')
+                    self.line_num = sum(1 for line in self.__open if not str(line, 'utf8').startswith('#'))
+                    self.__open.seek(0)
+                    self.anno_line_num = sum(1 for line in self.__open if str(line, 'utf8').startswith('#'))
+                    self.__open.seek(0)
 
 # Basic method==========================================================================================================
     def parse(self):
         """Parse information of each column of GTF file line by line."""
         for line in self.__open:
+            line = str(line, 'utf8')
             if not line.startswith('#') and line.strip():
                 split = line.strip().split('\t')
                 chr_num, source, feature = split[0], split[1], split[2]
