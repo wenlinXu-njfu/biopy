@@ -19,6 +19,7 @@ def main(chr_len_file: str,
          window_size: int = 100000,
          n: int = 8,
          cmap: str = 'RdYlGn',
+         reverse: bool = True,
          output_file: str = 'snp.distribution.pdf'):
     # Step1: parse chromosome length file.
     with open(chr_len_file) as len_file:
@@ -69,8 +70,8 @@ def main(chr_len_file: str,
     plt.xlabel('Mb', loc='right')
     plt.xlim(0, max(len_dict.values()) + 10*6)
     # draw snp distribution
-    if cmap == 'RdYlGn':
-        cmap = plt.get_cmap('RdYlGn').reversed()
+    if reverse:
+        cmap = plt.get_cmap(cmap).reversed()
     scatter = ax.scatter(
         x='X-coordinate',
         y='Y-coordinate',
@@ -104,18 +105,22 @@ def main(chr_len_file: str,
 @click.option('-cmap', '--color-map', 'color_map',
               metavar='<str>', default='RdYlGn', show_default=True,
               help='Color map of colorbar.')
+@click.option('-r', '--reverse', 'reverse',
+              is_flag=True, flag_value=True,
+              help='Reverse color map.')
 @click.option('-o', '--output-file', 'output_file',
               metavar='<file>', default='snp.distribution.pdf', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(snp_ref, chr_len, window_size, max_count, color_map, output_file):
+def run(snp_ref, chr_len, window_size, max_count, color_map, reverse, output_file):
     """Draw snp distribution."""
     main(chr_len_file=chr_len,
          snp_ref_file=snp_ref,
          window_size=window_size,
          n=max_count,
          cmap=color_map,
+         reverse=reverse,
          output_file=output_file)
 
 

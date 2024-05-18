@@ -191,15 +191,20 @@ class GenoType:
         # Set figure attributions.
         figure(figsize=(15, 10), dpi=300)
         # Plot heatmap.
-        ax = heatmap(consistency_df, cmap="crest",
-                     linecolor='w', linewidths=0.5,
-                     xticklabels=True, yticklabels=True,
-                     cbar_kws={'shrink': 0.4})
+        ax = heatmap(
+            consistency_df,
+            cmap="crest",
+            linecolor='w',
+            linewidths=0.5,
+            xticklabels=True,
+            yticklabels=True,
+            cbar_kws={'shrink': 0.4}
+        )
         tick_params('both', length=0)  # # Set scale length.
         # Set color bar ticks and ticks label.
         cbar = ax.collections[0].colorbar
-        cbar.set_ticks(range(0, 105, 5))
-        cbar.set_ticklabels(range(0, 105, 5))
+        cbar.set_ticks(range(10, 110, 10))
+        cbar.set_ticklabels(range(10, 110, 10))
         cbar.ax.tick_params(width=0.3)
         # # Save figure.
         savefig(f'{output_path}/Consistency.heatmap.pdf', bbox_inches='tight')
@@ -288,15 +293,15 @@ class GenoType:
                     else:
                         consistency_df.loc[gt1.name, gt2.name] = ''
                 pbar.update(1)
-        header = ['DatabaseSample', 'TestSample', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)']
+        header = ['Sample1', 'Sample2', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)']
         fmt1 = DataFrame(data, columns=header)
-        fmt1.sort_values(['TestSample', 'GS(%)'], key=natsort_key, inplace=True, ascending=[True, False])
-        fmt1.to_csv(f'{output_path}/TestSample.consistency.fmt1.xls', sep='\t', index=False)
+        fmt1.sort_values(['Sample1', 'GS(%)', 'Sample2'], key=natsort_key, inplace=True, ascending=[True, False, True])
+        fmt1.to_csv(f'{output_path}/Sample.consistency.fmt1.xls', sep='\t', index=False)
         # Step4: Draw consistency heatmap.
-        consistency_df.to_csv(f'{output_path}/TestSample.consistency.fmt2.xls', sep='\t', na_rep='')
+        consistency_df.to_csv(f'{output_path}/Sample.consistency.fmt2.xls', sep='\t', na_rep='')
         if len(consistency_df) <= 80:
             self.__draw_consistency_heatmap(
-                consistency_df=read_table(f'{output_path}/TestSample.consistency.fmt2.xls', index_col=0),
+                consistency_df=read_table(f'{output_path}/Sample.consistency.fmt2.xls', index_col=0),
                 output_path=output_path,
                 font_name=font_name
             )
@@ -306,4 +311,4 @@ class GenoType:
         test_sample_gt_df = merge.iloc[:, right_sample_range]
         test_sample_gt_df.rename(columns=lambda i: sub(r'_[xy]\b', '', str(i)), inplace=True)
         test_sample_gt_df.sort_values(merge.columns[0], key=natsort_key, inplace=True)
-        test_sample_gt_df.to_csv(f'{output_path}/TestSample.GT.xls', sep='\t', index=False, na_rep='NA')
+        test_sample_gt_df.to_csv(f'{output_path}/Compare.GT.xls', sep='\t', index=False, na_rep='NA')
