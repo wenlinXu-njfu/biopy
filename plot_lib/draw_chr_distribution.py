@@ -10,7 +10,7 @@ from io import StringIO
 from pandas import read_table
 import matplotlib.pyplot as plt
 import click
-from pybioinformatic import dict_sort_by_keys, TaskManager, Displayer
+from pybioinformatic import FuncDict, TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
@@ -23,11 +23,13 @@ def main(chr_len_file: str,
          output_file: str = 'snp.distribution.pdf'):
     # Step1: parse chromosome length file.
     with open(chr_len_file) as len_file:
-        len_dict = {
-            line.strip().split('\t')[0]: int(line.strip().split('\t')[1])
-            for line in len_file if line.strip()
-        }
-    len_dict = dict_sort_by_keys(d=len_dict)
+        len_dict = FuncDict(
+            {
+                line.strip().split('\t')[0]: int(line.strip().split('\t')[1])
+                for line in len_file if line.strip()
+            }
+        )
+    len_dict = len_dict.sort_by_keys()
 
     # Step3: stat snp for each window.
     tkm = TaskManager(num_processing=1)
