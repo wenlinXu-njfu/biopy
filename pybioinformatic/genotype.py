@@ -6,6 +6,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from typing import Union, List
+from typing_extensions import Literal
 from io import TextIOWrapper
 from os import getcwd
 from os.path import abspath
@@ -181,8 +182,52 @@ class GenoType:
         stat_df.fillna(0, inplace=True)
         return stat_df
 
+    def merge(self, other,
+              how: Literal['inner', 'outer'],
+              sheet1: Union[str, int, List[Union[str, int]]] = None,
+              sheet2: Union[str, int, List[Union[str, int]]] = None,
+              ):
+        df1 = self.to_dataframe(sheet=sheet1)
+        df1[df1.columns[1]] = df1[df1.columns[1]].astype(str)
+        df1[df1.columns[2]] = df1[df1.columns[2]].astype(str)
+        df1['tmp'] = df1[df1.columns[1]] + '_' + df1[df1.columns[2]] + '_' + df1[df1.columns[3]]
+        df1.set_index('tmp', drop=True, inplace=True)
+        df1 = df1.iloc[:, 4:]
+
+        df2 = other.to_dataframe(sheet=sheet2)
+        df2[df2.columns[1]] = df2[df2.columns[1]].astype(str)
+        df2[df2.columns[2]] = df2[df2.columns[2]].astype(str)
+        df2['tmp'] = df2[df2.columns[1]] + '_' + df2[df2.columns[2]] + '_' + df2[df2.columns[3]]
+        df2.set_index('tmp', drop=True, inplace=True)
+        df2 = df2.iloc[:, 4:]
+
+        merge = df1.join(other=df2, how=how)
+        samples = merge.columns.tolist()
+        samples.sort(key=natsort_key)
+        merge = merge.loc[:, samples]
+        merge.insert(0, 'Chr', [i.split('_')[0] for i in merge.index.tolist()])
+        merge.insert(1, 'Pos', [i.split('_')[1] for i in merge.index.tolist()])
+        merge.insert(2, 'Ref', [i.split('_')[2] for i in merge.index.tolist()])
+        merge.index.name = 'ID'
+        merge.rename(index=lambda i: '_'.join(i.split('_')[:2]), inplace=True)
+        merge.fillna('NA', inplace=True)
+        merge.sort_index(key=natsort_key, inplace=True)
+        return merge
+
     @staticmethod
-    def __draw_consistency_heatmap(consistency_df: DataFrame, output_path: str = getcwd(), font_name: str = 'Arial'):
+    def __round_to_nearest_ten(num: float) -> int:
+        remainder = num % 10
+        if remainder < 5:
+            return int(num - remainder)
+        else:
+            return int(num + (10 - remainder))
+
+    def __draw_consistency_heatmap(
+            self,
+            consistency_df: DataFrame,
+            output_path: str = getcwd(),
+            font_name: str = 'Arial'
+    ) -> None:
         # Set font and font size.
         rcParams['pdf.fonttype'] = 42
         rcParams['font.family'] = font_name
@@ -200,11 +245,17 @@ class GenoType:
             yticklabels=True,
             cbar_kws={'shrink': 0.4}
         )
-        tick_params('both', length=0)  # # Set scale length.
+        tick_params('both', length=0)  # Set scale length.
         # Set color bar ticks and ticks label.
+        min_gs = consistency_df.min(numeric_only=True).min()
+        max_gs = consistency_df.max(numeric_only=True).max()
+        min_value = self.__round_to_nearest_ten(min_gs)
+        min_value = min_value if min_value > 5 else 5
+        max_value = self.__round_to_nearest_ten(max_gs)
+        max_value = max_value if max_value <= 110 else 110
         cbar = ax.collections[0].colorbar
-        cbar.set_ticks(range(10, 110, 10))
-        cbar.set_ticklabels(range(10, 110, 10))
+        cbar.set_ticks(range(min_value, max_value, 5))
+        cbar.set_ticklabels(range(min_value, max_value, 5))
         cbar.ax.tick_params(width=0.3)
         # # Save figure.
         savefig(f'{output_path}/Consistency.heatmap.pdf', bbox_inches='tight')

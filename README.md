@@ -49,7 +49,7 @@ biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
 
 ### Genotype consistency calculation.
 ```shell
-genotype_consistency_analysis \
+gt_kit gs \
 -i biopy/test_data/GT/GT.xls.gz \
 -I biopy/test_data/GT/GT.xls.gz \
 --database-compare \
