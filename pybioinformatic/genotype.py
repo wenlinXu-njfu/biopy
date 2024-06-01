@@ -272,17 +272,20 @@ class GenoType:
             echo('\033[31mError: The two GT file loci to be compared are inconsistent.\033[0m', err=True)
             exit()
         # Calculate genotype consistency of each sample under different test batches.
+        samples = set(df1.columns[3:]) & set(df2.columns[3:])
         data = []
-        for sample in df1.columns[3:]:
-            NA_site = set(df1[sample][df1[sample].isnull()].index) | set(df2[sample][df2[sample].isnull()].index)
-            NA_num = len(NA_site)
-            series1 = df1[sample][~df1[sample].isnull()]
-            series2 = df2[sample][~df2[sample].isnull()]
-            IdenticalCount = series1.eq(series2).sum()
-            TotalCount = len(df1) - NA_num
-            GS = IdenticalCount / TotalCount * 100
-            data.append([sample, IdenticalCount, NA_num, TotalCount, GS])
-        bins = range(0, 110, 10)  # Set the consistency statistics interval.
+        with tqdm(total=len(samples), unit='sample') as pbar:
+            for sample in samples:
+                NA_site = set(df1[sample][df1[sample].isnull()].index) | set(df2[sample][df2[sample].isnull()].index)
+                NA_num = len(NA_site)
+                series1 = df1[sample][~df1[sample].isnull()]
+                series2 = df2[sample][~df2[sample].isnull()]
+                IdenticalCount = series1.eq(series2).sum()
+                TotalCount = len(df1) - NA_num
+                GS = IdenticalCount / TotalCount * 100
+                data.append([sample, IdenticalCount, NA_num, TotalCount, GS])
+                pbar.update(1)
+        bins = range(0, 105, 5)  # Set the consistency statistics interval.
         sample_consistency = DataFrame(data, columns=['SampleName', 'IdenticalCount', 'NaCount', 'TotalCount', 'GS(%)'])
         sample_consistency.sort_values('SampleName', key=natsort_key, inplace=True)
         interval_stat_df = interval_stat(ser=sample_consistency['GS(%)'], bins=bins, precision=0, name='Count')
@@ -297,7 +300,7 @@ class GenoType:
                 font_name: str = 'Arial') -> None:
         """
         Calculate genotype consistency.
-        Output TestSample.consistency.xls, TestSample.Consistency.xls and TestSample.GT.xls three files.
+        Output Sample.consistency.xls, Sample.Consistency.xls and Compare.GT.xls three files.
         """
         # Step1: Read GT file as DataFrame.
         df1 = self.to_dataframe(sheet1)  # index = 0, 1, 2, ...
