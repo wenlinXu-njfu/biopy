@@ -252,7 +252,7 @@ class GenoType:
         min_value = self.__round_to_nearest_ten(min_gs)
         min_value = min_value if min_value > 5 else 5
         max_value = self.__round_to_nearest_ten(max_gs)
-        max_value = max_value if max_value <= 110 else 110
+        max_value = max_value if max_value <= 105 else 105
         cbar = ax.collections[0].colorbar
         cbar.set_ticks(range(min_value, max_value, 5))
         cbar.set_ticklabels(range(min_value, max_value, 5))
