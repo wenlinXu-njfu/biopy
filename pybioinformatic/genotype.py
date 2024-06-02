@@ -272,8 +272,8 @@ class GenoType:
         df1['tmp'] = df1[df1.columns[0]] + '_' + df1[df1.columns[1]] + '_' + df1[df1.columns[2]]
         df1.set_index('tmp', drop=True, inplace=True)
         df2 = other.to_dataframe(sheet2, index_col=0, sort_allele=False)
-        df2[df2.columns[0]] = df2[df1.columns[0]].astype(str)
-        df2[df2.columns[1]] = df2[df1.columns[1]].astype(str)
+        df2[df2.columns[0]] = df2[df2.columns[0]].astype(str)
+        df2[df2.columns[1]] = df2[df2.columns[1]].astype(str)
         df2['tmp'] = df2[df2.columns[0]] + '_' + df2[df2.columns[1]] + '_' + df2[df2.columns[2]]
         df2.set_index('tmp', drop=True, inplace=True)
         # Check whether the two GT files contain the same loci.
