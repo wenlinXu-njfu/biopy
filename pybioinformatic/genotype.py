@@ -214,31 +214,33 @@ class GenoType:
         merge.sort_index(key=natsort_key, inplace=True)
         return merge
 
-    @staticmethod
-    def __round_to_nearest_ten(num: float) -> int:
-        remainder = num % 10
-        if remainder < 5:
-            return int(num - remainder)
-        else:
-            return int(num + (10 - remainder))
-
     def __draw_consistency_heatmap(
             self,
             consistency_df: DataFrame,
+            cmap: str = "crest",
             output_path: str = getcwd(),
             font_name: str = 'Arial'
     ) -> None:
-        # Set font and font size.
+        # Set font and dpi.
+        dpi = 300
+        if len(consistency_df) <= 40:
+            font_size = 8
+        elif 40 < len(consistency_df) <= 100:
+            font_size = 6
+        elif 100 < len(consistency_df) <= 150:
+            font_size = 4
+        else:
+            font_size = 1
+            dpi = 1000
         rcParams['pdf.fonttype'] = 42
         rcParams['font.family'] = font_name
-        if len(consistency_df) >= 40:
-            rcParams['font.size'] = 6
+        rcParams['font.size'] = font_size
         # Set figure attributions.
-        figure(figsize=(15, 10), dpi=300)
+        figure(figsize=(15, 10))
         # Plot heatmap.
         ax = heatmap(
-            consistency_df,
-            cmap="crest",
+            data=consistency_df,
+            cmap=cmap,
             linecolor='w',
             linewidths=0.5,
             xticklabels=True,
@@ -247,18 +249,18 @@ class GenoType:
         )
         tick_params('both', length=0)  # Set scale length.
         # Set color bar ticks and ticks label.
-        min_gs = consistency_df.min(numeric_only=True).min()
+        min_gs = consistency_df.min(numeric_only=True).min() + 1
         max_gs = consistency_df.max(numeric_only=True).max()
-        min_value = self.__round_to_nearest_ten(min_gs)
-        min_value = min_value if min_value > 5 else 5
-        max_value = self.__round_to_nearest_ten(max_gs)
-        max_value = max_value if max_value <= 105 else 105
+        min_value = int(min_gs)
+        max_value = int(max_gs)
+        step = int((max_value - min_value) / 10)
+        step = 1 if step == 0 else step
         cbar = ax.collections[0].colorbar
-        cbar.set_ticks(range(min_value, max_value, 5))
-        cbar.set_ticklabels(range(min_value, max_value, 5))
+        cbar.set_ticks(range(min_value, max_value + step, step))
+        cbar.set_ticklabels(range(min_value, max_value + step, step), fontsize=8)
         cbar.ax.tick_params(width=0.3)
         # # Save figure.
-        savefig(f'{output_path}/Consistency.heatmap.pdf', bbox_inches='tight')
+        savefig(f'{output_path}/Consistency.heatmap.pdf', bbox_inches='tight', dpi=dpi)
 
     def self_compare(self, other,
                      sheet1: Union[str, int, List[Union[str, int]]] = None,
@@ -306,6 +308,7 @@ class GenoType:
     def compare(self, other,
                 sheet1: Union[str, int, List[Union[str, int]]] = None,
                 sheet2: Union[str, int, List[Union[str, int]]] = None,
+                cmap: str = "crest",
                 output_path: str = getcwd(),
                 font_name: str = 'Arial') -> None:
         """
@@ -363,12 +366,12 @@ class GenoType:
         fmt1.to_csv(f'{output_path}/Sample.consistency.fmt1.xls', sep='\t', index=False)
         # Step4: Draw consistency heatmap.
         consistency_df.to_csv(f'{output_path}/Sample.consistency.fmt2.xls', sep='\t', na_rep='')
-        if len(consistency_df) <= 80:
-            self.__draw_consistency_heatmap(
-                consistency_df=read_table(f'{output_path}/Sample.consistency.fmt2.xls', index_col=0),
-                output_path=output_path,
-                font_name=font_name
-            )
+        self.__draw_consistency_heatmap(
+            consistency_df=read_table(f'{output_path}/Sample.consistency.fmt2.xls', index_col=0),
+            cmap=cmap,
+            output_path=output_path,
+            font_name=font_name
+        )
         # Step5: Output GT file of test sample.
         right_sample_range.insert(0, 0)  # Only output site ID
         right_sample_range.insert(1, len(df1.columns) + 2)
