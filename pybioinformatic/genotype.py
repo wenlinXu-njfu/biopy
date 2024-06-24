@@ -255,9 +255,8 @@ class GenoType:
         max_value = int(max_gs)
         step = int((max_value - min_value) / 10)
         step = 1 if step == 0 else step
-        print(min_value, max_value, step)
         cbar = ax.collections[0].colorbar
-        cbar_ticks = [i for i in range(min_value, max_value - min_value + step, step) if i <= 100]
+        cbar_ticks = [i for i in range(min_value, max_value + step, step) if i <= 100]
         cbar.set_ticks(cbar_ticks)
         cbar.set_ticklabels(cbar_ticks, fontsize=8)
         cbar.ax.tick_params(width=0.3)
