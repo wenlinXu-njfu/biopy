@@ -7,6 +7,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from re import findall, sub
 from typing import Tuple, Union
+from ViennaRNA import fold, circfold, RNA
 
 
 class Sequence:
@@ -377,6 +378,21 @@ class Nucleotide(Sequence):
                     pep = Protein(
                         f'{self.id} circular_translation_pep start={i + 1} end={j} circular=0', pep)
                 yield cds, pep
+
+    def predict_secondary_structure(self, ps_file: str, circular: bool = False):
+        seq = self.seq.replace('\n', '')
+        ss, mfe = circfold(seq) if circular else fold(seq)
+        RNA.PS_rna_plot(seq, ss, ps_file)
+        if self.seq.count('\n') > 1:
+            l1 = self.seq.strip().split('\n')
+            n = len(l1[0])
+            l2 = findall(r'[(.)]{1,%s}' % n, ss)
+            s = f'>{self.id}\n'
+            for i in zip(l1, l2):
+                s += f'{i[0]}\n{i[1]}\n'
+            return s.strip(), mfe
+        else:
+            return f'{self}\n{ss}', mfe
 
 
 class Protein(Sequence):
