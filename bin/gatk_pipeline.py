@@ -6,10 +6,12 @@ CreateDate: 2023/8/13
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
-from io import TextIOWrapper
-from os import makedirs, system
+from io import TextIOWrapper, StringIO
+from os import makedirs, system, listdir
+from collections import defaultdict
+from pandas import read_table
 import click
-from pybioinformatic import Displayer
+from pybioinformatic import TaskManager, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
@@ -19,7 +21,7 @@ def build_genome_index(genome_fasta_file: str):
     samtools_index = f'samtools faidx {genome_fasta_file}'
     gatk_index = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
     cmds = [bwa_index, samtools_index, gatk_index]
-    tkm = TaskManager(cmds, 3)
+    tkm = TaskManager(commands=cmds, num_processing=3)
     tkm.parallel_run_cmd()
 
 
@@ -33,7 +35,11 @@ def fastp(sample_name: str, fq1: str, fq2: str, output_path: str):
     return cmd
 
 
-def align(sample_name: str, genome_fasta_file: str, fq1: str, fq2: str, output_path: str):
+def align(sample_name: str,
+          genome_fasta_file: str,
+          fq1: str,
+          fq2: str,
+          output_path: str):
     cmds = []
     # Align command
     cmd1 = fr'bwa mem -t 5 -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fq1} {fq2} \
@@ -59,6 +65,9 @@ def align(sample_name: str, genome_fasta_file: str, fq1: str, fq2: str, output_p
     cmds.append(cmd6)
     cmd7 = f'samtools index {output_path}/{sample_name}.map30.sort.markdup.bam'
     cmds.append(cmd7)
+    # Stat reads depth
+    cmd8 = f'samtools depth {output_path}/{sample_name}.map30.sort.bam > {output_path}/{sample_name}.map30.depth'
+    cmds.append(cmd8)
     return cmds
 
 
@@ -86,6 +95,29 @@ def HaplotypeCaller(genome_fasta_file: str,
     return cmds
 
 
+def get_gt(depth_dir: str,
+           vcf_dir: str,
+           depth: int = 5,
+           tkm: TaskManager = None):
+    depth_dict = defaultdict(list)  # {sample: [positions]}
+    for sample in listdir(depth_dir):
+        with open(f'{depth_dir}/{sample}/{sample}.map30.depth') as f:
+            for line in f:
+                split = line.strip().split('\t')
+                if int(split[2]) >= depth:
+                    depth_dict[sample].append('_'.join(split[:2]))
+
+    if tkm is None:
+        tkm = TaskManager(num_processing=1)
+    cmd = f'file_format_conversion vcf2gt {vcf_dir}/*/*.map30.vcf'
+    stdout = tkm.echo_and_exec_cmd(cmd)
+    gt_df = read_table(StringIO(stdout), index_col=0)
+    for sample in gt_df.columns[3:]:
+        mask = (gt_df.index.isin(depth_dict[sample])) & (gt_df[sample].isna())
+        gt_df.loc[mask, sample] = gt_df.loc[mask, 'Ref'] * 2
+    return gt_df
+
+
 def main(fq_path: str,
          genome_fasta_file: str,
          build_index: bool,
@@ -105,22 +137,28 @@ def main(fq_path: str,
         fq1 = f'{fq_path}/{fq_prefix}_1.fq.gz'
         fq2 = f'{fq_path}/{fq_prefix}_2.fq.gz'
         with open(f'{output_path}/shell/{sample_name}.sh', 'w') as o:
-            cmds = []
-            cmd = fastp(sample_name=sample_name,
-                        fq1=fq1, fq2=fq2,
-                        output_path=f'{output_path}/QC/{sample_name}')
-            cmds.append(cmd)
-            cmds.extend(align(sample_name=sample_name,
-                              genome_fasta_file=genome_fasta_file,
-                              fq1=fq1, fq2=fq2,
-                              output_path=f'{output_path}/align/{sample_name}'))
-            cmds.extend(HaplotypeCaller(genome_fasta_file=genome_fasta_file,
-                                        bam_file=f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
-                                        sample_name=sample_name,
-                                        output_path=f'{output_path}/variant/{sample_name}'))
+            cmds = [
+                fastp(sample_name=sample_name,
+                      fq1=fq1, fq2=fq2,
+                      output_path=f'{output_path}/QC/{sample_name}')
+            ]
+            cmds.extend(
+                align(sample_name=sample_name,
+                      genome_fasta_file=genome_fasta_file,
+                      fq1=fq1, fq2=fq2,
+                      output_path=f'{output_path}/align/{sample_name}')
+            )
+            cmds.extend(
+                HaplotypeCaller(genome_fasta_file=genome_fasta_file,
+                                bam_file=f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
+                                sample_name=sample_name,
+                                output_path=f'{output_path}/variant/{sample_name}')
+            )
             o.write('\n'.join(cmds))
     system(f'for i in `ls {output_path}/shell`; do echo "sh {output_path}/shell/$i"; done > {output_path}/All.sh')
     system(f'exec_cmds -f {output_path}/All.sh -n {num_processing}')
+    gt = get_gt(depth_dir=f'{output_path}/align/', vcf_dir=f'{output_path}/variant/')
+    gt.to_csv(f'{output_path}/All.GT.xls', sep='\t', na_rep='NA')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
