@@ -1,6 +1,6 @@
 # A tiny bioinformatics and visual tool.
 
-## Dependency of python packages
+## Dependence of python packages
 **python ≥ 3.8.5<br />
 click ≥ 8.1.7<br />
 fire ≥ 0.6.0<br />
