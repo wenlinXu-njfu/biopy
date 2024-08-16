@@ -7,14 +7,18 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
+from datetime import datetime
 import click
 from pybioinformatic import TaskManager, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def main(command_file: TextIOWrapper, processing_num: int):
+    start_time = datetime.now().replace(microsecond=0)
     tkm = TaskManager([line.strip() for line in command_file], processing_num)
     tkm.parallel_run_cmd()
+    end_time = datetime.now().replace(microsecond=0)
+    click.echo(f'[{datetime.now().replace(microsecond=0)}] Total time spent {end_time - start_time}.', err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

@@ -9,8 +9,9 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from software_tool_lib.blast.blast2bed import run as run1
 from software_tool_lib.blast.reciprocal_blast import run as run2
+from software_tool_lib.blast.annotation import run as run3
 from pybioinformatic import Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
@@ -23,6 +24,7 @@ def blast_helper():
 
 blast_helper.add_command(run1, 'blast2bed')
 blast_helper.add_command(run2, 'reciprocal_blast')
+blast_helper.add_command(run3, 'annotation')
 
 if __name__ == '__main__':
     blast_helper()

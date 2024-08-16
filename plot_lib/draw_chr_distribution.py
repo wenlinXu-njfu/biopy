@@ -20,6 +20,7 @@ def main(chr_len_file: str,
          n: int = 8,
          cmap: str = 'RdYlGn',
          reverse: bool = True,
+         figure_size: str = '6.4x4.8',
          output_file: str = 'snp.distribution.pdf'):
     # Step1: parse chromosome length file.
     with open(chr_len_file) as len_file:
@@ -34,7 +35,7 @@ def main(chr_len_file: str,
     # Step3: stat snp for each window.
     tkm = TaskManager(num_processing=1)
     snp_ref = r"awk -F'\t' '{print $2,$3-1,$3}' OFS='\t' %s | sort -uV" % snp_ref_file
-    cmd = f"bedtools makewindows -g <(sort -uV {chr_len_file}) -w {window_size} | intersectBed -a - -b <({snp_ref}) -c"
+    cmd = f"bedtools makewindows -g <(cut -f 1-2 {chr_len_file} | sort -uV) -w {window_size} | intersectBed -a - -b <({snp_ref}) -c"
     stdout = tkm.echo_and_exec_cmd(cmd)
     snp_count = read_table(
         filepath_or_buffer=StringIO(stdout),
@@ -52,7 +53,8 @@ def main(chr_len_file: str,
     # Step4: draw snp distribution.
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['font.family'] = 'Arial'
-    fig = plt.figure()
+    figure_size = [float(i) for i in figure_size.split('x')]
+    fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111)
     # delete y ticks
     plt.tick_params('y', length=0)
@@ -97,25 +99,28 @@ def main(chr_len_file: str,
               help=r'Input snp.ref.xls file. (ID\tChr\tPos\tEtc)')
 @click.option('-l', '--chr-len', 'chr_len',
               metavar='<file>', required=True,
-              help=r'Input chromosome length file. (ChrName\tChrLength)')
+              help=r'Input chromosome length file. (ChrName\tChrLength\tEtc)')
 @click.option('-w', '--window-size', 'window_size',
               metavar='<int>', type=int, default=100000, show_default=True,
               help='Window size.')
 @click.option('-n', '--max-count', 'max_count',
               metavar='<int>', type=int, default=4, show_default=True,
               help='Max count of colormap.')
-@click.option('-cmap', '--color-map', 'color_map',
+@click.option('-c', '--color-map', 'color_map',
               metavar='<str>', default='RdYlGn', show_default=True,
               help='Color map of colorbar.')
 @click.option('-r', '--reverse', 'reverse',
               is_flag=True, flag_value=True,
               help='Reverse color map.')
+@click.option('-s', '--figure-size', 'figure_size',
+              metavar='<str>', default='10x5', show_default=True,
+              help='Figure size.')
 @click.option('-o', '--output-file', 'output_file',
               metavar='<file>', default='snp.distribution.pdf', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(snp_ref, chr_len, window_size, max_count, color_map, reverse, output_file):
+def run(snp_ref, chr_len, window_size, max_count, color_map, reverse, figure_size, output_file):
     """Draw snp distribution."""
     main(chr_len_file=chr_len,
          snp_ref_file=snp_ref,
@@ -123,6 +128,7 @@ def run(snp_ref, chr_len, window_size, max_count, color_map, reverse, output_fil
          n=max_count,
          cmap=color_map,
          reverse=reverse,
+         figure_size=figure_size,
          output_file=output_file)
 
 
