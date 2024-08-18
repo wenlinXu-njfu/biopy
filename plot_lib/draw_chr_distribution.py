@@ -30,7 +30,7 @@ def main(chr_len_file: str,
                 for line in len_file if line.strip()
             }
         )
-    len_dict = len_dict.sort_by_keys()
+    len_dict.sort_by_keys()
 
     # Step3: stat snp for each window.
     tkm = TaskManager(num_processing=1)
