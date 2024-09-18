@@ -91,7 +91,7 @@ def main(sample_info: TextIOWrapper,
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('-l', '--sample-info', 'sample_info',
               metavar='<file|stdin>', required=True, type=click.File('r'),
-              help=r'Sample information file. (Sample_name\tFastq_path)')
+              help=r'Sample information file. (Sample_name\tFastq_path\tEtc)')
 @click.option('-r', '--ref-genome', 'ref_genome',
               metavar='<file>', required=True,
               help='Reference genome fasta file.')
