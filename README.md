@@ -1,33 +1,31 @@
 # A tiny bioinformatics and visual tool.
 
 ## Dependence of python packages
-**python ≥ 3.8.5<br />
-click ≥ 8.1.7<br />
+**python ≥ 3.8<br />
 fire ≥ 0.6.0<br />
-matplotlib ≥ 3.5.1<br />
-natsort ≥ 8.4.0<br />
-numpy ≥ 1.23.1<br />
-openpyxl ≥ 3.0.9<br />
-pandas ≥ 2.0.3<br />
-pybioinformatic ≥ 0.0.1<br />
+pybioinformatic ≥ 0.0.3<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
-seaborn ≥ 0.11.2<br />
-tqdm ≥ 4.62.3<br />
-venn ≥ 0.1.3<br />
-ViennaRNA ≥ 2.6.4<br />
-xlsxwriter ≥ 3.1.9<br />**
+venn ≥ 0.1.3<br />**
 
 ## Dependency of other software
-**blast+ for circRNA flanking sequence analyse.<br />
-pfamscan for batch perform pfamscan.<br />**
+**blast+<br />
+bwa<br />
+fastp<br />
+featureCounts<br />
+gatk<br />
+hisat2<br />
+hmmsearch<br />
+HTseq<br />
+PfamScan<br />
+samtools**
 
 ## Getting started
 ```shell
 git clone https://github.com/wenlinXu-njfu/biopy.git
 python biopy/configure.py
-export PYTHONPATH=$PATH:/home/user/software/biopy
-export PATH=$PATH:/home/user/software/biopy/bin
+export PYTHONPATH=$PATH:/your/path/biopy
+export PATH=$PATH:/your/path/biopy/bin
 ```
 
 ## Example

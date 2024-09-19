@@ -2,6 +2,7 @@ from os import system, listdir, remove
 from os.path import dirname, isfile
 
 path = dirname(__file__)
+system(command="pip install fire pybioinformatic requests scipy venn")
 system(command=f"sed -i 's/\r//' {path}/bin/*")
 system(command=f"chmod 755 {path}/bin/*")
 system(command=f"python {path}/bin/batch_rename.py -d {path}/bin -old .py")
