@@ -10,8 +10,8 @@ from io import TextIOWrapper
 from os import getcwd, makedirs, system
 from shutil import which
 import click
-from pybioinformatic import parse_sample_info, MergeSamples, SpecificStrandRNASeqAnalyser
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+from pybioinformatic import parse_sample_info, MergeSamples, SpecificStrandRNASeqAnalyser, Displayer
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def main(sample_info: TextIOWrapper,
@@ -88,7 +88,7 @@ def main(sample_info: TextIOWrapper,
         o.write(cmd)
 
 
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-l', '--sample-info', 'sample_info',
               metavar='<file|stdin>', required=True, type=click.File('r'),
               help=r'Sample information file. (Sample_name\tFastq_path\tEtc)')
@@ -113,6 +113,8 @@ def main(sample_info: TextIOWrapper,
 @click.option('-o', '--out-path', 'out_path',
               metavar='<path>', default=getcwd(), show_default=True,
               help='Output path, if not exist, automatically created.')
+@click.option('-V', '--version', 'version', help='Show author and version information.',
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(sample_info, ref_genome, gff, feature_type, count_unit, num_threads, num_processing, out_path):
     """Strand specific RNA pair end sequencing analysis pipeline."""
     main(

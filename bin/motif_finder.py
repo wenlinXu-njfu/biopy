@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from typing import Tuple, Union
 import click
 from pybioinformatic import Fasta, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
@@ -18,7 +18,7 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          quiet: bool = False,
          log_file: TextIOWrapper = None,
          output_file: TextIOWrapper = None):
-    click.echo('# Seq_id\tStart\tEnd\tMotif', output_file)
+    click.echo('# Seq_id\tStart\tEnd\tStrand\tMotif', output_file)
     for fasta_file in fasta_files:
         with Fasta(fasta_file) as fa:
             for seq_obj in fa.parse():
@@ -50,7 +50,13 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_files, motif, quiet, log_file, outfile):
     """Find the motif in the sequence."""
-    main(fasta_files, motif, quiet, log_file, outfile)
+    main(
+        fasta_files=fasta_files,
+        motif=motif,
+        quiet=quiet,
+        log_file=log_file,
+        output_file=outfile
+    )
 
 
 if __name__ == '__main__':

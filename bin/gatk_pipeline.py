@@ -129,37 +129,37 @@ def main(fq_path: str,
     for line in sample_list:
         fq_prefix = line.strip().split('\t')[0]
         sample_name = line.strip().split('\t')[1]
-        makedirs(f'{output_path}/QC/{sample_name}', exist_ok=True)
-        makedirs(f'{output_path}/align/{sample_name}', exist_ok=True)
-        makedirs(f'{output_path}/variant/{sample_name}', exist_ok=True)
+        makedirs(f'{output_path}/01.QC/{sample_name}', exist_ok=True)
+        makedirs(f'{output_path}/02.mapping/{sample_name}', exist_ok=True)
+        makedirs(f'{output_path}/03.variant/{sample_name}', exist_ok=True)
         fq1 = f'{fq_path}/{fq_prefix}_1.fq.gz'
         fq2 = f'{fq_path}/{fq_prefix}_2.fq.gz'
         with open(f'{output_path}/shell/{sample_name}.sh', 'w') as o:
             cmds = [
                 fastp(sample_name=sample_name,
                       fq1=fq1, fq2=fq2,
-                      output_path=f'{output_path}/QC/{sample_name}')
+                      output_path=f'{output_path}/01.QC/{sample_name}')
             ]
             cmds.extend(
                 align(sample_name=sample_name,
                       genome_fasta_file=genome_fasta_file,
                       fq1=fq1, fq2=fq2,
-                      output_path=f'{output_path}/align/{sample_name}')
+                      output_path=f'{output_path}/02.mapping/{sample_name}')
             )
             cmds.extend(
                 HaplotypeCaller(genome_fasta_file=genome_fasta_file,
-                                bam_file=f'{output_path}/align/{sample_name}/{sample_name}.map30.sort.markdup.bam',
+                                bam_file=f'{output_path}/02.mapping/{sample_name}/{sample_name}.map30.sort.markdup.bam',
                                 sample_name=sample_name,
-                                output_path=f'{output_path}/variant/{sample_name}')
+                                output_path=f'{output_path}/03.variant/{sample_name}')
             )
             o.write('\n'.join(cmds))
 
     system(f'for i in `ls {output_path}/shell`; do echo "sh {output_path}/shell/$i"; done > {output_path}/All.sh')
     system(f'exec_cmds -f {output_path}/All.sh -n {num_processing}')
 
-    get_gt(depth_dir=f'{output_path}/align/',
+    get_gt(depth_dir=f'{output_path}/02.mapping/',
            depth=read_depth,
-           vcf_dir=f'{output_path}/variant/')
+           vcf_dir=f'{output_path}/03.variant/')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

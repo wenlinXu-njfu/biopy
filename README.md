@@ -3,14 +3,14 @@
 ## Dependence of python packages
 **python ≥ 3.8<br />
 fire ≥ 0.6.0<br />
-pybioinformatic ≥ 0.0.3<br />
+pybioinformatic == 0.0.5<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
-
 ## Dependency of other software
 **blast+<br />
 bwa<br />
+cufflinks<br />
 fastp<br />
 featureCounts<br />
 gatk<br />
@@ -18,7 +18,8 @@ hisat2<br />
 hmmsearch<br />
 HTseq<br />
 PfamScan<br />
-samtools**
+samtools<br />
+stringtie**
 
 ## Getting started
 ```shell
