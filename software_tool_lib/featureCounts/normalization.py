@@ -84,7 +84,7 @@ def main(featureCounts_result_file: TextIOWrapper,
               metavar='<str>', default=getcwd(), show_default=True,
               help='Output path.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
-              is_flag=True, is_eager=True, expose_value=False, callback=displayer)
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gene_exp_file, min_exp, output_path):
     """Standardize gene expression with FPKM and TPM."""
     main(gene_exp_file, min_exp, output_path)
