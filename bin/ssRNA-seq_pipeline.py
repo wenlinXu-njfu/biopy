@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from os import getcwd, makedirs, system
 from shutil import which
 import click
-from pybioinformatic import parse_sample_info, MergeSamples, SpecificStrandRNASeqAnalyser, Displayer
+from pybioinformatic import parse_sample_info, MergeSamples, StrandSpecificRNASeqAnalyser, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
@@ -28,7 +28,7 @@ def main(sample_info: TextIOWrapper,
     # single sample analyse
     for sample_name, fq_list in d.items():
         makedirs(f'{output_path}/shell/normal', exist_ok=True)
-        analyser = SpecificStrandRNASeqAnalyser(
+        analyser = StrandSpecificRNASeqAnalyser(
             read1=fq_list[0],
             read2=fq_list[1],
             ref_gff=gff,
@@ -50,7 +50,7 @@ def main(sample_info: TextIOWrapper,
     )
 
     # merge results of each sample
-    a = SpecificStrandRNASeqAnalyser(
+    a = StrandSpecificRNASeqAnalyser(
         read1='',
         read2='',
         ref_genome=genome,
@@ -84,7 +84,9 @@ def main(sample_info: TextIOWrapper,
                f'{stringtie_merge}\n'
                f'{cuffcompare}\n'
                f'{featureCounts}\n'
-               f'{featureCounts_helper} normalization -i {output_path}/04.expression/featureCounts.xls -o {output_path}/04.expression')
+               f'{featureCounts_helper} normalization '
+               f'-i {output_path}/04.expression/featureCounts.xls '
+               f'-o {output_path}/04.expression')
         o.write(cmd)
 
 
