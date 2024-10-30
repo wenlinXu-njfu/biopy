@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+"""
+File: joint.py
+Description: Joint two table files.
+CreateDate: 2024/10/12
+Author: xuwenlin
+E-mail: wenlinxu.njfu@outlook.com
+"""
+from io import TextIOWrapper
+from typing import Union, Literal
+from pandas import read_table
+import click
+from pybioinformatic import dataframe_to_str, Displayer
+
+displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+
+
+def main(left_table: Union[str, TextIOWrapper],
+         right_table: Union[str, TextIOWrapper],
+         left_column: int,
+         right_column: int,
+         joint_method: Literal['left', 'right', 'outer', 'inner', 'cross'],
+         output_file: TextIOWrapper):
+    left_table = read_table(left_table, index_col=left_column - 1)
+    right_table = read_table(right_table, index_col=right_column - 1)
+    merge = left_table.join(other=right_table, how=joint_method, lsuffix='_left_table', rsuffix='_right_table')
+    merge = dataframe_to_str(df=merge)
+    click.echo(merge, output_file)
+
+
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('-i', '--left-table', 'left_table',
+              metavar='<file|stdin>', type=click.File('r'), required=True,
+              help='Input left table file.')
+@click.option('-I', '--right-table', 'right_table',
+              metavar='<file|stdin>', type=click.File('r'), required=True,
+              help='Input right table file.')
+@click.option('-lc', '--left-column', 'left_column',
+              metavar='<int>', default=1, show_default=True,
+              help='Left table column to join on the right table.')
+@click.option('-rc', '--right-column', 'right_column',
+              metavar='<int>', default=1, show_default=True,
+              help='Right table column to join on the left table.')
+@click.option('-j', '--joint-method', 'joint_method',
+              metavar='<str>', type=click.Choice(['left', 'right', 'outer', 'inner', 'cross']),
+              default='left', show_default=True,
+              help='How to handle the operation of the two tables.')
+@click.option('-o', '--output_file', 'output_file',
+              metavar='<file|stdout>', type=click.File('w'),
+              help='Output file, stdout by default.')
+@click.option('-V', '--version', 'version', help='Show author and version information.',
+              is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
+def run(left_table, right_table, left_column, right_column, joint_method, output_file):
+    """Joint two table files."""
+    main(
+        left_table=left_table,
+        right_table=right_table,
+        left_column=left_column,
+        right_column=right_column,
+        joint_method=joint_method,
+        output_file=output_file
+    )
+
+
+if __name__ == '__main__':
+    run()
