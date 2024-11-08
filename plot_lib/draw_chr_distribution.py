@@ -32,7 +32,7 @@ def main(chr_len_file: str,
         )
     len_dict.sort_by_keys()
 
-    # Step3: stat snp for each window.
+    # Step2: stat snp for each window.
     tkm = TaskManager(num_processing=1)
     snp_ref = r"awk -F'\t' '{print $2,$3-1,$3}' OFS='\t' %s | sort -uV" % snp_ref_file
     cmd = f"bedtools makewindows -g <(cut -f 1-2 {chr_len_file} | sort -uV) -w {window_size} | intersectBed -a - -b <({snp_ref}) -c"
@@ -50,9 +50,10 @@ def main(chr_len_file: str,
         snp_count.loc[snp_count.BedChr == chromosome, 'Y-coordinate'] = y
         y -= 1
 
-    # Step4: draw snp distribution.
+    # Step3: draw snp distribution.
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['font.family'] = 'Arial'
+    plt.rcParams['font.size'] = 8
     figure_size = [float(i) for i in figure_size.split('x')]
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111)
@@ -66,13 +67,41 @@ def main(chr_len_file: str,
     y_ticks = range(len(len_dict), 0, -1)
     y_labels = list(len_dict.keys())
     plt.yticks(ticks=y_ticks, labels=y_labels)
-    x_ticks = [i for i in range(0, max(len_dict.values()) - 10 ** 8, 10 ** 8)]
+    if max(len_dict.values()) / 10 ** 3 <= 10:
+        step = 10 ** 3
+        unit = 'Kb'
+        unit_step = 10 ** 3
+    elif 10 < max(len_dict.values()) / 10 ** 3 <= 100:
+        step = 10 ** 4
+        unit = 'Kb'
+        unit_step = 10 ** 3
+    elif 100 < max(len_dict.values()) / 10 ** 3 < 1000:
+        step = 10 ** 5
+        unit = 'Kb'
+        unit_step = 10 ** 3
+    elif max(len_dict.values()) / 10 ** 6 <= 10:
+        step = 10 ** 6
+        unit = 'Mb'
+        unit_step = 10 ** 6
+    elif 10 < max(len_dict.values()) / 10 ** 6 <= 100:
+        step = 10 ** 7
+        unit = 'Mb'
+        unit_step = 10 ** 6
+    elif 100 < max(len_dict.values()) / 10 ** 6 < 1000:
+        step = 10 ** 8
+        unit = 'Mb'
+        unit_step = 10 ** 6
+    else:
+        step = 10 ** 9
+        unit = 'Gb'
+        unit_step = 10 ** 9
+    x_ticks = [i for i in range(0, max(len_dict.values()) - step, step)]
     x_ticks.append(max(len_dict.values()))
-    x_labels = ['%.2f' % int(i / 10 ** 6) for i in range(0, max(len_dict.values()) - 10 ** 8, 10 ** 8)]
-    x_labels.append('%.2f' % (max(len_dict.values()) / 10**6))
+    x_labels = ['%.2f' % int(i / unit_step) for i in range(0, max(len_dict.values()) - step, step)]
+    x_labels.append('%.2f' % (max(len_dict.values()) / unit_step))
     plt.xticks(ticks=x_ticks, labels=x_labels)
-    plt.xlabel('Mb', loc='right')
-    plt.xlim(0, max(len_dict.values()) + 10*6)
+    plt.xlabel(unit, loc='right')
+    plt.xlim(0, max(len_dict.values()) + step)
     # draw snp distribution
     if reverse:
         cmap = plt.get_cmap(cmap).reversed()
@@ -87,9 +116,10 @@ def main(chr_len_file: str,
     )
     colorbar_tickslabel = []
     for i in range(0, n + 1):
-        colorbar_tickslabel.append(str(i)) if i < n else colorbar_tickslabel.append(f'>{n}')
+        colorbar_tickslabel.append(str(i)) if i < n else colorbar_tickslabel.append(f'≥{n}')
     cbar = plt.colorbar(mappable=scatter, ticks=range(n + 1))
     cbar.ax.set_yticklabels(colorbar_tickslabel)
+    plt.title(f'Window Size: {window_size}')
     plt.savefig(output_file, bbox_inches='tight', dpi=300)
 
 

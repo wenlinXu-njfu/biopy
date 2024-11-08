@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 """
 File: ssRNA-seq_pipeline.py
-Description: ssRNA-seq pipeline.
+Description: Strand specific RNA pair end sequencing analysis pipeline (including lncRNA and its target gene prediction).
 Date: 2023/2/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
+from typing import Literal
 from os import getcwd, makedirs, system
+from os.path import abspath
 from shutil import which
 import click
-from pybioinformatic import parse_sample_info, MergeSamples, StrandSpecificRNASeqAnalyser, Displayer
+from pybioinformatic import (
+    parse_sample_info,
+    MergeSamples,
+    StrandSpecificRNASeqAnalyser,
+    LncRNAPredictor,
+    Displayer
+)
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
@@ -19,9 +27,12 @@ def main(sample_info: TextIOWrapper,
          gff: str,
          feature_type: str,
          count_unit: str,
+         module: Literal['ve', 'pl'],
+         pfamscan_database: str,
          num_threads: int,
          num_processing: int,
          output_path: str):
+    output_path = abspath(output_path)
     storer = MergeSamples(set(), set())
     d = parse_sample_info(sample_info=sample_info)
 
@@ -77,17 +88,104 @@ def main(sample_info: TextIOWrapper,
         featureCounts_exec='featureCounts'
     )
 
-    with open(f'{output_path}/shell/run_all_normal.sh', 'w') as o:
+    # lncRNA prediction
+    makedirs(f'{output_path}/05.lncRNA_prediction', exist_ok=True)
+    lp = LncRNAPredictor(
+        nucl_fasta_file=f'{output_path}/03.assembly/novel_transcript.fa',
+        output_path=f'{output_path}/05.lncRNA_prediction',
+        pep_fasta_file=None,
+        num_thread=num_threads,
+        module=module
+    )
+    CNCI_cmd = lp.run_CNCI(CNCI_exec='CNCI.py')
+    CPC2_cmd = lp.run_CPC2(CPC2_exec='CPC2.py')
+    PLEK_cmd = lp.run_PLEK(PLEK_exec='PLEK')
+    lncRNA_prediction_cmd = (
+        f'{CNCI_cmd}\n{CPC2_cmd}\n{PLEK_cmd}\n'
+        f'pfamscan_helper batch '
+        f'-i {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input '
+        f'-d {pfamscan_database} '
+        f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_out '
+        f'-n {num_threads}')
+    with open(f'{output_path}/shell/lncRNA_prediction.sh', 'w') as o:
+        o.write(lncRNA_prediction_cmd)
+
+    # lncRNA target gene prediction
+    makedirs(f'{output_path}/06.lncRNA_target_prediction', exist_ok=True)
+    target_prediction_script = f'''#!/usr/bin/env python
+from pybioinformatic import LncRNATargetPredictor
+
+ltp = LncRNATargetPredictor(
+    lncRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/lncRNA.gtf',
+    mRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/target.gtf',
+    lncRNA_exp_file='{output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls',
+    mRNA_exp_file='{output_path}/06.lncRNA_target_prediction/target_exp.xls',
+    output_path='{output_path}/06.lncRNA_target_prediction',
+    lncRNA_min_exp=1,
+    mRNA_min_exp=1,
+    r=0.8,
+    FDR=0.05,
+    q_value=0.05,
+    num_processing={num_threads},
+)
+
+if __name__ == '__main__':
+    ltp.co_location()
+    ltp.co_expression()
+'''
+    with open(f'{output_path}/shell/lncRNA_target_prediction.py', 'w') as o:
+        o.write(target_prediction_script)
+
+    # write all step commands
+    with open(f'{output_path}/shell/All_step.sh', 'w') as o:
         exec_cmds = which('exec_cmds')
         featureCounts_helper = which('featureCounts_helper')
-        cmd = (f'{exec_cmds} -f {output_path}/shell/merge_normal.sh -n {num_processing}\n'
-               f'{stringtie_merge}\n'
-               f'{cuffcompare}\n'
-               f'{featureCounts}\n'
-               f'{featureCounts_helper} normalization '
-               f'-i {output_path}/04.expression/featureCounts.xls '
-               f'-o {output_path}/04.expression')
+        seqkit = which('seqkit')
+        ORF_finder = which('ORF_finder')
+        file_split = which('file_split')
+        lncRNA_results = lp.merge_results(
+            CNCI_results=f'{output_path}/05.lncRNA_prediction/CNCI/CNCI.index',
+            CPC2_results=f'{output_path}/05.lncRNA_prediction/CPC2/CPC2.txt',
+            PLEK_results=f'{output_path}/05.lncRNA_prediction/PLEK/PLEK.xls',
+            PfamScan_results=f'{output_path}/05.lncRNA_prediction/PfamScan/pfamscan_out/all_results.xls',
+            seqkit_exec=seqkit
+        )
+        cmd = (
+            f'#!/bin/bash\n\n'
+            f'{exec_cmds} -f {output_path}/shell/merge_normal.sh -n {num_processing}\n\n'
+            f'{stringtie_merge}\n\n'
+            f'{cuffcompare}\n\n'
+            f'{featureCounts}\n\n'
+            f'{featureCounts_helper} normalization '
+            f'-i {output_path}/04.expression/featureCounts.xls '
+            f'-o {output_path}/04.expression\n\n'
+            f'{ORF_finder} -l 30 -P -log {output_path}/03.assembly/ORF.log '
+            f'-o {output_path}/03.assembly {output_path}/03.assembly/novel_transcript.fa -n {num_threads}\n\n'
+            f'{file_split} -n 200 '
+            f'-i {output_path}/03.assembly/novel_transcript_pep.fa '
+            f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input\n\n'
+            f'{exec_cmds} -f {output_path}/shell/lncRNA_prediction.sh -n 4\n\n'
+            f'{lncRNA_results}\n\n'
+            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -wf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/lncRNA.gtf\n\n'
+            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -vwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf\n\n'
+            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -wf - {output_path}/04.expression/FPKM.fc.xls | '
+            f'cat <(head -n 1 {output_path}/04.expression/FPKM.fc.xls) - '
+            f'> {output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls\n\n'
+            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -vwf - {output_path}/04.expression/FPKM.fc.xls '
+            f'> {output_path}/06.lncRNA_target_prediction/target_exp.xls\n\n'
+            f'python {output_path}/shell/lncRNA_target_prediction.py'
+        )
         o.write(cmd)
+    system(f'chmod 755 {output_path}/shell/All_step.sh')
+    click.echo(f'Commands created successfully, please run "bash {output_path}/shell/All_step.sh".', err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -106,6 +204,12 @@ def main(sample_info: TextIOWrapper,
 @click.option('-c', '--count-unit', 'count_unit',
               metavar='<str>', default='transcript_id', show_default=True,
               help='Raw reads count unit, such as transcript_id or gene_id.')
+@click.option('-m', '--module', 'module',
+              metavar='<str>', type=click.Choice(['ve', 'pl']), default='pl', show_default=True,
+              help='')
+@click.option('-d', '--pfamscan-database', 'pfamscan_database',
+              metavar='<path>', required=True,
+              help='PfamScan database path.')
 @click.option('-t', '--num-threads', 'num_threads',
               metavar='<int>', type=int, default=10, show_default=True,
               help='The number of threads.')
@@ -117,14 +221,25 @@ def main(sample_info: TextIOWrapper,
               help='Output path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(sample_info, ref_genome, gff, feature_type, count_unit, num_threads, num_processing, out_path):
-    """Strand specific RNA pair end sequencing analysis pipeline."""
+def run(sample_info,
+        ref_genome,
+        gff,
+        feature_type,
+        count_unit,
+        module,
+        pfamscan_database,
+        num_threads,
+        num_processing,
+        out_path):
+    """Strand specific RNA pair end sequencing analysis pipeline (including lncRNA and its target gene prediction)."""
     main(
         sample_info=sample_info,
         genome=ref_genome,
         gff=gff,
         feature_type=feature_type,
         count_unit=count_unit,
+        module=module,
+        pfamscan_database=pfamscan_database,
         num_threads=num_threads,
         num_processing=num_processing,
         output_path=out_path

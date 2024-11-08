@@ -6,6 +6,7 @@ from plot_lib.plot_heatmap import run as plot_heatmap
 from plot_lib.plot_venn import run as plot_venn
 from plot_lib.plot_volcano import run as plot_volcano
 from plot_lib.draw_chr_distribution import run as draw_chr_distribution
+from plot_lib.draw_enrich_figure import run as draw_enrich_figure
 
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'

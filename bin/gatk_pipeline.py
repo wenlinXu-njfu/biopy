@@ -18,8 +18,10 @@ displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 def build_genome_index(genome_fasta_file: str):
     bwa = which('bwa')
     bwa_index = f'{bwa} index {genome_fasta_file}'
-    samtools_index = f'samtools faidx {genome_fasta_file}'
-    gatk_index = f'gatk CreateSequenceDictionary -R {genome_fasta_file}'
+    samtools = which('samtools')
+    samtools_index = f'{samtools} faidx {genome_fasta_file}'
+    gatk = which('gatk')
+    gatk_index = f'{gatk} CreateSequenceDictionary -R {genome_fasta_file}'
     cmds = [bwa_index, samtools_index, gatk_index]
     tkm = TaskManager(commands=cmds, num_processing=3)
     tkm.parallel_run_cmd()

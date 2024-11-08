@@ -10,7 +10,7 @@ from io import TextIOWrapper
 from typing import Union, Literal
 from pandas import read_table
 import click
-from pybioinformatic import dataframe_to_str, Displayer
+from pybioinformatic import Displayer
 
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
@@ -21,11 +21,10 @@ def main(left_table: Union[str, TextIOWrapper],
          right_column: int,
          joint_method: Literal['left', 'right', 'outer', 'inner', 'cross'],
          output_file: TextIOWrapper):
-    left_table = read_table(left_table, index_col=left_column - 1)
-    right_table = read_table(right_table, index_col=right_column - 1)
+    left_table = read_table(left_table, index_col=left_column - 1, dtype=str)
+    right_table = read_table(right_table, index_col=right_column - 1, dtype=str)
     merge = left_table.join(other=right_table, how=joint_method, lsuffix='_left_table', rsuffix='_right_table')
-    merge = dataframe_to_str(df=merge)
-    click.echo(merge, output_file)
+    merge.to_csv(output_file, sep='\t', na_rep='NA')
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -46,8 +45,8 @@ def main(left_table: Union[str, TextIOWrapper],
               default='left', show_default=True,
               help='How to handle the operation of the two tables.')
 @click.option('-o', '--output_file', 'output_file',
-              metavar='<file|stdout>', type=click.File('w'),
-              help='Output file, stdout by default.')
+              metavar='<file>', type=click.File('w'), default='joint.xls', show_default=True,
+              help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(left_table, right_table, left_column, right_column, joint_method, output_file):

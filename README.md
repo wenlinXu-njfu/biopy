@@ -3,7 +3,7 @@
 ## Dependence of python packages
 **python ≥ 3.8<br />
 fire ≥ 0.6.0<br />
-pybioinformatic == 0.0.5<br />
+pybioinformatic == 0.0.6<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
@@ -27,6 +27,19 @@ git clone https://github.com/wenlinXu-njfu/biopy.git
 python biopy/configure.py
 export PYTHONPATH=$PATH:/your/path/biopy
 export PATH=$PATH:/your/path/biopy/bin
+```
+
+## Issue
+### ImportError: libffi.so.7: cannot open shared object file: No such file or directory
+```shell
+# First use the following command to verify that the file exists in that path.
+ls /usr/lib/x86_64-linux-gnu/libffi.so.7
+
+# If libffi.so.6 is present on your system but libffi.so.7 is missing, you can try creating a soft link to an existing libffi.so.6 file.
+ln -s /usr/lib/x86_64-linux-gnu/libffi.so.6 /usr/lib/x86_64-linux-gnu/libffi.so.7
+
+# You can also install libffi7 with sudo grant.
+sudo apt-get install libffi7
 ```
 
 ## Example
