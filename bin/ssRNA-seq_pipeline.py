@@ -126,6 +126,7 @@ ltp = LncRNATargetPredictor(
     r=0.8,
     FDR=0.05,
     q_value=0.05,
+    distance=100000,
     num_processing={num_threads},
 )
 
