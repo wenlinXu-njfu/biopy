@@ -17,9 +17,24 @@ from pybioinformatic import (
     MergeSamples,
     StrandSpecificRNASeqAnalyser,
     LncRNAPredictor,
+    LncRNAClassification,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.3.0')
+
+
+def check_dependency():
+    software_list = ['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
+                     'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools']
+    click.echo('Dependency check.', err=True)
+    for software in software_list:
+        path = which(software)
+        if path:
+            click.echo(f'{software}: {path}', err=True)
+        else:
+            click.echo(f'{software}: command not found', err=True)
+    if not all([which(i) for i in software_list]):
+        exit()
 
 
 def main(sample_info: TextIOWrapper,
@@ -32,6 +47,7 @@ def main(sample_info: TextIOWrapper,
          num_threads: int,
          num_processing: int,
          output_path: str):
+    check_dependency()
     output_path = abspath(output_path)
     storer = MergeSamples(set(), set())
     d = parse_sample_info(sample_info=sample_info)
@@ -81,7 +97,9 @@ def main(sample_info: TextIOWrapper,
 
     cuffcompare = a.run_cuffcompare(cuffcompare_exe='cuffcompare', gffread_exe='gffread')
 
+    anno_file = 'gtf' if feature_type == 'exon' else 'gff'
     featureCounts = a.run_featureCounts(
+        anno_file=anno_file,
         bam_list=list(storer.hisat2_bam),
         feature_type=feature_type,
         count_unit=count_unit,
@@ -112,8 +130,7 @@ def main(sample_info: TextIOWrapper,
 
     # lncRNA target gene prediction
     makedirs(f'{output_path}/06.lncRNA_target_prediction', exist_ok=True)
-    target_prediction_script = f'''#!/usr/bin/env python
-from pybioinformatic import LncRNATargetPredictor
+    target_prediction_script = f'''from pybioinformatic import LncRNATargetPredictor
 
 ltp = LncRNATargetPredictor(
     lncRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/lncRNA.gtf',
@@ -121,8 +138,8 @@ ltp = LncRNATargetPredictor(
     lncRNA_exp_file='{output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls',
     mRNA_exp_file='{output_path}/06.lncRNA_target_prediction/target_exp.xls',
     output_path='{output_path}/06.lncRNA_target_prediction',
-    lncRNA_min_exp=1,
-    mRNA_min_exp=1,
+    lncRNA_min_exp=0.5,
+    mRNA_min_exp=0.000001,
     r=0.8,
     FDR=0.05,
     q_value=0.05,
@@ -137,7 +154,18 @@ if __name__ == '__main__':
     with open(f'{output_path}/shell/lncRNA_target_prediction.py', 'w') as o:
         o.write(target_prediction_script)
 
+    # lncRNA classification
+    lc = LncRNAClassification(
+        mRNA_gff_file=gff,
+        lncRNA_gtf_file=f'{output_path}/06.lncRNA_target_prediction/lncRNA.gtf',
+        out_dir=f'{output_path}/07.lncRNA_classification'
+    )
+    classify_script = lc.classification()
+    with open(f'{output_path}/shell/lncRNA_classification.sh', 'w') as o:
+        o.write(classify_script)
+
     # write all step commands
+    python = which('python')
     with open(f'{output_path}/shell/All_step.sh', 'w') as o:
         exec_cmds = which('exec_cmds')
         featureCounts_helper = which('featureCounts_helper')
@@ -160,29 +188,30 @@ if __name__ == '__main__':
             f'{featureCounts_helper} normalization '
             f'-i {output_path}/04.expression/featureCounts.xls '
             f'-o {output_path}/04.expression\n\n'
-            f'{ORF_finder} -l 30 -P -log {output_path}/03.assembly/ORF.log '
+            f'{ORF_finder} -l 30 -F -log {output_path}/03.assembly/ORF.log '
             f'-o {output_path}/03.assembly {output_path}/03.assembly/novel_transcript.fa -n {num_threads}\n\n'
             f'{file_split} -n 200 '
             f'-i {output_path}/03.assembly/novel_transcript_pep.fa '
             f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input\n\n'
             f'{exec_cmds} -f {output_path}/shell/lncRNA_prediction.sh -n 4\n\n'
             f'{lncRNA_results}\n\n'
-            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
             f'sed "s/>//;s/ .*//" | '
-            f'grep -wf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/lncRNA.gtf\n\n'
-            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'grep -Fwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/lncRNA.gtf\n\n'
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
             f'sed "s/>//;s/ .*//" | '
-            f'grep -vwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf\n\n'
-            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'grep -vFwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf\n\n'
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
             f'sed "s/>//;s/ .*//" | '
-            f'grep -wf - {output_path}/04.expression/FPKM.fc.xls | '
+            f'grep -Fwf - {output_path}/04.expression/FPKM.fc.xls | '
             f'cat <(head -n 1 {output_path}/04.expression/FPKM.fc.xls) - '
             f'> {output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls\n\n'
-            f'grep ">" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
             f'sed "s/>//;s/ .*//" | '
-            f'grep -vwf - {output_path}/04.expression/FPKM.fc.xls '
+            f'grep -vFwf - {output_path}/04.expression/FPKM.fc.xls '
             f'> {output_path}/06.lncRNA_target_prediction/target_exp.xls\n\n'
-            f'python {output_path}/shell/lncRNA_target_prediction.py'
+            f'{python} {output_path}/shell/lncRNA_target_prediction.py\n\n'
+            f'bash {output_path}/shell/lncRNA_classification.sh'
         )
         o.write(cmd)
     system(f'chmod 755 {output_path}/shell/All_step.sh')
@@ -207,7 +236,7 @@ if __name__ == '__main__':
               help='Raw reads count unit, such as transcript_id or gene_id.')
 @click.option('-m', '--module', 'module',
               metavar='<str>', type=click.Choice(['ve', 'pl']), default='pl', show_default=True,
-              help='')
+              help='CNCI -m option.')
 @click.option('-d', '--pfamscan-database', 'pfamscan_database',
               metavar='<path>', required=True,
               help='PfamScan database path.')

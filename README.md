@@ -80,6 +80,39 @@ CAAAAAAAAACCATAAGCCGCCATGTCTCACATCGCAACCGGCTCAAGTAGAGTGCCCCTAATAATATGATCTTCGCTAC
 ```
 ![image](test_data/RNA_structure/structure.png)
 
+### lncRNA and target prediction.
+```shell
+ssRNA-seq_pipeline \
+-l sample.info.xls \
+-r genome.fa \
+-g genome.gff3 \
+-f exon \
+-c transcript_id \
+-m pl \
+-d PfamScanDataBase \
+-t 15 \
+-p 6 \
+-o .
+```
+```
+# Options explain:
+-l: The first two columns of sample.info.xls file must be Sample_name and Fastq_path.
+-r: Referenece genome fasta file, please build hisat2 index before runing.
+-g: Referenece genome annotation gff file.
+-f: FeatureCounts -t option.
+-c: FeatureCounts -g option.
+-m: CNCI -m option.
+-d: PfamScan -dir option.
+-t: Number of threads for each sample.
+-p: Number of processing. It means how many sample are analyzed in parallel.
+-o: Output path.
+
+# Dependency software
+Make sure these software can be found in your environment variable:
+fastp, histat2, samtools, stringtie, cufflinks, featureCounts, PfamScan, CPC2, CNCI, and PLEK
+```
+![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
+
 ### Genotype consistency calculation.
 ```shell
 gt_kit gs \
@@ -116,7 +149,7 @@ plot chr_distribution \
 -l biopy/test_data/chr_distribution/chr_len.xls \
 -w 100000 \
 -n 4 \
--cmap RdYlGn \
+-c RdYlGn \
 -o biopy/test_data/chr_distribution/snp.distribution.png
 ```
 ![image](test_data/chr_distribution/snp.distribution.png)

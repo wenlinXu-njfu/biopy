@@ -65,7 +65,8 @@ def apply_func(grouped_df: DataFrame,
         ax2.plot([0, chr_len], [best['fold_enrichment'], best['fold_enrichment']], 'r--', linewidth=0.8)
         ax2.set_xticks(
             [i for i in range(10 ** 6, chr_len, 10 ** 5)],
-            [str(i / 1000000) for i in range(10 ** 6, chr_len, 10 ** 5)]
+            [str(i / 1000000) for i in range(10 ** 6, chr_len, 10 ** 5)],
+            rotation=45
         )
         range_start = best['Centromere_start'] - 10 ** 6
         range_end = best['Centromere_end'] + 10 ** 6
@@ -108,7 +109,6 @@ def main(chr_len_file: TextIOWrapper,
     ))
     ret.set_index(keys='Centromere_id', drop=True, inplace=True)
     ret.to_csv(f'{out_path}/Centromere_pos.xls', sep='\t')
-
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

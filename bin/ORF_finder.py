@@ -61,26 +61,26 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('fasta_files', nargs=-1, metavar='<fasta files|stdin>', type=click.File('r'), required=True)
-@click.option('-l', '--min_len', 'min_len', metavar='<int>', type=int, default=30, show_default=True,
+@click.option('-l', '--min-len', 'min_len', metavar='<int>', type=int, default=30, show_default=True,
               help='Minimal ORF length.')
-@click.option('-p', '--parse_seqids', 'parse_seqids', is_flag=True, flag_value=True,
+@click.option('-p', '--parse-seqids', 'parse_seqids', is_flag=True, flag_value=True,
               help='Parse sequence id.')
 @click.option('-c', '--completed', 'completed', is_flag=True, flag_value=True,
               help='Remain completed ORF.')
-@click.option('-P', '--only_plus', 'only_plus', is_flag=True, flag_value=True,
-              help='Only predict plus chain.')
-@click.option('-log', '--log_file', 'log_file', metavar='<file|stderr>', type=click.File('w'),
+@click.option('-F', '--forward', 'forward', is_flag=True, flag_value=True,
+              help='Only predict forward chain.')
+@click.option('-log', '--logfile', 'log_file', metavar='<file|stderr>', type=click.File('w'),
               help='Write the sequence that not found ORF to logfile, stderr by default.')
-@click.option('-o', '--output_path', 'output_path', metavar='<path|stdout>',
+@click.option('-o', '--output-path', 'output_path', metavar='<path|stdout>',
               help='Output path, stdout by default.')
 @click.option('-n', '--num_processes', 'num_processes', metavar='<int>', type=int, default=1, show_default=True,
               help='Number of processes.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('ORF predicting.')
-def run(fasta_files, parse_seqids, min_len, completed, only_plus, log_file, output_path, num_processes):
+def run(fasta_files, parse_seqids, min_len, completed, forward, log_file, output_path, num_processes):
     """ORF prediction."""
-    main(fasta_files, parse_seqids, min_len, completed, only_plus, log_file, output_path, num_processes)
+    main(fasta_files, parse_seqids, min_len, completed, forward, log_file, output_path, num_processes)
 
 
 if __name__ == '__main__':
