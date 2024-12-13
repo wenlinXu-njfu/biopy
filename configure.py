@@ -1,8 +1,8 @@
 from os import system, listdir, remove
-from os.path import dirname, isfile
+from os.path import abspath, isfile
 from shutil import which
 
-path = dirname(__file__)
+path = '/'.join(abspath(__file__).split('/')[:-1])
 system(command="pip install fire pybioinformatic==0.0.7b  requests scipy venn")
 system(command=f"sed -i 's/\r//' {path}/bin/*")
 python_path = which('python')
