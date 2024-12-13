@@ -3,7 +3,7 @@ from os.path import dirname, isfile
 from shutil import which
 
 path = dirname(__file__)
-system(command="pip install fire pybioinformatic==0.0.7b requests scipy venn")
+system(command="pip install fire pybioinformatic==0.0.7 requests scipy venn")
 system(command=f"sed -i 's/\r//' {path}/bin/*")
 python_path = which('python')
 system(command=f"sed -i 's@#!/usr/bin/env python@#!{python_path}@' {path}/bin/*")
