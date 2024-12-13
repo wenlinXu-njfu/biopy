@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: ssRNA-seq_pipeline.py
-Description: Strand specific RNA pair end sequencing analysis pipeline (including lncRNA and its target gene prediction).
+Description: Strand specific (dUTP constructed library) pair end RNA-seq analysis pipeline (including lncRNA and its target gene prediction).
 Date: 2023/2/21
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -261,7 +261,7 @@ def run(sample_info,
         num_threads,
         num_processing,
         out_path):
-    """Strand specific RNA pair end sequencing analysis pipeline (including lncRNA and its target gene prediction)."""
+    """Strand specific (dUTP constructed library) pair end RNA-seq analysis pipeline (including lncRNA and its target gene prediction)."""
     main(
         sample_info=sample_info,
         genome=ref_genome,
