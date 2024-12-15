@@ -7,7 +7,7 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import StringIO, TextIOWrapper
-from os import getcwd
+from os import getcwd, makedirs
 from pandas import read_csv, read_table
 import click
 from pybioinformatic import merge_duplicate_indexes, get_FPKM, get_TPM, Displayer
@@ -42,6 +42,7 @@ def main(featureCounts_result_file: TextIOWrapper,
     :param out_path: Output path. {type=str, default=.}
     :return: None
     """
+    makedirs(out_path, exist_ok=True)
 
     def __rename(columns: list):
         columns = [i.split('/')[-1] for i in columns]
@@ -82,7 +83,7 @@ def main(featureCounts_result_file: TextIOWrapper,
               help='Gene minimum expression threshold in all samples.')
 @click.option('-o', '--output-path', 'output_path',
               metavar='<str>', default=getcwd(), show_default=True,
-              help='Output path.')
+              help='Output path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gene_exp_file, min_exp, output_path):
