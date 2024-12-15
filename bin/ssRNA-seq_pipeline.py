@@ -91,7 +91,7 @@ def main(sample_info: TextIOWrapper,
         m=200,
         c=1.0,
         F=0.5,
-        g=0,
+        g=500,
         stringtie_exec='stringtie'
     )
 
