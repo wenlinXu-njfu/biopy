@@ -98,7 +98,7 @@ def main(sample_info: TextIOWrapper,
     cuffcompare = a.run_cuffcompare(cuffcompare_exe='cuffcompare', gffread_exe='gffread')
 
     anno_file = 'gtf' if feature_type == 'exon' else 'gff'
-    featureCounts = a.run_featureCounts(
+    all_featureCounts = a.run_featureCounts(
         anno_file=anno_file,
         bam_list=list(storer.hisat2_bam),
         feature_type=feature_type,
@@ -135,8 +135,8 @@ def main(sample_info: TextIOWrapper,
 ltp = LncRNATargetPredictor(
     lncRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/lncRNA.gtf',
     mRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/target.gtf',
-    lncRNA_exp_file='{output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls',
-    mRNA_exp_file='{output_path}/06.lncRNA_target_prediction/target_exp.xls',
+    lncRNA_exp_file='{output_path}/06.lncRNA_target_prediction/lncRNA_exp/FPKM.fc.xls',
+    mRNA_exp_file='{output_path}/06.lncRNA_target_prediction/target_exp/FPKM.fc.xls',
     output_path='{output_path}/06.lncRNA_target_prediction',
     lncRNA_min_exp=0.5,
     mRNA_min_exp=0.000001,
@@ -144,7 +144,7 @@ ltp = LncRNATargetPredictor(
     FDR=0.05,
     q_value=0.05,
     distance=100000,
-    num_processing={num_threads},
+    num_processing={num_threads * num_processing},
 )
 
 if __name__ == '__main__':
@@ -168,6 +168,7 @@ if __name__ == '__main__':
     python = which('python')
     with open(f'{output_path}/shell/All_step.sh', 'w') as o:
         exec_cmds = which('exec_cmds')
+        featureCounts = which('featureCounts')
         featureCounts_helper = which('featureCounts_helper')
         seqkit = which('seqkit')
         ORF_finder = which('ORF_finder')
@@ -179,12 +180,44 @@ if __name__ == '__main__':
             PfamScan_results=f'{output_path}/05.lncRNA_prediction/PfamScan/pfamscan_out/all_results.xls',
             seqkit_exec=seqkit
         )
+        create_lncRNA_gtf = (
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -Fwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/lncRNA.gtf'
+        )
+        makedirs(f'{output_path}/06.lncRNA_target_prediction/lncRNA_exp', exist_ok=True)
+        makedirs(f'{output_path}/06.lncRNA_target_prediction/target_exp', exist_ok=True)
+        lncRNA_exp = (
+            f'{featureCounts} -t exon -g transcript_id -fMO -p --countReadPairs -s 2 -T {num_threads} '
+            f'-a {output_path}/06.lncRNA_target_prediction/lncRNA.gtf '
+            f'-o {output_path}/06.lncRNA_target_prediction/lncRNA_exp/lncRNA.fc.xls '
+            f'{output_path}/02.mapping/*/*.ht2.sort.bam '
+            f'2> {output_path}/06.lncRNA_target_prediction/lncRNA_exp/lncRNA.fc.log\n'
+            f'{featureCounts_helper} normalization '
+            f'-i {output_path}/06.lncRNA_target_prediction/lncRNA.fc.xls '
+            f'-o {output_path}/06.lncRNA_target_prediction/lncRNA_exp'
+        )
+        create_target_gtf = (
+            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
+            f'sed "s/>//;s/ .*//" | '
+            f'grep -vFwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf'
+        )
+        target_exp = (
+            f'{featureCounts} -t exon -g transcript_id -fMO -p --countReadPairs -s 2 -T {num_threads} '
+            f'-a {output_path}/06.lncRNA_target_prediction/target.gtf '
+            f'-o {output_path}/06.lncRNA_target_prediction/target_exp/target.fc.xls '
+            f'{output_path}/02.mapping/*/*.ht2.sort.bam '
+            f'2> {output_path}/06.lncRNA_target_prediction/target_exp/target.fc.log\n'
+            f'{featureCounts_helper} normalization '
+            f'-i {output_path}/06.lncRNA_target_prediction/target.fc.xls '
+            f'-o {output_path}/06.lncRNA_target_prediction/target_exp'
+        )
         cmd = (
             f'#!/bin/bash\n\n'
             f'{exec_cmds} -f {output_path}/shell/merge_normal.sh -n {num_processing}\n\n'
             f'{stringtie_merge}\n\n'
             f'{cuffcompare}\n\n'
-            f'{featureCounts}\n\n'
+            f'{all_featureCounts}\n\n'
             f'{featureCounts_helper} normalization '
             f'-i {output_path}/04.expression/featureCounts.xls '
             f'-o {output_path}/04.expression\n\n'
@@ -195,23 +228,12 @@ if __name__ == '__main__':
             f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input\n\n'
             f'{exec_cmds} -f {output_path}/shell/lncRNA_prediction.sh -n 4\n\n'
             f'{lncRNA_results}\n\n'
-            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
-            f'sed "s/>//;s/ .*//" | '
-            f'grep -Fwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/lncRNA.gtf\n\n'
-            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
-            f'sed "s/>//;s/ .*//" | '
-            f'grep -vFwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf\n\n'
-            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
-            f'sed "s/>//;s/ .*//" | '
-            f'grep -Fwf - {output_path}/04.expression/FPKM.fc.xls | '
-            f'cat <(head -n 1 {output_path}/04.expression/FPKM.fc.xls) - '
-            f'> {output_path}/06.lncRNA_target_prediction/lncRNA_exp.xls\n\n'
-            f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
-            f'sed "s/>//;s/ .*//" | '
-            f'grep -vFwf - {output_path}/04.expression/FPKM.fc.xls '
-            f'> {output_path}/06.lncRNA_target_prediction/target_exp.xls\n\n'
+            f'{create_lncRNA_gtf}\n\n'
+            f'{create_target_gtf}\n\n'
+            f'{lncRNA_exp}\n\n'
+            f'{target_exp}\n\n'
             f'{python} {output_path}/shell/lncRNA_target_prediction.py\n\n'
-            f'bash {output_path}/shell/lncRNA_classification.sh'
+            f'bash {output_path}/shell/lncRNA_classification.sh\n'
         )
         o.write(cmd)
     system(f'chmod 755 {output_path}/shell/All_step.sh')
