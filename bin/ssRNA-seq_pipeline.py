@@ -194,7 +194,7 @@ if __name__ == '__main__':
             f'{output_path}/02.mapping/*/*.ht2.sort.bam '
             f'2> {output_path}/06.lncRNA_target_prediction/lncRNA_exp/lncRNA.fc.log\n'
             f'{featureCounts_helper} normalization '
-            f'-i {output_path}/06.lncRNA_target_prediction/lncRNA.fc.xls '
+            f'-i {output_path}/06.lncRNA_target_prediction/lncRNA_exp/lncRNA.fc.xls '
             f'-o {output_path}/06.lncRNA_target_prediction/lncRNA_exp'
         )
         create_target_gtf = (
@@ -209,7 +209,7 @@ if __name__ == '__main__':
             f'{output_path}/02.mapping/*/*.ht2.sort.bam '
             f'2> {output_path}/06.lncRNA_target_prediction/target_exp/target.fc.log\n'
             f'{featureCounts_helper} normalization '
-            f'-i {output_path}/06.lncRNA_target_prediction/target.fc.xls '
+            f'-i {output_path}/06.lncRNA_target_prediction/target_exp/target.fc.xls '
             f'-o {output_path}/06.lncRNA_target_prediction/target_exp'
         )
         cmd = (
