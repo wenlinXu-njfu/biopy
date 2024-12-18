@@ -26,7 +26,7 @@ displayer = Displayer(__file__.split('/')[-1], version='0.3.0')
 def check_dependency():
     software_list = ['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
                      'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools']
-    click.echo('Dependency check.', err=True)
+    click.echo('Dependency check.\n', err=True)
     for software in software_list:
         path = which(software)
         if path:
