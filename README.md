@@ -57,7 +57,7 @@ done | exec_cmds -f - -n 10
 ORF_finder \
 -l 30 \
 -n 10 \
--pc \
+-Fc \
 -log biopy/test_data/ORF_finder/ORF_finder.log \
 -o biopy/test_data/ORF_finder/ \
 biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
