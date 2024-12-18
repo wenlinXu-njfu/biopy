@@ -3,23 +3,25 @@
 ## Dependence of python packages
 **python ≥ 3.8<br />
 fire ≥ 0.6.0<br />
-pybioinformatic == 0.0.6<br />
+pybioinformatic == 0.0.9<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
 ## Dependency of other software
-**blast+<br />
-bwa<br />
-cufflinks<br />
-fastp<br />
-featureCounts<br />
-gatk<br />
-hisat2<br />
-hmmsearch<br />
-HTseq<br />
-PfamScan<br />
-samtools<br />
-stringtie**
+**bedtools: https://github.com/arq5x/bedtools2<br />
+bwa: https://github.com/lh3/bwa<br />
+CNCI: https://github.com/www-bioinfo-org/CNCI<br />
+CPC2: https://github.com/gao-lab/CPC2_standalone<br />
+cufflinks: https://github.com/cole-trapnell-lab/cufflinks<br />
+fastp: https://github.com/OpenGene/fastp<br />
+featureCounts: https://subread.sourceforge.net/<br />
+gatk: https://github.com/broadinstitute/gatk<br />
+hisat2: https://daehwankimlab.github.io/hisat2/<br />
+PfamScan: https://github.com/aziele/pfam_scan<br />
+PLEK: https://sourceforge.net/projects/plek2/<br />
+samtools: https://github.com/samtools/samtools<br />
+seqkit: https://github.com/shenwei356/seqkit<br />
+stringtie: https://github.com/gpertea/stringtie**
 
 ## Getting started
 ```shell
@@ -59,6 +61,16 @@ ORF_finder \
 -log biopy/test_data/ORF_finder/ORF_finder.log \
 -o biopy/test_data/ORF_finder/ \
 biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
+```
+### Search protein motif
+```shell
+ORF_finder \
+-l 1 \
+-n 10 \
+-F \
+-log biopy/test_data/ORF_finder/ORF_finder.log \
+biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
+motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -q -
 ```
 
 ### RNA secondary structure prediction.
@@ -108,8 +120,8 @@ ssRNA-seq_pipeline \
 -o: Output path.
 
 # Dependency software
-Make sure these software can be found in your environment variable:
-fastp, histat2, samtools, stringtie, cufflinks, featureCounts, PfamScan, CPC2, CNCI, and PLEK
+Make sure these command can be found in your environment variable:
+fastp, histat2, samtools, stringtie, cuffcompare, featureCounts, pfam_scan.pl, CPC2.py, CNCI.py, and PLEK2.py
 ```
 ![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
 
