@@ -18,6 +18,7 @@ from pybioinformatic import VCF, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
+@Timer('Converting the vcf file to gt format.')
 def main(vcf_files: Tuple[TextIOWrapper],
          output_file: TextIOWrapper,
          read_depth: int = 5,
@@ -116,7 +117,6 @@ def main(vcf_files: Tuple[TextIOWrapper],
               help='Output file, stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@Timer('Converting the vcf file to gt format.')
 def run(vcf_files, depth_files_dir, depth_file_suffix, read_depth, output_file):
     """Convert the file format from VCF to Genotype."""
     main(
