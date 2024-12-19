@@ -9,7 +9,7 @@ E-mail: wenlinxu.njfu@outlook.com
 import click
 from file_format_conversion_lib import (gff_sort, gff2gtf, gff2bed, gtf2bed,
                                         format_fasta, fa2tab, fq2fa, vcf2gt,
-                                        __version__)
+                                        embl2fa, __version__)
 from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version=__version__)
 
@@ -30,6 +30,7 @@ file_format_conversion.add_command(format_fasta, 'fasta')
 file_format_conversion.add_command(fa2tab, 'fa2tab')
 file_format_conversion.add_command(fq2fa, 'fq2fa')
 file_format_conversion.add_command(vcf2gt, 'vcf2gt')
+file_format_conversion.add_command(embl2fa, 'embl2fa')
 
 
 if __name__ == '__main__':
