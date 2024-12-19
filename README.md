@@ -122,7 +122,7 @@ ssRNA-seq_pipeline \
 
 # Dependency software
 Make sure these command can be found in your environment variable:
-fastp, histat2, samtools, stringtie, cuffcompare, featureCounts, pfam_scan.pl, CPC2.py, CNCI.py, and PLEK2.py
+fastp, histat2, samtools, stringtie, cuffcompare, featureCounts, pfam_scan.pl, CPC2.py, CNCI.py, and PLEK
 ```
 ![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
 
