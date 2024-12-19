@@ -2,6 +2,7 @@
 
 ## Dependence of python packages
 **python ≥ 3.8<br />
+biopython ≥ 1.79<br />
 fire ≥ 0.6.0<br />
 pybioinformatic == 0.0.9<br />
 requests ≥ 2.26.0<br />
