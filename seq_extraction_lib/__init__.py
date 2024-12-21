@@ -5,4 +5,4 @@ from seq_extraction_lib.gff_extract_seq import run as gff_extract_seq
 from seq_extraction_lib.gtf_extract_seq import run as gtf_extract_seq
 from seq_extraction_lib.KEGG import run as kegg
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
