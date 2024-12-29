@@ -8,6 +8,7 @@ E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
 from os import makedirs, system, getcwd
+from os.path import abspath
 from shutil import which
 from datetime import datetime
 import click
@@ -27,9 +28,9 @@ def build_genome_index(genome_fasta_file: str):
     tkm.parallel_run_cmd()
 
 
-def fastp(sample_name: str, fq1: str, fq2: str, output_path: str):
+def fastp(sample_name: str, fq1: str, fq2: str, num_threads: int, output_path: str):
     fastp = which('fastp')
-    cmd = (f'{fastp} -i {fq1} -I {fq2} '
+    cmd = (f'{fastp} -w {num_threads} -i {fq1} -I {fq2} '
            f'-o {output_path}/{sample_name}_clean_1.fq.gz '
            f'-O {output_path}/{sample_name}_clean_2.fq.gz '
            f'-h {output_path}/{sample_name}.fastp.html '
@@ -42,22 +43,23 @@ def align(sample_name: str,
           genome_fasta_file: str,
           fq1: str,
           fq2: str,
+          num_threads: int,
           output_path: str):
     cmds = []
     bwa = which('bwa')
     samtools = which('samtools')
     gatk = which('gatk')
     # Align command
-    cmd1 = fr'{bwa} mem -t 5 -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fq1} {fq2} \
-    | {samtools} view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.bam'
+    cmd1 = (fr'{bwa} mem -t {num_threads} -R "@RG\tID:{sample_name}\tSM:{sample_name}\tPL:ILLUMINA" {genome_fasta_file} {fq1} {fq2} | '
+            fr'{samtools} view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.bam')
     cmds.append(cmd1)
     # map=30 filter
-    awk = r'''awk '{if($1~/@/){print}else{if( $7 =="=" &&  $5>=30 ){print $0}}}' '''
+    awk = r'''awk '{if($1~/@/){print}else{if( $7 == "=" &&  $5 >= 30 ){print $0}}}' '''
     cmd2 = (fr'{samtools} view -h {output_path}/{sample_name}.bam | {awk} | '
             fr'{samtools} view -b -S -T {genome_fasta_file} - > {output_path}/{sample_name}.map30.bf.bam')
     cmds.append(cmd2)
     # Sort bam file
-    cmd3 = f'{samtools} sort -@ 5 -o {output_path}/{sample_name}.map30.sort.bam {output_path}/{sample_name}.map30.bf.bam'
+    cmd3 = f'{samtools} sort -@ {num_threads} -o {output_path}/{sample_name}.map30.sort.bam {output_path}/{sample_name}.map30.bf.bam'
     cmds.append(cmd3)
     cmd4 = f'{samtools} index {output_path}/{sample_name}.map30.sort.bam'
     cmds.append(cmd4)
@@ -120,6 +122,7 @@ def main(fq_path: str,
          genome_fasta_file: str,
          build_index: bool,
          sample_list: TextIOWrapper,
+         num_threads: int,
          num_processing: int,
          output_path: str,
          read_depth: int = 5):
@@ -127,6 +130,7 @@ def main(fq_path: str,
     if build_index:
         build_genome_index(genome_fasta_file)
 
+    output_path = abspath(output_path)
     makedirs(f'{output_path}/shell', exist_ok=True)
     for line in sample_list:
         fq_prefix = line.strip().split('\t')[0]
@@ -140,12 +144,14 @@ def main(fq_path: str,
             cmds = [
                 fastp(sample_name=sample_name,
                       fq1=fq1, fq2=fq2,
+                      num_threads=num_threads,
                       output_path=f'{output_path}/01.QC/{sample_name}')
             ]
             cmds.extend(
                 align(sample_name=sample_name,
                       genome_fasta_file=genome_fasta_file,
                       fq1=fq1, fq2=fq2,
+                      num_threads=num_threads,
                       output_path=f'{output_path}/02.mapping/{sample_name}')
             )
             cmds.extend(
@@ -180,9 +186,12 @@ def main(fq_path: str,
 @click.option('-l', '--sample_list', 'sample_list',
               metavar='<file|stdin>', type=click.File('r'), required=True,
               help=r'Input sample list file. (FastqPrefix\tSampleName)')
+@click.option('-t', '--num-threads', 'num_threads',
+              metavar='<int>', type=int, default=10, show_default=True,
+              help='The number of threads for each sample.')
 @click.option('-p', '--num-processing', 'num_processing',
               metavar='<int>', type=int, default=5, show_default=True,
-              help='Number of processing.')
+              help='Number of processing. It means how many samples are analyzed in parallel at a time.')
 @click.option('-o', '--output-path', 'output_path',
               metavar='<str>', default=getcwd(), show_default=True,
               help='Output path, if not exist, automatically created.')
@@ -193,6 +202,7 @@ def run(fq_path: str,
         build_index: bool,
         read_depth: int,
         sample_list: TextIOWrapper,
+        num_threads: int,
         num_processing: int,
         output_path: str):
     """Variation analysis pipeline of GATK."""
@@ -202,6 +212,7 @@ def run(fq_path: str,
         genome_fasta_file=genome_fasta_file,
         build_index=build_index,
         sample_list=sample_list,
+        num_threads=num_threads,
         num_processing=num_processing,
         output_path=output_path,
         read_depth=read_depth

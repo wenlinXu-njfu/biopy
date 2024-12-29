@@ -264,10 +264,10 @@ if __name__ == '__main__':
               help='PfamScan database path.')
 @click.option('-t', '--num-threads', 'num_threads',
               metavar='<int>', type=int, default=10, show_default=True,
-              help='The number of threads.')
+              help='The number of threads for each sample.')
 @click.option('-p', '--num-processing', 'num_processing',
               metavar='<int>', type=int, default=4, show_default=True,
-              help='The number of processing.')
+              help='The number of processing. It means how many samples are analyzed in parallel at a time.')
 @click.option('-o', '--out-path', 'out_path',
               metavar='<path>', default=getcwd(), show_default=True,
               help='Output path, if not exist, automatically created.')
