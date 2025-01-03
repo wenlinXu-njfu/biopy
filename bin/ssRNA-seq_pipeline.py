@@ -118,9 +118,10 @@ def main(sample_info: TextIOWrapper,
     CNCI_cmd = lp.run_CNCI(CNCI_exec='CNCI.py')
     CPC2_cmd = lp.run_CPC2(CPC2_exec='CPC2.py')
     PLEK_cmd = lp.run_PLEK(PLEK_exec='PLEK')
+    pfamscan_helper = which('pfamscan_helper')
     lncRNA_prediction_cmd = (
         f'{CNCI_cmd}\n{CPC2_cmd}\n{PLEK_cmd}\n'
-        f'pfamscan_helper batch '
+        f'{pfamscan_helper} batch '
         f'-i {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input '
         f'-d {pfamscan_database} '
         f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_out '
@@ -173,6 +174,13 @@ if __name__ == '__main__':
         seqkit = which('seqkit')
         ORF_finder = which('ORF_finder')
         file_split = which('file_split')
+        plot = which('plot')
+        CNCI_results = r'''awk '{if($3 =="noncoding"){print $1}}' %s/05.lncRNA_prediction/CNCI/CNCI.index | sort -uV''' % output_path
+        CPC2_results = r'''awk '{if($9 == "noncoding"){print $1}}' %s/05.lncRNA_prediction/CPC2/CPC2.txt | sort -uV''' % output_path
+        PfamScan_results = r'''cut -f1 %s/05.lncRNA_prediction/PfamScan/pfamscan_out/all_results.xls | grep -vFw -f - <(grep '>' %s/03.assembly/novel_transcript.fa | sed 's/>//') | cut -d' ' -f 1 | sort -uV''' % (
+        output_path, output_path)
+        PLEK_results = r'''awk '{if($1 == "Non-coding"){print $3}}' %s/05.lncRNA_prediction/PLEK/PLEK.xls | sed 's/>//' | sort -uV''' % output_path
+        plot_venn = f'''{plot} venn -g CNCI,CPC2,PfamScan,PLEK <({CNCI_results}) <({CPC2_results}) <({PfamScan_results}) <({PLEK_results}) -o {output_path}/05.lncRNA_prediction/venn.pdf'''
         lncRNA_results = lp.merge_results(
             CNCI_results=f'{output_path}/05.lncRNA_prediction/CNCI/CNCI.index',
             CPC2_results=f'{output_path}/05.lncRNA_prediction/CPC2/CPC2.txt',
@@ -227,6 +235,7 @@ if __name__ == '__main__':
             f'-i {output_path}/03.assembly/novel_transcript_pep.fa '
             f'-o {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input\n\n'
             f'{exec_cmds} -f {output_path}/shell/lncRNA_prediction.sh -n 4\n\n'
+            f'{plot_venn}\n\n'
             f'{lncRNA_results}\n\n'
             f'{create_lncRNA_gtf}\n\n'
             f'{create_target_gtf}\n\n'
