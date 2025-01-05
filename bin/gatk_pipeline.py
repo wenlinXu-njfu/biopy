@@ -167,8 +167,8 @@ def main(fq_path: str,
 
     # get genotype
     file_format_conversion = which('file_format_conversion')
-    depth_dir = f'{output_path}/02.mapping/'
-    vcf_dir = f'{output_path}/03.variant/'
+    depth_dir = f'{output_path}/02.mapping'
+    vcf_dir = f'{output_path}/03.variant'
     output_file = f'{output_path}/04.stats/All.GT.xls'
     vcf2gt = f'{file_format_conversion} vcf2gt -d {depth_dir} -D {read_depth} -s "map30.depth" -o {output_file} {vcf_dir}/*/*.map30.vcf'
 
@@ -230,7 +230,6 @@ def run(fq_path: str,
         num_processing: int,
         output_path: str):
     """Variation analysis pipeline of GATK."""
-    start_time = datetime.now().replace(microsecond=0)
     main(
         fq_path=fq_path,
         genome_fasta_file=genome_fasta_file,
@@ -241,8 +240,6 @@ def run(fq_path: str,
         output_path=output_path,
         read_depth=read_depth
     )
-    end_time = datetime.now().replace(microsecond=0)
-    click.echo(f'[{datetime.now().replace(microsecond=0)}] Total time spent {end_time - start_time}.', err=True)
 
 
 if __name__ == '__main__':
