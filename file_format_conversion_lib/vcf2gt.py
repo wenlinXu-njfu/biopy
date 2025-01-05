@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-File: multi_vcf2gt.py
-Description: Merge genotypes for all samples from vcf files.
+File: vcf2gt.py
+Description: Convert the file format from VCF to Genotype.
 CreateDate: 2023/10/28
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -15,7 +15,7 @@ from pandas import read_table, concat
 from tqdm import tqdm
 import click
 from pybioinformatic import VCF, Timer, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 @Timer('Converting the vcf file to gt format.')
@@ -118,7 +118,7 @@ def main(vcf_files: Tuple[TextIOWrapper],
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(vcf_files, depth_files_dir, depth_file_suffix, read_depth, output_file):
-    """Merge genotypes for all samples from vcf files."""
+    """Convert the file format from VCF to Genotype."""
     main(
         vcf_files=vcf_files,
         output_file=output_file,
