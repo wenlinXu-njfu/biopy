@@ -132,7 +132,7 @@ def main(fq_path: str,
     genome_fasta_file = abspath(genome_fasta_file)
     output_path = abspath(output_path)
 
-    makedirs(f'{output_path}/shell', exist_ok=True)
+    makedirs(f'{output_path}/shell/normal', exist_ok=True)
     for line in sample_list:
         fq_prefix = line.strip().split('\t')[0]
         sample_name = line.strip().split('\t')[1]
