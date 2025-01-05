@@ -163,7 +163,7 @@ def main(fq_path: str,
             )
             o.write('\n'.join(cmds))
 
-    system(f'for i in `ls {output_path}/shell/normal`; do echo "sh {output_path}/shell/$i"; done > {output_path}/shell/run_normal.sh')
+    system(f'for i in `ls {output_path}/shell/normal`; do echo "sh {output_path}/shell/normal/$i"; done > {output_path}/shell/run_normal.sh')
 
     # get genotype
     file_format_conversion = which('file_format_conversion')
