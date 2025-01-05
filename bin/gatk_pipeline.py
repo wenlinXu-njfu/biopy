@@ -169,7 +169,7 @@ def main(fq_path: str,
     file_format_conversion = which('file_format_conversion')
     depth_dir = f'{output_path}/02.mapping'
     vcf_dir = f'{output_path}/03.variant'
-    output_file = f'{output_path}/04.stats/All.GT.xls'
+    output_file = f'{output_path}/03.variant/All.GT.xls'
     vcf2gt = f'{file_format_conversion} vcf2gt -d {depth_dir} -D {read_depth} -s "map30.depth" -o {output_file} {vcf_dir}/*/*.map30.vcf'
 
     # merge genotype
