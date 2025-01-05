@@ -12,8 +12,21 @@ from os.path import abspath
 from shutil import which
 from datetime import datetime
 import click
-from pybioinformatic import TaskManager, Displayer
+from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
+
+
+def check_dependency():
+    software_list = ['fastp', 'bwa', 'samtools', 'gatk']
+    click.echo('Dependency check.\n', err=True)
+    for software in software_list:
+        path = which(software)
+        if path:
+            click.echo(f'{software}: {path}', err=True)
+        else:
+            click.echo(f'{software}: command not found', err=True)
+    if not all([which(i) for i in software_list]):
+        exit()
 
 
 def build_genome_index(genome_fasta_file: str):
@@ -24,8 +37,7 @@ def build_genome_index(genome_fasta_file: str):
     gatk = which('gatk')
     gatk_index = f'{gatk} CreateSequenceDictionary -R {genome_fasta_file}'
     cmds = [bwa_index, samtools_index, gatk_index]
-    tkm = TaskManager(commands=cmds, num_processing=3)
-    tkm.parallel_run_cmd()
+    return '\n'.join(cmds)
 
 
 def fastp(sample_name: str, fq1: str, fq2: str, num_threads: int, output_path: str):
@@ -105,19 +117,6 @@ def HaplotypeCaller(genome_fasta_file: str,
     return cmds
 
 
-def get_gt(depth_dir: str,
-           vcf_dir: str,
-           depth: int = 5,
-           output_file: str = None,
-           tkm: TaskManager = None):
-    if tkm is None:
-        tkm = TaskManager(num_processing=1)
-    output_file = 'All.GT.xls' if output_file is None else output_file
-    file_format_conversion = which('file_format_conversion')
-    cmd = f'{file_format_conversion} vcf2gt -d {depth_dir} -D {depth} -s "map30.depth" -o {output_file} {vcf_dir}/*/*.map30.vcf'
-    tkm.echo_and_exec_cmd(cmd)
-
-
 def main(fq_path: str,
          genome_fasta_file: str,
          build_index: bool,
@@ -127,10 +126,12 @@ def main(fq_path: str,
          output_path: str,
          read_depth: int = 5):
     """Variation analysis pipeline of GATK."""
-    if build_index:
-        build_genome_index(genome_fasta_file)
+    check_dependency()
 
+    fq_path = abspath(fq_path)
+    genome_fasta_file = abspath(genome_fasta_file)
     output_path = abspath(output_path)
+
     makedirs(f'{output_path}/shell', exist_ok=True)
     for line in sample_list:
         fq_prefix = line.strip().split('\t')[0]
@@ -140,7 +141,7 @@ def main(fq_path: str,
         makedirs(f'{output_path}/03.variant/{sample_name}', exist_ok=True)
         fq1 = f'{fq_path}/{fq_prefix}_1.fq.gz'
         fq2 = f'{fq_path}/{fq_prefix}_2.fq.gz'
-        with open(f'{output_path}/shell/{sample_name}.sh', 'w') as o:
+        with open(f'{output_path}/shell/normal/{sample_name}.sh', 'w') as o:
             cmds = [
                 fastp(sample_name=sample_name,
                       fq1=fq1, fq2=fq2,
@@ -162,12 +163,35 @@ def main(fq_path: str,
             )
             o.write('\n'.join(cmds))
 
-    system(f'for i in `ls {output_path}/shell`; do echo "sh {output_path}/shell/$i"; done > {output_path}/All.sh')
-    system(f'exec_cmds -f {output_path}/All.sh -n {num_processing}')
+    system(f'for i in `ls {output_path}/shell/normal`; do echo "sh {output_path}/shell/$i"; done > {output_path}/shell/run_normal.sh')
 
-    get_gt(depth_dir=f'{output_path}/02.mapping/',
-           depth=read_depth,
-           vcf_dir=f'{output_path}/03.variant/')
+    # get genotype
+    file_format_conversion = which('file_format_conversion')
+    depth_dir = f'{output_path}/02.mapping/'
+    vcf_dir = f'{output_path}/03.variant/'
+    output_file = f'{output_path}/04.stats/All.GT.xls'
+    vcf2gt = f'{file_format_conversion} vcf2gt -d {depth_dir} -D {read_depth} -s "map30.depth" -o {output_file} {vcf_dir}/*/*.map30.vcf'
+
+    # merge genotype
+    gatk = which('gatk')
+    CombineGVCFs = f'{gatk} CombineGVCFs -R {genome_fasta_file} $(for i in `ls {output_path}/03.variant/*/*.gvcf`; do echo "-V $i" ;done) -O {output_path}/03.variant/cohort.gvcf'
+    GenotypeGVCFs = f'{gatk} GenotypeGVCFs -R {genome_fasta_file} -V {output_path}/03.variant/cohort.gvcf -O {output_path}/03.variant/cohort.vcf'
+
+    # write all step commands
+    exec_cmds = which('exec_cmds')
+    with open(f'{output_path}/shell/All_step.sh', 'w') as o:
+        cmds = [
+            f'{exec_cmds} -f {output_path}/shell/run_normal.sh -n {num_processing}',
+            vcf2gt, CombineGVCFs, GenotypeGVCFs
+        ]
+        if build_index:
+            with open(f'{output_path}/shell/build_index.sh', 'w') as o2:
+                build_index_cmd = build_genome_index(genome_fasta_file)
+                o2.write(build_index_cmd)
+            cmds.insert(0, f'{exec_cmds} -f {output_path}/shell/build_index.sh -n 3')
+        o.write('\n\n'.join(cmds))
+    system(f'chmod 755 {output_path}/shell/All_step.sh')
+    click.echo(f'Commands created successfully, please run "bash {output_path}/shell/All_step.sh".', err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
