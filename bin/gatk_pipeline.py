@@ -10,7 +10,6 @@ from io import TextIOWrapper
 from os import makedirs, system, getcwd
 from os.path import abspath
 from shutil import which
-from datetime import datetime
 import click
 from pybioinformatic import Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
