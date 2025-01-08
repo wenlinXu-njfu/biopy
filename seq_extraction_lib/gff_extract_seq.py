@@ -64,7 +64,7 @@ def main(gff_file: Union[str, TextIOWrapper],
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(gff_file, ref_fasta_file, feature_type, id_file, id_field, other_infor, num_processing, output_file):
     """Extract sequences from GFF file."""
-    other_infor = other_infor.split(',')
+    other_infor = other_infor.split(',') if other_infor else None
     main(
         gff_file=gff_file,
         fa_file=ref_fasta_file,
