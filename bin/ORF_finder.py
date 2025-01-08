@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: ORF_finder.py
-Description: ORF prediction.
+Description: Search for open reading frames (ORFs) in the nucleotide sequence you enter, and return maximum length ORF of each nucleotide sequence.
 CreateDate: 2022/3/25
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -21,6 +21,7 @@ def sub_processing(nucl_obj: Nucleotide, min_len: int, complete: bool, only_plus
     return ORF
 
 
+@Timer('ORF predicting.')
 def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          parse_seqids: bool = True,
          min_len: int = 30,
@@ -77,9 +78,8 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
               help='Number of processes.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@Timer('ORF predicting.')
 def run(fasta_files, parse_seqids, min_len, completed, forward, log_file, output_path, num_processes):
-    """ORF prediction."""
+    """Search for open reading frames (ORFs) in the nucleotide sequence you enter, and return maximum length ORF of each nucleotide sequence."""
     main(fasta_files, parse_seqids, min_len, completed, forward, log_file, output_path, num_processes)
 
 
