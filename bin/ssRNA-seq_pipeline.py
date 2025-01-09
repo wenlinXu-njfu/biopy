@@ -20,7 +20,7 @@ from pybioinformatic import (
     LncRNAClassification,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='0.3.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.4.0')
 
 
 def check_dependency():
@@ -51,6 +51,7 @@ def main(sample_info: TextIOWrapper,
     output_path = abspath(output_path)
     storer = MergeSamples(set(), set())
     d = parse_sample_info(sample_info=sample_info)
+    script_template_path = '/'.join(__file__.split('/')[:-2]) + '/script_template'
 
     # single sample analyse
     for sample_name, fq_list in d.items():
@@ -131,28 +132,12 @@ def main(sample_info: TextIOWrapper,
 
     # lncRNA target gene prediction
     makedirs(f'{output_path}/06.lncRNA_target_prediction', exist_ok=True)
-    target_prediction_script = f'''from pybioinformatic import LncRNATargetPredictor
-
-ltp = LncRNATargetPredictor(
-    lncRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/lncRNA.gtf',
-    mRNA_gtf_file='{output_path}/06.lncRNA_target_prediction/target.gtf',
-    lncRNA_exp_file='{output_path}/06.lncRNA_target_prediction/lncRNA_exp/FPKM.fc.xls',
-    mRNA_exp_file='{output_path}/06.lncRNA_target_prediction/target_exp/FPKM.fc.xls',
-    output_path='{output_path}/06.lncRNA_target_prediction',
-    lncRNA_min_exp=0.5,
-    mRNA_min_exp=0.000001,
-    r=0.8,
-    FDR=0.05,
-    q_value=0.05,
-    distance=100000,
-    num_processing={num_threads * num_processing},
-)
-
-if __name__ == '__main__':
-    ltp.co_location()
-    ltp.co_expression()
-'''
-    with open(f'{output_path}/shell/lncRNA_target_prediction.py', 'w') as o:
+    with open(f'{script_template_path}/lncRNA_target_prediction') as f, \
+        open(f'{output_path}/shell/lncRNA_target_prediction.py', 'w') as o:
+        args = [output_path for _ in range(5)]
+        args.append(num_threads * num_processing)
+        args = tuple(args)
+        target_prediction_script = f.read() % args
         o.write(target_prediction_script)
 
     # lncRNA classification
