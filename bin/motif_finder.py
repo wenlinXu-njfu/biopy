@@ -10,19 +10,20 @@ from io import TextIOWrapper
 from typing import Tuple, Union
 import click
 from pybioinformatic import Fasta, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.3.0')
 
 
 def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          motif: str,
+         only_forward: bool = False,
          quiet: bool = False,
          log_file: TextIOWrapper = None,
          output_file: TextIOWrapper = None):
-    click.echo('# Seq_id\tStart\tEnd\tStrand\tMotif', output_file)
+    click.echo('# Seq_id\tStart\tEnd\tStrand\tMotif\tSequence', output_file)
     for fasta_file in fasta_files:
         with Fasta(fasta_file) as fa:
             for seq_obj in fa.parse():
-                ret = seq_obj.find_motif(motif)
+                ret = seq_obj.find_motif(motif=motif, only_forward=only_forward)
                 if 'not found' not in ret:
                     click.echo(ret, output_file)
                 else:
@@ -35,6 +36,8 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
 @click.option('-m', '--motif', 'motif',
               metavar='<str>', required=True,
               help='Specify motif sequence, support for regular expressions.')
+@click.option('-F', '--only-forward', 'only_forward', is_flag=True, flag_value=True,
+              help='Only search forward chain.')
 @click.option('-q', '--quiet', 'quiet',
               is_flag=True, flag_value=True,
               help='Do not report sequence that not found motif. This conflicts with the "-l --log_file" option and '
@@ -48,11 +51,12 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
               help=r'Output file (Seq_id\tStart\tEnd\tStrand\tMotif), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(fasta_files, motif, quiet, log_file, outfile):
+def run(fasta_files, motif, only_forward, quiet, log_file, outfile):
     """Find the motif in the sequence."""
     main(
         fasta_files=fasta_files,
         motif=motif,
+        only_forward=only_forward,
         quiet=quiet,
         log_file=log_file,
         output_file=outfile
