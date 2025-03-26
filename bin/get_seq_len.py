@@ -29,7 +29,7 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
               help='Parse sequence id.')
 @click.option('-o', '--output_file', 'outfile',
               metavar='<file|stdout>', type=click.File('w'),
-              help=r'Output file (Seq_id\tSeq_len), stdout by default.')
+              help=r'Output file (Seq_id\tSeq_len\tFile_path), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_files, parse_seqids, outfile):

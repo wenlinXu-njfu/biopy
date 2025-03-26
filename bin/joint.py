@@ -9,10 +9,11 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from typing import Union, Literal
 from pandas import read_table
+from natsort import natsort_key
 import click
 from pybioinformatic import Displayer
 
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def main(left_table: Union[str, TextIOWrapper],
@@ -24,6 +25,7 @@ def main(left_table: Union[str, TextIOWrapper],
     left_table = read_table(left_table, index_col=left_column - 1, dtype=str)
     right_table = read_table(right_table, index_col=right_column - 1, dtype=str)
     merge = left_table.join(other=right_table, how=joint_method, lsuffix='_left_table', rsuffix='_right_table')
+    merge.sort_index(key=natsort_key, inplace=True)
     merge.to_csv(output_file, sep='\t', na_rep='NA')
 
 

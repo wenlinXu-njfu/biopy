@@ -17,7 +17,10 @@ def main(command_file: TextIOWrapper, num_processing: int):
     start_time = datetime.now().replace(microsecond=0)
     cmds = [line.strip() for line in command_file if line.strip() and not line.startswith('#')]
     tkm = TaskManager(commands=cmds, num_processing=num_processing)
-    tkm.parallel_run_cmd()
+    rets = tkm.parallel_run_cmd()
+    for ret in rets:
+        if ret.get():
+            click.echo(ret.get(), err=True)
     end_time = datetime.now().replace(microsecond=0)
     click.echo(f'[{datetime.now().replace(microsecond=0)}] Total time spent {end_time - start_time}.', err=True)
 
