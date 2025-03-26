@@ -1,0 +1,29 @@
+#!/usr/bin/env Rscript
+library(DESeq2)
+
+reads_count <- read.table('{reads_count_file}', header = T, row.names = 1)
+
+coldata <- data.frame(
+  condition=factor(
+    rep(c('control', 'treat'), times=c({num_control_repeat}, {num_treat_repeat})),
+    levels=c('control', 'treat')
+  )
+)
+
+dds <- DESeqDataSetFromMatrix(reads_count, coldata, design = ~condition)
+
+dds_norm <- DESeq(dds)
+
+res <- results(dds_norm, contrast=c('condition','treat','control'))  # 处理比控制
+res <- res[complete.cases(res),]  # 去除NA
+res$gene_id <- rownames(res)
+summary(res)
+write.table(res[c(7, 1:6)], '{out_path}/volcano_data.txt', row.names = F, sep = '\t', quote = F)
+
+deg <- subset(res, padj<{padj} & abs(log2FoldChange)>={log2FoldChange})
+deg$gene_id <- rownames(deg)
+
+dds_norm <- as.data.frame(counts(dds_norm, normalize=TRUE))
+dds_norm$gene_id <- rownames(dds_norm)
+resdata <-  merge(as.data.frame(deg), dds_norm, by = "gene_id", sort = FALSE)
+write.csv(resdata, file= "{out_path}/DESeq2.csv", row.names = F, quote=F)

@@ -1,0 +1,4 @@
+new
+genome %s
+load %s
+snapshotDirectory %s
