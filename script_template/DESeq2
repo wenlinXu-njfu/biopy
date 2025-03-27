@@ -14,8 +14,8 @@ dds <- DESeqDataSetFromMatrix(reads_count, coldata, design = ~condition)
 
 dds_norm <- DESeq(dds)
 
-res <- results(dds_norm, contrast=c('condition','treat','control'))  # 处理比控制
-res <- res[complete.cases(res),]  # 去除NA
+res <- results(dds_norm, contrast=c('condition','treat','control'))
+res <- res[complete.cases(res),]
 res$gene_id <- rownames(res)
 summary(res)
 write.table(res[c(7, 1:6)], '{out_path}/volcano_data.txt', row.names = F, sep = '\t', quote = F)

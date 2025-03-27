@@ -34,21 +34,21 @@ def main(gene_exp_file: str,
     # plot scatter figure
     plt.scatter(df[df['sig'] == 'up']['log2FoldChange'],
                 df[df['sig'] == 'up']['-lg_p'],
-                color='salmon', marker='o', label='up', s=5)
+                color='salmon', marker='o', label='up', s=3, zorder=1)
     plt.scatter(df[df['sig'] == 'normal']['log2FoldChange'],
                 df[df['sig'] == 'normal']['-lg_p'],
-                color='lightgrey', marker='o', label='normal', s=5)
+                color='lightgrey', marker='o', label='normal', s=3, zorder=0)
     plt.scatter(df[df['sig'] == 'down']['log2FoldChange'],
                 df[df['sig'] == 'down']['-lg_p'],
-                color='lightgreen', marker='o', label='down', s=5)
+                color='lightgreen', marker='o', label='down', s=3, zorder=1)
     # plot line figure
-    max_y = int(df['-lg_p'].max()) + 5
-    max_x = int(df['log2FoldChange'].max()) + 1
-    min_x = int(df['log2FoldChange'].min()) - 1
+    max_y = float(df['-lg_p'].replace([np.inf, -np.inf], np.nan).max()) + 5
+    max_x = float(df['log2FoldChange'].max()) + 1
+    min_x = float(df['log2FoldChange'].min()) - 1
     max_abs_x = max(abs(max_x), abs(min_x))
-    plt.plot([log2fc, log2fc], [0, max_y], '--', alpha=0.8, color='gray', linewidth=0.3)
-    plt.plot([-log2fc, -log2fc], [0, max_y], '--', alpha=0.8, color='gray', linewidth=0.3)
-    plt.plot([-max_abs_x, max_abs_x], [-np.log10(padj), -np.log10(padj)], '--', alpha=0.8, color='gray', linewidth=0.3)
+    plt.plot([log2fc, log2fc], [0, max_y], '--', alpha=0.8, color='k', linewidth=0.8, zorder=2)
+    plt.plot([-log2fc, -log2fc], [0, max_y], '--', alpha=0.8, color='k', linewidth=0.8, zorder=2)
+    plt.plot([-max_abs_x, max_abs_x], [-np.log10(padj), -np.log10(padj)], '--', alpha=0.8, color='k', linewidth=0.8, zorder=2)
     # set axes label
     plt.xlabel(r'$log_2Fold$' + ' Change')
     plt.ylabel(r'$-log_{10}P$' + ' adjust')
