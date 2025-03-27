@@ -60,7 +60,10 @@ def main(enrich_results_file: Union[str, TextIOWrapper],
 
     cbar = plt.colorbar(scatter)  # add color bar
     cbar.set_label(label='P value', loc='center')
-    handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6, num=5, markersize=100)
+    if len(df['Size'].unique()) > 5:
+        handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6, markersize=100, num=5)
+    else:
+        handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6, markersize=100)
     if dot_size_fold != 1:
         labels = ['%.0f' % (int(findall(r'\d+', i)[0]) / dot_size_fold) for i in labels]
     ax.legend(handles, labels, loc="upper right", title="Count")
