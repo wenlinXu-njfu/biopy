@@ -4,12 +4,13 @@
 **python ≥ 3.8<br />
 biopython ≥ 1.79<br />
 fire ≥ 0.6.0<br />
-pybioinformatic == 0.1.0<br />
+pybioinformatic == 0.1.1<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
 ## Dependency of other software
 **bedtools: https://github.com/arq5x/bedtools2<br />
+blast+: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/<br />
 bwa: https://github.com/lh3/bwa<br />
 CNCI: https://github.com/www-bioinfo-org/CNCI<br />
 CPC2: https://github.com/gao-lab/CPC2_standalone<br />
@@ -71,27 +72,8 @@ ORF_finder \
 -F \
 -log biopy/test_data/ORF_finder/ORF_finder.log \
 biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
-motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -q -
+motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -Fq -
 ```
-
-### RNA secondary structure prediction.
-```python
-from pybioinformatic import Nucleotide
-
-# Generate random nucleic acid sequence.
-random_nucl = Nucleotide.random_nucl(name='demo', length=[100, 150], bias=1.0)
-
-# Secondary structure prediction
-ss, mfe = random_nucl.predict_secondary_structure('biopy/test_data/RNA_structure/structure.ps')
-print(ss, mfe, sep='\n')
-```
-```
->demo length=135
-CAAAAAAAAACCATAAGCCGCCATGTCTCACATCGCAACCGGCTCAAGTAGAGTGCCCCTAATAATATGATCTTCGCTACAGAAGTTCCCCCCCCGCTGCCGGCTAGATGCGAACTCCACGCCTGGATGGCTCAG
-...............((((((((.((......(((((.(.((((...((((.................((.((((......)))).))........)))).)))).).))))).......)).))).)))))...
--27.299999237060547
-```
-![image](test_data/RNA_structure/structure.png)
 
 ### lncRNA and target prediction.
 ```shell
@@ -103,27 +85,48 @@ ssRNA-seq_pipeline \
 -c transcript_id \
 -m pl \
 -d PfamScanDataBase \
+-a KEGG_anno.xls \
 -t 15 \
 -p 6 \
 -o .
 ```
-```
-# Options explain:
--l: The first two columns of sample.info.xls file must be Sample_name and Fastq_path.
--r: Referenece genome fasta file, please build hisat2 index before runing.
--g: Referenece genome annotation gff file.
--f: FeatureCounts -t option.
--c: FeatureCounts -g option.
--m: CNCI -m option.
--d: PfamScan -dir option.
--t: Number of threads for each sample.
--p: Number of processing. It means how many sample are analyzed in parallel.
--o: Output path.
 
-# Dependency software
-Make sure these command can be found in your environment variable:
-fastp, histat2, samtools, stringtie, cuffcompare, featureCounts, pfam_scan.pl, CPC2.py, CNCI.py, and PLEK
+#### Options explain:
+- -l: The first four columns of sample.info.xls file (TAB delimiter) must be Sample_name, Read1_path, Read2_path and Comparative_combination (for differential expression analysis).<br />
 ```
++-----------+-------------------------------------+-------------------------------------+-------------------------------------------+
+| sample1_1 | /your/path/to/sample1_1/read1.fq.gz | /your/path/to/sample1_1/read2.fq.gz | sample2_vs_sample1:C;sample3_vs_sample1:C |
+| sample1_2 | /your/path/to/sample1_2/read1.fq.gz | /your/path/to/sample1_2/read2.fq.gz | sample2_vs_sample1:C;sample3_vs_sample1:C |
+| sample2_1 | /your/path/to/sample2_1/read1.fq.gz | /your/path/to/sample2_1/read2.fq.gz | sample2_vs_sample1:T                      |
+| sample2_2 | /your/path/to/sample2_2/read1.fq.gz | /your/path/to/sample2_2/read2.fq.gz | sample2_vs_sample1:T                      |
+| sample3_1 | /your/path/to/sample3_1/read1.fq.gz | /your/path/to/sample3_1/read2.fq.gz | sample3_vs_sample1:T                      |
+| sample3_2 | /your/path/to/sample3_2/read1.fq.gz | /your/path/to/sample3_2/read2.fq.gz | sample3_vs_sample1:T                      |
++-----------+-------------------------------------+-------------------------------------+-------------------------------------------+
+```
+- -r: Referenece genome fasta file, please build hisat2 index before runing.
+- -g: Referenece genome annotation gff file.
+- -f: FeatureCounts -t option.
+- -c: FeatureCounts -g option.
+- -m: CNCI -m option.
+- -d: PfamScan -dir option.
+- -a: GO or KEGG annotation file for enrichment analysis. (ID\tTerm\tDescription, eg. Pe.001G000600.2\tGO:0005886\tplasma membrane)
+- -t: Number of threads for each sample.
+- -p: Number of processing. It means how many samples are analyzed in parallel.
+- -o: Output path.
+
+#### Dependency software
+Make sure the R interpreter for the current environment variable have installed DESeq2 and clusterProfiler packages.<br />
+Make sure these commands can be found in your environment variable:
+- fastp
+- histat2
+- samtools
+- stringtie
+- cuffcompare
+- featureCounts
+- pfam_scan.pl
+- CPC2.py
+- CNCI.py
+- PLEK
 ![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
 
 ### Genotype consistency calculation.
