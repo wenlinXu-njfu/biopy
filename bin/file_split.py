@@ -7,30 +7,28 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from os import makedirs
-from typing import Union
 from io import TextIOWrapper
 import click
-from click._compat import _NonClosingTextIOWrapper
 from pybioinformatic import Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
-def main(input_file: Union[TextIOWrapper, list],
+def main(input_file: TextIOWrapper,
          sub_file_line_num: int,
          output_dir: str,
          header: bool,
          header_line_num: int):
     makedirs(output_dir, exist_ok=True)
     line_count, subfile_num = 0, 1
-    line_num = sum(1 for _ in input_file)
     header_content = content = ''
-    # Read content from a file.
-    if isinstance(input_file, TextIOWrapper):
-        output_prefix = f"{input_file.name.split('/')[-1]}."
-        input_file = open(input_file.name)
-    # Read content from stdout.
-    else:
+    if input_file.name == '<stdin>':
+        input_file = click.open_file('-').readlines()
+        line_num = sum(1 for _ in input_file)
         output_prefix = ''
+    else:
+        line_num = sum(1 for _ in input_file)
+        input_file.seek(0)
+        output_prefix = f"{input_file.name.split('/')[-1]}."
     for line in input_file:
         line_count += 1
         if header:
@@ -83,8 +81,6 @@ def main(input_file: Union[TextIOWrapper, list],
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(input_file, line_num, header, header_num, output_dir):
     """Divide a large file into several smaller files."""
-    if isinstance(input_file, _NonClosingTextIOWrapper):
-        input_file = click.open_file('-').readlines()
     main(input_file, line_num, output_dir, header, header_num)
 
 
