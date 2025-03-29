@@ -20,9 +20,9 @@ gene_id <- as.character(gene_id$V1)
 go_rich <- enricher(gene = as.character(gene_id),
                     TERM2GENE = term2gene,
                     TERM2NAME = term2name,
-                    pvalueCutoff = 1,
-                    pAdjustMethod = 'BH',
-                    qvalueCutoff = 1)
+                    pvalueCutoff = {pvalueCutoff},
+                    pAdjustMethod = '{pAdjustMethod}',
+                    qvalueCutoff = {qvalueCutoff})
 dotplot(go_rich)
 write.table(as.data.frame(go_rich), file= "{out_path}/enrich.xls",
             row.names = F, quote=F, sep='\t')

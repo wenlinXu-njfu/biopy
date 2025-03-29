@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 from pybioinformatic import LncRNATargetPredictor
 
+out_path = '{out_path}'
 ltp = LncRNATargetPredictor(
-    lncRNA_gtf_file='{out_path}/05.lncRNA_prediction/lncRNA.gtf',
-    mRNA_gtf_file='{out_path}/06.lncRNA_target_prediction/target.gtf',
-    lncRNA_exp_file='{out_path}/06.lncRNA_target_prediction/lncRNA_exp/FPKM.fc.xls',
-    mRNA_exp_file='{out_path}/06.lncRNA_target_prediction/target_exp/FPKM.fc.xls',
-    output_path='{out_path}/06.lncRNA_target_prediction',
-    lncRNA_min_exp=0.5,
-    mRNA_min_exp=0.000001,
-    r=0.85,
-    FDR=0.05,
-    q_value=0.05,
-    distance=100000,
+    lncRNA_gtf_file=f'{out_path}/05.lncRNA_prediction/lncRNA.gtf',
+    mRNA_gtf_file=f'{out_path}/06.lncRNA_target_prediction/target.gtf',
+    lncRNA_exp_file=f'{out_path}/06.lncRNA_target_prediction/lncRNA_exp/FPKM.fc.xls',
+    mRNA_exp_file=f'{out_path}/06.lncRNA_target_prediction/target_exp/FPKM.fc.xls',
+    output_path=f'{out_path}/06.lncRNA_target_prediction',
+    lncRNA_min_exp={lncRNA_min_exp},
+    mRNA_min_exp={mRNA_min_exp},
+    r={r},
+    FDR={FDR},
+    q_value={q_value},
+    distance={distance},
     num_processing={num_processing}
 )
 
