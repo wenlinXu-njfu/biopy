@@ -7,11 +7,12 @@ Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import Literal
 from collections import defaultdict
-from os import getcwd, makedirs, system
+from os import makedirs, system
 from os.path import abspath
 from shutil import which
+from yaml import safe_load
+from schema import Schema, And, Use, SchemaError
 import click
 from pybioinformatic import (
     parse_sample_info,
@@ -22,14 +23,14 @@ from pybioinformatic import (
     TaskManager,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='0.5.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.6.0')
 
 
 def check_dependency():
     software_list = ['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
                      'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools', 'R']
     flag = []
-    click.echo('Dependency check.', err=True)
+    click.echo('\033[36mCheck dependency.\033[0m', err=True)
     for software in software_list:
         path = which(software)
         if path:
@@ -45,38 +46,127 @@ def check_dependency():
         flag.append(True)
     else:
         flag.append(False)
-        click.echo('R package DESeq2 has not been installed.', err=True)
+        click.echo('\033[31mR package DESeq2 has not been installed.\033[0m', err=True)
     cmd2 = '''R CMD Rscript -e 'if(requireNamespace("clusterProfiler", quietly = TRUE)) {print("True")} else {print("False")}' '''
     stdout2 = tkm.echo_and_exec_cmd(cmd=cmd2, show_cmd=False)
     if 'True' in stdout2:
         flag.append(True)
     else:
         flag.append(False)
-        click.echo('R package clusterProfiler has not been installed.', err=True)
+        click.echo('\033[31mR package clusterProfiler has not been installed.\033[0m', err=True)
     if not all(flag):
         exit()
 
 
-def main(sample_info: TextIOWrapper,
-         genome: str,
-         gff: str,
-         feature_type: str,
-         count_unit: str,
-         module: Literal['ve', 'pl'],
-         pfamscan_database: str,
-         kegg_anno_file: str,
-         num_threads: int,
-         num_processing: int,
-         output_path: str):
+def check_config(yaml_file: TextIOWrapper):
+    click.echo('\033[36mCheck params.\033[0m', err=True)
+    config_schema = Schema({
+        "input": {
+            "sample_info": str,
+            "ref_genome": str,
+            "ref_genome_gff": str,
+            "enrich_anno_file": str
+        },
+        "output": {"dir": str},
+        "global_params": {
+            "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
+            "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
+        },
+        "featureCounts_params": {
+            "feature_type": click.Choice(['gene', 'mRNA', 'transcript', 'five_prime_UTR' 'CDS', 'three_prime_UTR', 'exon']),
+            "mate_feature": click.Choice(['ID', 'Name', 'gene_id', 'transcript_id'])
+        },
+        "CNCI_params": {
+            "CNCI_module": str
+        },
+        "pfamscan_params": {
+            "pfamscan_database": str
+        },
+        "lncRNA_target_prediction_params": {
+            "lncRNA_min_exp": float,
+            "mRNA_min_exp": float,
+            "r": And(Use(float), lambda x: 0 <= x <= 1, error="r must between 0 and 1."),
+            "FDR": And(Use(float), lambda x: 0 <= x <= 1, error="FDR must between 0 and 1."),
+            "q_value": And(Use(float), lambda x: 0 <= x <= 1, error="q_value must between 0 and 1."),
+            "distance": And(Use(int), lambda x: 0 < x, error="distance must be positive integer.")
+        },
+        "DESeq2_params": {
+            "padj": And(Use(float), lambda x: 0 <= x <= 1, error="padj must between 0 and 1."),
+            "log2FoldChange": And(Use(float), lambda x: 0 < x, error="log2FoldChange must be greater than 0.")
+        },
+        "clusterProfiler_params": {
+            "pvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="pvalueCutoff must between 0 and 1."),
+            "pAdjustMethod": click.Choice(["holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"]),
+            "qvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="qvalueCutoff must between 0 and 1.")
+        }
+    })
+
+    config = safe_load(yaml_file)
+    try:
+        config_schema.validate(config)
+        click.echo("\033[32mConfiguration verification passed.\n\033[0m", err=True)
+    except SchemaError as e:
+        click.echo(f"\033[31mConfig error: {e}\033[0m", err=True)
+        exit()
+    else:
+        return config
+
+
+def main(config: TextIOWrapper):
     check_dependency()
-    plot = which('plot')
-    python = which('python')
-    Rscript = which('Rscript')
+    config = check_config(config)
+
+    # input
+    sample_info = config['input']['sample_info']
+    genome = config['input']['ref_genome']
+    gff = config['input']['ref_genome_gff']
+    kegg_anno_file = config['input']['enrich_anno_file']
+
+    # output
+    output_path = config['output']['dir']
+
+    # global params
+    num_threads = config['global_params']['num_threads']
+    num_processing = config['global_params']['num_processing']
+
+    # featureCounts params
+    feature_type = config['featureCounts_params']['feature_type']
+    count_unit = config['featureCounts_params']['mate_feature']
+
+    # CNCI params
+    module = config['CNCI_params']['CNCI_module']
+
+    # pfamscan params
+    pfamscan_database = config['pfamscan_params']['pfamscan_database']
+
+    # lncRNA target prediction params
+    lncRNA_min_exp = config['lncRNA_target_prediction_params']['lncRNA_min_exp']
+    mRNA_min_exp = config['lncRNA_target_prediction_params']['mRNA_min_exp']
+    r = config['lncRNA_target_prediction_params']['r']
+    FDR = config['lncRNA_target_prediction_params']['FDR']
+    q_value = config['lncRNA_target_prediction_params']['q_value']
+    distance = config['lncRNA_target_prediction_params']['distance']
+
+    # DESeq2 params
+    padj = config['DESeq2_params']['padj']
+    log2FoldChange = config['DESeq2_params']['log2FoldChange']
+
+    # clusterProfiler params
+    pvalueCutoff = config['clusterProfiler_params']['pvalueCutoff']
+    pAdjustMethod = config['clusterProfiler_params']['pAdjustMethod']
+    qvalueCutoff = config['clusterProfiler_params']['qvalueCutoff']
+
     exec_cmds = which('exec_cmds')
-    ORF_finder = which('ORF_finder')
     file_split = which('file_split')
     featureCounts = which('featureCounts')
     featureCounts_helper = which('featureCounts_helper')
+    joint = which('joint')
+    ORF_finder = which('ORF_finder')
+    plot = which('plot')
+    python = which('python')
+    Rscript = which('Rscript')
+    seqkit = which('seqkit')
+
     output_path = abspath(output_path)
     storer = MergeSamples(set(), set())
     sample_info_dict = parse_sample_info(sample_info=sample_info)
@@ -143,7 +233,6 @@ def main(sample_info: TextIOWrapper,
     )
 
     # lncRNA prediction
-    seqkit = which('seqkit')
     makedirs(f'{output_path}/05.lncRNA_prediction', exist_ok=True)
     lp = LncRNAPredictor(
         nucl_fasta_file=f'{output_path}/03.assembly/novel_transcript.fa',
@@ -178,10 +267,16 @@ def main(sample_info: TextIOWrapper,
     makedirs(f'{output_path}/06.lncRNA_target_prediction', exist_ok=True)
     with open(f'{script_template_path}/lncRNA_target_prediction') as f, \
         open(f'{output_path}/shell/lncRNA_target_prediction.py', 'w') as o:
-        args = [output_path for _ in range(5)]
-        args.append(num_threads * num_processing)
-        args = tuple(args)
-        target_prediction_script = f.read() % args
+        target_prediction_script = f.read().format(
+            out_path=output_path,
+            lncRNA_min_exp=lncRNA_min_exp,
+            mRNA_min_exp=mRNA_min_exp,
+            r=r,
+            FDR=FDR,
+            q_value=q_value,
+            distance=distance,
+            num_processing=num_processing * num_threads
+        )
         o.write(target_prediction_script)
 
     # lncRNA classification
@@ -191,7 +286,6 @@ def main(sample_info: TextIOWrapper,
         out_dir=f'{output_path}/07.lncRNA_classification'
     )
     classify_script = lc.classification()
-    joint = which('joint')
     sense = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tsense"}' ''' %
              f'{output_path}/07.lncRNA_classification/sense.bed')
     antisense = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tantisense"}' ''' %
@@ -246,15 +340,18 @@ def main(sample_info: TextIOWrapper,
                         num_control_repeat=num_control_sample,
                         num_treat_repeat=num_treat_sample,
                         out_path=f'{output_path}/08.mRNA_differential_expression_analysis/{cc_name}',
-                        padj=0.05,
-                        log2FoldChange=1.5
+                        padj=padj,
+                        log2FoldChange=log2FoldChange
                     )
                     o2.write(DESeq2_script)
                 with open(f'{output_path}/shell/clusterProfiler/mRNA/{cc_name}.R', 'w') as o3:
                     clusterProfiler_script = raw_clusterProfiler_scrpit.format(
                         out_path=f'{output_path}/10.DEmRNA_enrich/{cc_name}',
                         anno_file=kegg_anno_file,
-                        DEgenes=f'{output_path}/10.DEmRNA_enrich/{cc_name}/DEmRNA.lst'
+                        DEgenes=f'{output_path}/10.DEmRNA_enrich/{cc_name}/DEmRNA.lst',
+                        pvalueCutoff=pvalueCutoff,
+                        pAdjustMethod=pAdjustMethod,
+                        qvalueCutoff=qvalueCutoff
                     )
                     o3.write(clusterProfiler_script)
 
@@ -299,22 +396,28 @@ def main(sample_info: TextIOWrapper,
                     num_control_repeat=num_control_sample,
                     num_treat_repeat=num_treat_sample,
                     out_path=f'{output_path}/09.lncRNA_differential_expression_analysis/{cc_name}',
-                    padj=0.05,
-                    log2FoldChange=1.5
+                    padj=padj,
+                    log2FoldChange=log2FoldChange
                 )
                 o2.write(DESeq2_script)
             with open(f'{output_path}/shell/clusterProfiler/co_loc/{cc_name}.R', 'w') as o3:
                 clusterProfiler_script = raw_clusterProfiler_scrpit.format(
                     out_path=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc',
                     anno_file=kegg_anno_file,
-                    DEgenes=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/target.lst'
+                    DEgenes=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/target.lst',
+                    pvalueCutoff=pvalueCutoff,
+                    pAdjustMethod=pAdjustMethod,
+                    qvalueCutoff=qvalueCutoff
                 )
                 o3.write(clusterProfiler_script)
             with open(f'{output_path}/shell/clusterProfiler/co_exp/{cc_name}.R', 'w') as o4:
                 clusterProfiler_script = raw_clusterProfiler_scrpit.format(
                     out_path=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp',
                     anno_file=kegg_anno_file,
-                    DEgenes=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/target.lst'
+                    DEgenes=f'{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/target.lst',
+                    pvalueCutoff=pvalueCutoff,
+                    pAdjustMethod=pAdjustMethod,
+                    qvalueCutoff=qvalueCutoff
                 )
                 o4.write(clusterProfiler_script)
 
@@ -337,7 +440,7 @@ def main(sample_info: TextIOWrapper,
         makedirs(f'{output_path}/06.lncRNA_target_prediction/lncRNA_exp', exist_ok=True)
         makedirs(f'{output_path}/06.lncRNA_target_prediction/target_exp', exist_ok=True)
         lncRNA_exp = (
-            f'{featureCounts} -t exon -g transcript_id -fMO -p --countReadPairs -s 2 -T {featureCounts_num_threads} '
+            f'{featureCounts} -t {feature_type} -g {count_unit} -fMO -p --countReadPairs -s 2 -T {featureCounts_num_threads} '
             f'-a {output_path}/05.lncRNA_prediction/lncRNA.gtf '
             f'-o {output_path}/06.lncRNA_target_prediction/lncRNA_exp/lncRNA.fc.xls '
             f'{output_path}/02.mapping/*/*.ht2.sort.bam '
@@ -352,7 +455,7 @@ def main(sample_info: TextIOWrapper,
             f'grep -vFwf - {output_path}/03.assembly/All.gtf > {output_path}/06.lncRNA_target_prediction/target.gtf'
         )
         target_exp = (
-            f'{featureCounts} -t exon -g transcript_id -fMO -p --countReadPairs -s 2 -T {featureCounts_num_threads} '
+            f'{featureCounts} -t {feature_type} -g {count_unit} -fMO -p --countReadPairs -s 2 -T {featureCounts_num_threads} '
             f'-a {output_path}/06.lncRNA_target_prediction/target.gtf '
             f'-o {output_path}/06.lncRNA_target_prediction/target_exp/target.fc.xls '
             f'{output_path}/02.mapping/*/*.ht2.sort.bam '
@@ -398,70 +501,16 @@ def main(sample_info: TextIOWrapper,
         )
         o.write(cmd)
     system(f'chmod 755 {output_path}/shell/All_step.sh')
-    click.echo(f'Commands created successfully, please run "bash {output_path}/shell/All_step.sh".', err=True)
+    click.echo(f'\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m', err=True)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('-l', '--sample-info', 'sample_info',
-              metavar='<file|stdin>', required=True, type=click.File('r'),
-              help=r'Sample information file. (Sample_name\tFastq_path\tEtc)')
-@click.option('-r', '--ref-genome', 'ref_genome',
-              metavar='<file>', required=True,
-              help='Reference genome fasta file.')
-@click.option('-g', '--gff', 'gff',
-              metavar='<file>', required=True,
-              help='Reference genome gff annotation file.')
-@click.option('-f', '--feature-type', 'feature_type',
-              metavar='<str>', default='exon', show_default=True,
-              help='Genome feature type, such as exon, CDS, etc. Multiple features are separated by commas.')
-@click.option('-c', '--count-unit', 'count_unit',
-              metavar='<str>', default='transcript_id', show_default=True,
-              help='Raw reads count unit, such as transcript_id or gene_id.')
-@click.option('-m', '--module', 'module',
-              metavar='<str>', type=click.Choice(['ve', 'pl']), default='pl', show_default=True,
-              help='CNCI -m option.')
-@click.option('-d', '--pfamscan-database', 'pfamscan_database',
-              metavar='<path>', required=True,
-              help='PfamScan database path.')
-@click.option('-a', '--kegg-anno-file', 'kegg_anno_file',
-              metavar='<file>', required=True,
-              help=r'KEGG anno file for enrichment analysis. (DEgene\tko\tDescription)')
-@click.option('-t', '--num-threads', 'num_threads',
-              metavar='<int>', type=int, default=10, show_default=True,
-              help='The number of threads for each sample.')
-@click.option('-p', '--num-processing', 'num_processing',
-              metavar='<int>', type=int, default=4, show_default=True,
-              help='The number of processing. It means how many samples are analyzed in parallel at a time.')
-@click.option('-o', '--out-path', 'out_path',
-              metavar='<path>', default=getcwd(), show_default=True,
-              help='Output path, if not exist, automatically created.')
+@click.argument('config', nargs=1, metavar='<yaml file|stdin>', type=click.File('r'), required=True)
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(sample_info,
-        ref_genome,
-        gff,
-        feature_type,
-        count_unit,
-        module,
-        pfamscan_database,
-        kegg_anno_file,
-        num_threads,
-        num_processing,
-        out_path):
+def run(config):
     """Strand specific (dUTP constructed library) pair end RNA-seq analysis pipeline (including lncRNA and its target gene prediction)."""
-    main(
-        sample_info=sample_info,
-        genome=ref_genome,
-        gff=gff,
-        feature_type=feature_type,
-        count_unit=count_unit,
-        module=module,
-        pfamscan_database=pfamscan_database,
-        kegg_anno_file=kegg_anno_file,
-        num_threads=num_threads,
-        num_processing=num_processing,
-        output_path=out_path
-    )
+    main(config=config)
 
 
 if __name__ == '__main__':

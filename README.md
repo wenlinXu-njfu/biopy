@@ -77,22 +77,52 @@ motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -Fq -
 
 ### lncRNA and target prediction.
 ```shell
-ssRNA-seq_pipeline \
--l sample.info.xls \
--r genome.fa \
--g genome.gff3 \
--f exon \
--c transcript_id \
--m pl \
--d PfamScanDataBase \
--a KEGG_anno.xls \
--t 15 \
--p 6 \
--o .
+ssRNA-seq_pipeline config.yaml
 ```
 
-#### Options explain:
-- -l: The first four columns of sample.info.xls file (TAB delimiter) must be Sample_name, Read1_path, Read2_path and Comparative_combination (for differential expression analysis).<br />
+#### config.yaml file content:
+```yaml
+input:
+  sample_info: "/your/path/to/sample.info.xls"  # Sample information file.
+  ref_genome: "/your/path/to/genome.fa"  # Reference genome fasta file.
+  ref_genome_gff: "/your/path/to/genome.gff"  # Reference genome gff annotation file.
+  enrich_anno_file: "/your/path/to/KEGG_anno.xls"  # GO or KEGG annotation file for enrichment analysis. (ID\tTerm\tDescription, eg. Pe.001G000600.2\tGO:0005886\tplasma membrane)
+
+output:
+  dir: "/your/path/to/out_dir"
+
+global_params:
+  num_threads: 10  # The number of threads for each sample.
+  num_processing: 5  # The number of processing. It means how many samples are analyzed in parallel at a time.
+
+featureCounts_params:
+  feature_type: "exon"  # FeatureCounts -t option. Each entry in the provided gff annotation file is taken as a feature (e.g. an exon).
+  mate_feature: "transcript_id"  # FeatureCounts -g option. A meta-feature is the aggregation of a set of features (e.g. a gene).
+
+CNCI_params:
+  CNCI_module: "pl"  # CNCI -m option. Specify classification model. (pl for plant, ve for vertebrate)
+
+pfamscan_params:
+  pfamscan_database: "/your/path/to/Pfam"  # PfamScan -dir option. Directory location of Pfam files.
+
+lncRNA_target_prediction_params:
+  lncRNA_min_exp: 0.5  # The minimum lncRNA expression filtering parameters for calculating co-expression.
+  mRNA_min_exp: 0.000001  # The minimum mRNA expression filtering parameters for calculating co-expression.
+  r: 0.85  # Pearson correlation of co-expression.
+  FDR: 0.05  # FDR of co-expression.
+  q_value: 0.05  # q value of co-expression.
+  distance: 100000  # Maximum distance between lncRNA and mRNA.
+
+DESeq2_params:
+  padj: 0.05  # Adjusted p-value.
+  log2FoldChange: 1.5  # log2FoldChange.
+
+clusterProfiler_params:
+  pvalueCutoff: 0.05  # p value Cutoff.
+  pAdjustMethod: 'BH'  # Multiple hypothesis testing methods.
+  qvalueCutoff: 0.2  # q value cutoff.
+```
+- The first four columns of sample.info.xls file (TAB delimiter) must be Sample_name, Read1_path, Read2_path and Comparative_combination (for differential expression analysis).<br />
 ```
 +-----------+-------------------------------------+-------------------------------------+-------------------------------------------+
 | sample1_1 | /your/path/to/sample1_1/read1.fq.gz | /your/path/to/sample1_1/read2.fq.gz | sample2_vs_sample1:C;sample3_vs_sample1:C |
@@ -103,16 +133,6 @@ ssRNA-seq_pipeline \
 | sample3_2 | /your/path/to/sample3_2/read1.fq.gz | /your/path/to/sample3_2/read2.fq.gz | sample3_vs_sample1:T                      |
 +-----------+-------------------------------------+-------------------------------------+-------------------------------------------+
 ```
-- -r: Referenece genome fasta file, please build hisat2 index before runing.
-- -g: Referenece genome annotation gff file.
-- -f: FeatureCounts -t option.
-- -c: FeatureCounts -g option.
-- -m: CNCI -m option.
-- -d: PfamScan -dir option.
-- -a: GO or KEGG annotation file for enrichment analysis. (ID\tTerm\tDescription, eg. Pe.001G000600.2\tGO:0005886\tplasma membrane)
-- -t: Number of threads for each sample.
-- -p: Number of processing. It means how many samples are analyzed in parallel.
-- -o: Output path.
 
 #### Dependency software
 Make sure the R interpreter for the current environment variable have installed DESeq2 and clusterProfiler packages.<br />
@@ -127,6 +147,7 @@ Make sure these commands can be found in your environment variable:
 - CPC2.py
 - CNCI.py
 - PLEK
+#### How it works
 ![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
 
 ### Genotype consistency calculation.
