@@ -48,7 +48,7 @@ def parse_json(content: str,
                     for i in level_3_children:
                         name = i['name'].split('\t')
                         K = name[1].split(' ')[0]
-                        id = 'pop' + name[0].split(' ')[0] + '\t' + K + '\t' + ' '.join(name[0].split(' ')[1:])
+                        id = 'pop:' + name[0].split(' ')[0] + '\t' + K + '\t' + ' '.join(name[0].split(' ')[1:])
                         click.echo(f'{id}\t{level_1_ko}\t{level_1_name}\t{level_2_ko}\t{level_2_name}\t{level_3_ko}\t{level_3_name}', out_file)
 
 
