@@ -48,7 +48,7 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
                    'This conflicts with the "-q --quiet" option and has a lower priority than the "-q --quiet" option.')
 @click.option('-o', '--output_file', 'outfile',
               metavar='<file|stdout>', type=click.File('w'),
-              help=r'Output file (Seq_id\tStart\tEnd\tStrand\tMotif), stdout by default.')
+              help=r'Output file (Seq_id\tStart\tEnd\tStrand\tMotif\tSequence), stdout by default.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(fasta_files, motif, only_forward, quiet, log_file, outfile):
