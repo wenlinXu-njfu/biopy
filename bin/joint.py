@@ -26,6 +26,7 @@ def main(left_table: Union[str, TextIOWrapper],
     right_table = read_table(right_table, index_col=right_column - 1, dtype=str)
     merge = left_table.join(other=right_table, how=joint_method, lsuffix='_left_table', rsuffix='_right_table')
     merge.sort_index(key=natsort_key, inplace=True)
+    merge.drop_duplicates(inplace=True)
     merge.to_csv(output_file, sep='\t', na_rep='NA')
 
 

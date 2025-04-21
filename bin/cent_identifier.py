@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import click
 from pybioinformatic import Displayer
 
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def apply_func(grouped_df: DataFrame,
@@ -34,15 +34,24 @@ def apply_func(grouped_df: DataFrame,
             centromere_start = filtered_df['start'].min()
             centromere_end = filtered_df['end'].max()
             centromere_len = centromere_end - centromere_start + 1
+            q_p = max([chr_len - centromere_end, centromere_start -1]) / min([chr_len - centromere_end, centromere_start -1])
+            if 1 < q_p <= 1.7:
+                karyotype = 'M'
+            elif 1.7 < q_p <= 3:
+                karyotype = 'SM'
+            elif 3 < q_p <= 7:
+                karyotype = 'ST'
+            else:
+                karyotype = 'T'
             if min_cent_len <= centromere_len <= max_cent_len:
-                data = [centromere_id, chr_name, chr_len, centromere_start, centromere_end, centromere_len, fold_enrichment]
+                data = [centromere_id, chr_name, chr_len, centromere_start, centromere_end, centromere_len, fold_enrichment, q_p, karyotype]
                 data_list.append(data)
-    columns = ['Centromere_id', 'Chromosome', 'Chromosome_length', 'Centromere_start', 'Centromere_end', 'Centromere_length', 'fold_enrichment']
+    columns = ['Centromere_id', 'Chromosome', 'Chromosome_length', 'Centromere_start', 'Centromere_end', 'Centromere_length', 'fold_enrichment', 'q:p', 'Karyotype']
     raw = DataFrame(data=data_list, columns=columns)
     Centromere_length_median = min_cent_len + (max_cent_len - min_cent_len) / 2
     raw['Diff'] = abs(raw['Centromere_length'] - Centromere_length_median)
     if raw.empty:
-        best = Series(data=[centromere_id, chr_name, chr_len, 'NA', 'NA', 'NA', 'NA'], index=columns)
+        best = Series(data=[centromere_id, chr_name, chr_len, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'], index=columns)
     else:
         best = raw.iloc[raw['Diff'].idxmin(), :-1]
 
