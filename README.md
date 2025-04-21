@@ -50,7 +50,7 @@ sudo apt-get install libffi7
 ### Run commands concurrently.
 ```shell
 for i in `ls dir`;
-do echo blastn -query dir/$i -db genome.fa -out "$i.blastn.xls";
+do echo blastn -query dir/$i -db genome.fa -outfmt 6 -out "$i.blastn.xls";
 done | exec_cmds -f - -n 10
 ```
 
