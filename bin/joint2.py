@@ -39,8 +39,9 @@ def main(master_table: Union[str, TextIOWrapper],
     # merge tables
     other_tables.insert(0, master_table)
     merged_table = concat(other_tables, axis=1)
-    merged_table.sort_index(key=natsort_key, inplace=True)
-    merged_table.to_csv(output_file, sep='\t', na_rep='NA')
+    merged_table.reset_index(inplace=True)
+    merged_table.sort_values(by=index, key=natsort_key, inplace=True)
+    merged_table.to_csv(output_file, sep='\t', na_rep='NA', index=False)
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
