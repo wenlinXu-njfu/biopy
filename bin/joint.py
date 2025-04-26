@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 File: joint.py
-Description: Joint two table files.
+Description: Joint two table files by different ways ('left', 'right', 'outer', 'inner', or 'cross').
 CreateDate: 2024/10/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
@@ -53,7 +53,7 @@ def main(left_table: Union[str, TextIOWrapper],
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(left_table, right_table, left_column, right_column, joint_method, output_file):
-    """Joint two table files."""
+    """Joint two table files by different ways ('left', 'right', 'outer', 'inner', or 'cross')."""
     main(
         left_table=left_table,
         right_table=right_table,

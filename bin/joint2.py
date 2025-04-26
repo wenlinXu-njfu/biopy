@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
 File: joint2.py
-Description: Joint other table files.
+Description: Perform inner or outer joins on a group of table files based on the common field names of the table files.
 CreateDate: 2024/10/12
 Author: xuwenlin
 E-mail: wenlinxu.njfu@outlook.com
 """
 from io import TextIOWrapper
-from typing import Union, Tuple
+from typing import Union, Tuple, Literal
 from pandas import read_table,concat
 from natsort import natsort_key
 import click
@@ -17,8 +17,9 @@ displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
 def main(master_table: Union[str, TextIOWrapper],
-         other_tables: Tuple[TextIOWrapper],
-         output_file: TextIOWrapper):
+         other_tables: Tuple[Union[str, TextIOWrapper]],
+         output_file: TextIOWrapper,
+         joint_method: Literal['outer', 'inner'] = 'outer'):
     # read in raw table
     master_table = read_table(master_table, dtype=str)
     other_tables = [
@@ -38,7 +39,7 @@ def main(master_table: Union[str, TextIOWrapper],
 
     # merge tables
     other_tables.insert(0, master_table)
-    merged_table = concat(other_tables, axis=1)
+    merged_table = concat(other_tables, axis=1, join=joint_method)
     merged_table.reset_index(inplace=True)
     merged_table.sort_values(by=index, key=natsort_key, inplace=True)
     merged_table.to_csv(output_file, sep='\t', na_rep='NA', index=False)
@@ -49,13 +50,17 @@ def main(master_table: Union[str, TextIOWrapper],
 @click.option('-i', '--master-table', 'master_table_file',
               metavar='<file|stdin>', type=click.File('r'), required=True,
               help='Input master table file.')
+@click.option('-j', '--joint-method', 'joint_method',
+              metavar='<str>', type=click.Choice(['outer', 'inner']),
+              default='outer', show_default=True,
+              help='How to handle the operation of these tables.')
 @click.option('-o', '--output_file', 'output_file',
               metavar='<file>', type=click.File('w'), default='joint.xls', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(master_table_file, table_files, output_file):
-    """Joint other table files."""
+def run(master_table_file, table_files, joint_method, output_file):
+    """Perform inner or outer joins on a group of table files based on the common field names of the table files."""
     main(
         master_table=master_table_file,
         other_tables=table_files,
