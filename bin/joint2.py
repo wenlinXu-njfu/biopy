@@ -55,7 +55,7 @@ def main(master_table: Union[str, TextIOWrapper],
               metavar='<file|stdin>', type=click.File('r'), required=True,
               help='Input master table file.')
 @click.option('-j', '--joint-method', 'joint_method',
-              metavar='<str>', type=click.Choice(['left', 'outer', 'inner']),
+              type=click.Choice(['left', 'outer', 'inner']),
               default='left', show_default=True,
               help='How to handle the operation of these tables.')
 @click.option('-o', '--output_file', 'output_file',
