@@ -187,6 +187,7 @@ plot chr_distribution \
 -w 100000 \
 -n 4 \
 -c RdYlGn \
+-r \
 -o biopy/test_data/chr_distribution/snp.distribution.png
 ```
 ![image](test_data/chr_distribution/snp.distribution.png)
