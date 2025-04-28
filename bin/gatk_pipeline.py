@@ -54,19 +54,39 @@ def main(genome_fasta_file: str,
             )
             pipeline = sc.pipeline()
             o.write(pipeline)
-    system(f'for i in `ls {output_path}/shell/normal`; do echo "sh {output_path}/shell/normal/$i"; done > {output_path}/shell/run_normal.sh')
+    system(
+        f'for i in `ls {output_path}/shell/normal`; '
+        f'do echo "sh {output_path}/shell/normal/$i"; '
+        f'done > {output_path}/shell/run_normal.sh'
+    )
 
     # Vcf2GT
     file_format_conversion = which('file_format_conversion')
     depth_dir = f'{output_path}/02.mapping'
     vcf_dir = f'{output_path}/03.variant'
     output_file = f'{output_path}/03.variant/All.GT.xls'
-    vcf2gt = f'{file_format_conversion} vcf2gt -d {depth_dir} -D {read_depth} -s "bwa.mem.sort.map30.markdup.bam.depth" -o {output_file} {vcf_dir}/*/*.filtered.vcf'
+    vcf2gt = (
+        f'{file_format_conversion} vcf2gt '
+        f'-d {depth_dir} '
+        f'-D {read_depth} '
+        f'-s "bwa.mem.sort.map30.markdup.bam.depth" '
+        f'-o {output_file} {vcf_dir}/*/*.filtered.vcf'
+    )
 
     # Merge vcf
     gatk = which('gatk')
-    CombineGVCFs = f'{gatk} CombineGVCFs -R {genome_fasta_file} $(for i in `ls {output_path}/03.variant/*/*.gvcf`; do echo "-V $i" ;done) -O {output_path}/03.variant/cohort.gvcf'
-    GenotypeGVCFs = f'{gatk} GenotypeGVCFs -R {genome_fasta_file} -V {output_path}/03.variant/cohort.gvcf -O {output_path}/03.variant/cohort.vcf'
+    CombineGVCFs = (
+        f'{gatk} CombineGVCFs '
+        f'-R {genome_fasta_file} '
+        f'$(for i in `ls {output_path}/03.variant/*/*.gvcf`; do echo "-V $i" ;done) '
+        f'-O {output_path}/03.variant/cohort.gvcf'
+    )
+    GenotypeGVCFs = (
+        f'{gatk} GenotypeGVCFs '
+        f'-R {genome_fasta_file} '
+        f'-V {output_path}/03.variant/cohort.gvcf '
+        f'-O {output_path}/03.variant/cohort.vcf'
+    )
 
     # Write all step commands
     exec_cmds = which('exec_cmds')
@@ -89,7 +109,10 @@ def main(genome_fasta_file: str,
             cmds.insert(0, f'{exec_cmds} -f {output_path}/shell/build_index.sh -n 3')
         o.write('\n\n'.join(cmds))
     system(f'chmod 755 {output_path}/shell/All_step.sh')
-    click.echo(f'\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m', err=True)
+    click.echo(
+        message='\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
+        err=True
+    )
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
