@@ -119,7 +119,7 @@ def main(chr_len_file: str,
         colorbar_tickslabel.append(str(i)) if i < n else colorbar_tickslabel.append(f'≥{n}')
     cbar = plt.colorbar(mappable=scatter, ticks=range(n + 1))
     cbar.ax.set_yticklabels(colorbar_tickslabel)
-    plt.title(f'Window Size: {window_size}')
+    plt.title(f'Window Size: {window_size} bp')
     plt.savefig(output_file, bbox_inches='tight', dpi=300)
 
 
