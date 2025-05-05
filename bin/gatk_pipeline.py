@@ -11,7 +11,7 @@ from os.path import abspath
 from shutil import which
 import click
 from pybioinformatic import parse_sample_info, build_ref_index, GatkSNPCalling, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
+displayer = Displayer(__file__.split('/')[-1], version='1.0.1')
 
 
 def check_dependency():
@@ -32,8 +32,7 @@ def main(genome_fasta_file: str,
          sample_info: str,
          num_threads: int,
          num_processing: int,
-         output_path: str,
-         read_depth: int = 5):
+         output_path: str):
     """Variation analysis pipeline of GATK."""
     check_dependency()
     output_path = abspath(output_path)
@@ -60,32 +59,50 @@ def main(genome_fasta_file: str,
         f'done > {output_path}/shell/run_normal.sh'
     )
 
-    # Vcf2GT
-    file_format_conversion = which('file_format_conversion')
-    depth_dir = f'{output_path}/02.mapping'
-    vcf_dir = f'{output_path}/03.variant'
-    output_file = f'{output_path}/03.variant/All.GT.xls'
-    vcf2gt = (
-        f'{file_format_conversion} vcf2gt '
-        f'-d {depth_dir} '
-        f'-D {read_depth} '
-        f'-s "bwa.mem.sort.map30.markdup.bam.depth" '
-        f'-o {output_file} {vcf_dir}/*/*.filtered.vcf'
-    )
-
     # Merge vcf
     gatk = which('gatk')
     CombineGVCFs = (
         f'{gatk} CombineGVCFs '
         f'-R {genome_fasta_file} '
         f'$(for i in `ls {output_path}/03.variant/*/*.gvcf`; do echo "-V $i" ;done) '
-        f'-O {output_path}/03.variant/cohort.gvcf'
+        f'-O {output_path}/03.variant/cohort.gvcf.gz'
     )
     GenotypeGVCFs = (
         f'{gatk} GenotypeGVCFs '
         f'-R {genome_fasta_file} '
-        f'-V {output_path}/03.variant/cohort.gvcf '
-        f'-O {output_path}/03.variant/cohort.vcf'
+        f'-V {output_path}/03.variant/cohort.gvcf.gz '
+        f'-O {output_path}/03.variant/cohort.vcf.gz'
+    )
+
+    # Separate SNP and INDEL
+    select_snp = (
+        f'{gatk} SelectVariants '
+        f'-R {genome_fasta_file} '
+        f'--select-type-to-include SNP '
+        f'-V {output_path}/03.variant/cohort.vcf.gz '
+        f'-O {output_path}/03.variant/cohort.snp.vcf.gz'
+    )
+    select_indel = (
+        f'{gatk} SelectVariants '
+        f'-R {genome_fasta_file} '
+        f'--select-type-to-include INDEL '
+        f'-V {output_path}/03.variant/cohort.vcf.gz '
+        f'-O {output_path}/03.variant/cohort.indel.vcf.gz'
+    )
+
+    # Vcf2GT
+    file_format_conversion = which('file_format_conversion')
+    vcf2gt = (
+        f'{file_format_conversion} vcf2gt '
+        f'-o {output_path}/03.variant/All.GT.xls '
+        f'{output_path}/03.variant/cohort.vcf.gz'
+    )
+
+    # Stat genotype
+    gt_kit = which('gt_kit')
+    makedirs(f'{output_path}/04.stats', exist_ok=True)
+    stat_gt = (
+        f'{gt_kit} stat -gt {output_path}/03.variant/All.GT.xls -n {num_processing * num_threads} -o {output_path}/04.stats'
     )
 
     # Write all step commands
@@ -93,9 +110,12 @@ def main(genome_fasta_file: str,
     with open(f'{output_path}/shell/All_step.sh', 'w') as o:
         cmds = [
             f'{exec_cmds} -f {output_path}/shell/run_normal.sh -n {num_processing}',
-            vcf2gt,
             CombineGVCFs,
-            GenotypeGVCFs
+            GenotypeGVCFs,
+            select_snp,
+            select_indel,
+            vcf2gt,
+            stat_gt
         ]
         if build_index:
             with open(f'{output_path}/shell/build_index.sh', 'w') as o2:
@@ -122,9 +142,6 @@ def main(genome_fasta_file: str,
 @click.option('--build-index', 'build_index',
               is_flag=True, flag_value=True,
               help='Build genome index.')
-@click.option('-d', '--read-depth', 'read_depth',
-              metavar='<int>', type=int, default=5, show_default=True,
-              help='The number of reads supported variant.')
 @click.option('-l', '--sample-info', 'sample_info',
               metavar='<file>', required=True,
               help=r'Input sample information file. (SampleName\tRead1Path\tRead2Path)')
@@ -141,7 +158,6 @@ def main(genome_fasta_file: str,
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 def run(genome_fasta_file: str,
         build_index: bool,
-        read_depth: int,
         sample_info: str,
         num_threads: int,
         num_processing: int,
@@ -153,8 +169,7 @@ def run(genome_fasta_file: str,
         sample_info=sample_info,
         num_threads=num_threads,
         num_processing=num_processing,
-        output_path=output_path,
-        read_depth=read_depth
+        output_path=output_path
     )
 
 
