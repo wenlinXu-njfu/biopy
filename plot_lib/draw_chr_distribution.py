@@ -11,7 +11,7 @@ from pandas import read_table
 import matplotlib.pyplot as plt
 import click
 from pybioinformatic import FuncDict, TaskManager, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.1.1')
 
 
 def main(chr_len_file: str,
@@ -19,7 +19,7 @@ def main(chr_len_file: str,
          window_size: int = 100000,
          n: int = 8,
          cmap: str = 'RdYlGn',
-         reverse: bool = True,
+         reverse_cmap: bool = True,
          figure_size: str = '6.4x4.8',
          output_file: str = 'snp.distribution.pdf'):
     # Step1: parse chromosome length file.
@@ -103,7 +103,7 @@ def main(chr_len_file: str,
     plt.xlabel(unit, loc='right')
     plt.xlim(0, max(len_dict.values()) + step)
     # draw snp distribution
-    if reverse:
+    if reverse_cmap:
         cmap = plt.get_cmap(cmap).reversed()
     scatter = ax.scatter(
         x='X-coordinate',
@@ -137,9 +137,9 @@ def main(chr_len_file: str,
               metavar='<int>', type=int, default=4, show_default=True,
               help='Max count of colormap.')
 @click.option('-c', '--color-map', 'color_map',
-              metavar='<str>', default='RdYlGn', show_default=True,
-              help='Color map of colorbar.')
-@click.option('-r', '--reverse', 'reverse',
+              metavar='<str>', default='RdYlGn_r', show_default=True,
+              help='Color map of colorbar. See url "https://matplotlib.org/stable/users/explain/colors/colormaps.html".')
+@click.option('-r', '--reverse-cmap', 'reverse_cmap',
               is_flag=True, flag_value=True,
               help='Reverse color map.')
 @click.option('-s', '--figure-size', 'figure_size',
@@ -150,14 +150,14 @@ def main(chr_len_file: str,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(snp_ref, chr_len, window_size, max_count, color_map, reverse, figure_size, output_file):
+def run(snp_ref, chr_len, window_size, max_count, color_map, reverse_cmap, figure_size, output_file):
     """Draw snp distribution."""
     main(chr_len_file=chr_len,
          snp_ref_file=snp_ref,
          window_size=window_size,
          n=max_count,
          cmap=color_map,
-         reverse=reverse,
+         reverse_cmap=reverse_cmap,
          figure_size=figure_size,
          output_file=output_file)
 

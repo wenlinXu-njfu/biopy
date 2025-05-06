@@ -9,19 +9,24 @@ E-mail: wenlinxu.njfu@outlook.com
 from typing import Union
 from io import TextIOWrapper
 from os import makedirs, getcwd
+import matplotlib.pyplot as plt
 import click
 from pybioinformatic import GenoType, Timer, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.1.1')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def main(gt_file1: Union[str, TextIOWrapper],
          gt_file2: Union[str, TextIOWrapper],
          database_compare: bool,
+         color_map: str,
+         reverse_cmap: bool,
          font_name: str,
          output_path: str):
     makedirs(output_path, exist_ok=True)
+    if reverse_cmap:
+        color_map = plt.get_cmap(color_map).reversed()
     with GenoType(gt_file1) as gt1, GenoType(gt_file2) as gt2:
-        gt1.compare(gt2, output_path=output_path, font_name=font_name) \
+        gt1.compare(gt2, output_path=output_path, font_name=font_name, cmap=color_map) \
             if database_compare else \
             gt1.self_compare(gt2, output_path=output_path)
 
@@ -37,6 +42,12 @@ def main(gt_file1: Union[str, TextIOWrapper],
               default=True, show_default=True,
               help='Specify comparison mode. Database compare means test sample compare with database sample. '
                    'Self compare means each sample compares with its different test batch.')
+@click.option('-c', '--color-map', 'color_map',
+              metavar='<str>', default='RdYlGn_r', show_default=True,
+              help='Color map of colorbar. See url "https://matplotlib.org/stable/users/explain/colors/colormaps.html".')
+@click.option('-r', '--reverse-cmap', 'reverse_cmap',
+              is_flag=True, flag_value=True,
+              help='Reverse color map.')
 @click.option('-f', '--font_name', 'font_name',
               metavar='<str>', default='Arial', show_default=True,
               help='Set figure font, if "--database-compare" specified.')
@@ -46,9 +57,9 @@ def main(gt_file1: Union[str, TextIOWrapper],
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
 @Timer('Genotype consistency analysis underway.')
-def run(database_gt, test_gt, database_compare, font_name, output_path):
+def run(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path):
     """Genotype consistency analysis."""
-    main(database_gt, test_gt, database_compare, font_name, output_path)
+    main(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path)
 
 
 if __name__ == '__main__':
