@@ -57,22 +57,22 @@ done | exec_cmds -f - -n 10
 ### Protein translation
 ```shell
 ORF_finder \
--l 30 \
--n 10 \
--Fc \
--log biopy/test_data/ORF_finder/ORF_finder.log \
--o biopy/test_data/ORF_finder/ \
-biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
+    -l 30 \
+    -n 10 \
+    -Fc \
+    -log biopy/test_data/ORF_finder/ORF_finder.log \
+    -o biopy/test_data/ORF_finder/ \
+    biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
 ```
 ### Search protein motif
 ```shell
 ORF_finder \
--l 1 \
--n 10 \
--F \
--log biopy/test_data/ORF_finder/ORF_finder.log \
-biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
-motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -Fq -
+    -l 1 \
+    -n 10 \
+    -F \
+    -log biopy/test_data/ORF_finder/ORF_finder.log \
+    biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
+    motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -Fq -
 ```
 
 ### lncRNA and target prediction.
@@ -153,41 +153,41 @@ Make sure these commands can be found in your environment variable:
 ### Genotype consistency calculation.
 ```shell
 gt_kit gs \
--i biopy/test_data/GT/GT.xls.gz \
--I biopy/test_data/GT/GT.xls.gz \
---database-compare \
--o biopy/test_data/GT/
+    -i biopy/test_data/GT/GT.xls.gz \
+    -I biopy/test_data/GT/GT.xls.gz \
+    --database-compare \
+    -o biopy/test_data/GT/
 ```
 ![image](test_data/GT/Consistency.heatmap.png)
 
 ### Plot gene structure.
 ```shell
 plot gene_structure \
--i biopy/test_data/gene_structure/Ptc.gff3.gz \
--o biopy/test_data/gene_structure/mRNA_structure.png
+    -i biopy/test_data/gene_structure/Ptc.gff3.gz \
+    -o biopy/test_data/gene_structure/mRNA_structure.png
 ```
 ![image](test_data/gene_structure/mRNA_structure.png)
 
 ### Plot circos figure.
 ```shell
 plot circos \
--c biopy/test_data/circos/Ptc_chr_len.txt \
--d biopy/test_data/circos/gene_density.txt \
--s biopy/test_data/circos/stat.txt \
--l biopy/test_data/circos/link.txt \
--o biopy/test_data/circos/circos.png
+    -c biopy/test_data/circos/Ptc_chr_len.txt \
+    -d biopy/test_data/circos/gene_density.txt \
+    -s biopy/test_data/circos/stat.txt \
+    -l biopy/test_data/circos/link.txt \
+    -o biopy/test_data/circos/circos.png
 ```
 ![image](test_data/circos/circos.png)
 
 ### Plot chromosome distribution.
 ```shell
 plot chr_distribution \
--i biopy/test_data/chr_distribution/snp.ref.xls \
--l biopy/test_data/chr_distribution/chr_len.xls \
--w 100000 \
--n 4 \
--c RdYlGn \
--r \
--o biopy/test_data/chr_distribution/snp.distribution.png
+    -i biopy/test_data/chr_distribution/snp.ref.xls \
+    -l biopy/test_data/chr_distribution/chr_len.xls \
+    -w 100000 \
+    -n 4 \
+    -c RdYlGn \
+    -r \
+    -o biopy/test_data/chr_distribution/snp.distribution.png
 ```
 ![image](test_data/chr_distribution/snp.distribution.png)
