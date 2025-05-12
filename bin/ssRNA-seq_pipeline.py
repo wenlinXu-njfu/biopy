@@ -22,7 +22,7 @@ from pybioinformatic import (
     TaskManager,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='1.0.0')
+displayer = Displayer(__file__.split('/')[-1], version='1.0.1')
 tkm = TaskManager(num_processing=1)
 
 
@@ -412,8 +412,17 @@ def main(config: TextIOWrapper):
                 f'{output_path}/07.lncRNA_classification/intronic.bed')
     intergenic = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tintergenic"}' ''' %
                   f'{output_path}/07.lncRNA_classification/intergenic.bed')
+    plot_pie = (
+        r'''cat <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intronic"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "sense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "antisense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intergenic"}') | plot pie -i - -o %s'''
+    ) % (
+        f'{output_path}/07.lncRNA_classification/intronic.bed',
+        f'{output_path}/07.lncRNA_classification/sense.bed',
+        f'{output_path}/07.lncRNA_classification/antisense.bed',
+        f'{output_path}/07.lncRNA_classification/intergenic.bed',
+        f'{output_path}/07.lncRNA_classification/pie.pdf'
+    )
     cmd = (
-
+        f"{plot_pie}\n"
         fr"cat <({sense}) <({antisense}) <({intronic}) <({intergenic}) | sort -uV | sed '1iLncRNA_id\tLncRNA_type' | "
         fr"{joint} -i {output_path}/06.lncRNA_target_prediction/co_loc.xls "
         fr"-I - -o {output_path}/07.lncRNA_classification/co_loc.xls"
