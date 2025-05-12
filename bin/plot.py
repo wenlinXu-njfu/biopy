@@ -12,11 +12,12 @@ from plot_lib import (plot_venn,
                       plot_volcano,
                       plot_heatmap,
                       plot_cluster_heatmap,
+                      plot_pie,
                       plot_gene_structure,
                       plot_circos,
                       draw_chr_distribution,
                       draw_enrich_figure)
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.2')
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
@@ -35,6 +36,7 @@ plot.add_command(plot_gene_structure, name='gene_structure')
 plot.add_command(plot_circos, name='circos')
 plot.add_command(draw_chr_distribution, name='chr_distribution')
 plot.add_command(draw_enrich_figure, name='draw_enrich_figure')
+plot.add_command(plot_pie, name='pie')
 
 
 if __name__ == '__main__':

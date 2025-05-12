@@ -301,9 +301,9 @@ def main(config: TextIOWrapper):
     )
     with open(f'{output_path}/shell/lncRNA_prediction.sh', 'w') as o:
         o.write(f'{lp.run_CNCI()}\n{lp.run_CPC2()}\n{lp.run_PLEK()}\n{pfamscan_cmd}')
-    CNCI_results = r'''awk '{if($3 =="noncoding"){print $1}}' %s/05.lncRNA_prediction/CNCI/CNCI.index | sort -uV''' % output_path
-    CPC2_results = r'''awk '{if($9 == "noncoding"){print $1}}' %s/05.lncRNA_prediction/CPC2/CPC2.txt | sort -uV''' % output_path
-    PLEK_results = r'''awk '{if($1 == "Non-coding"){print $3}}' %s/05.lncRNA_prediction/PLEK/PLEK.xls | sed 's/>//' | sort -uV''' % output_path
+    CNCI_results = r'''awk -F'\t' '{if($2 =="noncoding"){print $1}}' %s/05.lncRNA_prediction/CNCI/CNCI.index | sort -uV''' % output_path
+    CPC2_results = r'''awk -F'\t' '{if($9 == "noncoding"){print $1}}' %s/05.lncRNA_prediction/CPC2/CPC2.txt | sort -uV''' % output_path
+    PLEK_results = r'''awk -F'\t' '{if($1 == "Non-coding"){print $3}}' %s/05.lncRNA_prediction/PLEK/PLEK.xls | sed 's/>//' | sort -uV''' % output_path
     PfamScan_results = (
         f"cut -f1 {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_out/all_results.xls | "
         f"grep -vFw -f - <(grep '>' {output_path}/03.assembly/novel_transcript.fa | sed 's/>//') | "
@@ -412,9 +412,12 @@ def main(config: TextIOWrapper):
                 f'{output_path}/07.lncRNA_classification/intronic.bed')
     intergenic = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tintergenic"}' ''' %
                   f'{output_path}/07.lncRNA_classification/intergenic.bed')
-    cmd = (fr"cat <({sense}) <({antisense}) <({intronic}) <({intergenic}) | sort -uV | sed '1iLncRNA_id\tLncRNA_type' | "
-           fr"{joint} -i {output_path}/06.lncRNA_target_prediction/co_loc.xls "
-           fr"-I - -o {output_path}/07.lncRNA_classification/co_loc.xls")
+    cmd = (
+
+        fr"cat <({sense}) <({antisense}) <({intronic}) <({intergenic}) | sort -uV | sed '1iLncRNA_id\tLncRNA_type' | "
+        fr"{joint} -i {output_path}/06.lncRNA_target_prediction/co_loc.xls "
+        fr"-I - -o {output_path}/07.lncRNA_classification/co_loc.xls"
+    )
     with open(f'{output_path}/shell/lncRNA_classification.sh', 'w') as o:
         click.echo(classify_script, o)
         click.echo(cmd, o)
