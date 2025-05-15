@@ -16,6 +16,7 @@ from pybioinformatic import GenoType, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
 
+@Timer('Calculating MissRate, HetRate, and MAF.')
 def main(gt_file: Union[str, TextIOWrapper],
          num_processing: int,
          output_path: str):
@@ -56,8 +57,8 @@ def main(gt_file: Union[str, TextIOWrapper],
               help='Output file path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@Timer('Calculating MissRate, HetRate, and MAF.')
 def run(gt_file, num_processing, output_path):
+    """Calculate the miss rate, heterozygosity rate and MAF of SNP sites from GT files."""
     main(gt_file, num_processing, output_path)
 
 

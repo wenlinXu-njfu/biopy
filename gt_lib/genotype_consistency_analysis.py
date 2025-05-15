@@ -15,6 +15,7 @@ from pybioinformatic import GenoType, Timer, Displayer
 displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
+@Timer('Genotype consistency analysis underway.')
 def main(gt_file1: Union[str, TextIOWrapper],
          gt_file2: Union[str, TextIOWrapper],
          database_compare: bool,
@@ -56,7 +57,6 @@ def main(gt_file1: Union[str, TextIOWrapper],
               help='Output file path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-@Timer('Genotype consistency analysis underway.')
 def run(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path):
     """Genotype consistency analysis."""
     main(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path)

@@ -3,4 +3,4 @@ from gt_lib.merge import run as merge
 from gt_lib.stat_gt import run as stat
 
 __all__ = ['gs', 'merge', 'stat']
-__version__ = '0.1.0'
+__version__ = '0.2.0'
