@@ -12,7 +12,7 @@ from os import makedirs, getcwd
 import matplotlib.pyplot as plt
 import click
 from pybioinformatic import GenoType, Timer, Displayer
-displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.1')
 
 
 @Timer('Genotype consistency analysis underway.')
@@ -21,13 +21,12 @@ def main(gt_file1: Union[str, TextIOWrapper],
          database_compare: bool,
          color_map: str,
          reverse_cmap: bool,
-         font_name: str,
          output_path: str):
     makedirs(output_path, exist_ok=True)
     if reverse_cmap:
         color_map = plt.get_cmap(color_map).reversed()
     with GenoType(gt_file1) as gt1, GenoType(gt_file2) as gt2:
-        gt1.compare(gt2, output_path=output_path, font_name=font_name, cmap=color_map) \
+        gt1.compare(gt2, output_path=output_path, cmap=color_map) \
             if database_compare else \
             gt1.self_compare(gt2, output_path=output_path)
 
@@ -49,17 +48,14 @@ def main(gt_file1: Union[str, TextIOWrapper],
 @click.option('-r', '--reverse-cmap', 'reverse_cmap',
               is_flag=True, flag_value=True,
               help='Reverse color map.')
-@click.option('-f', '--font_name', 'font_name',
-              metavar='<str>', default='Arial', show_default=True,
-              help='Set figure font, if "--database-compare" specified.')
 @click.option('-o', '--output-path', 'output_path',
               metavar='<path>', default=getcwd(), show_default=True,
               help='Output file path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path):
+def run(database_gt, test_gt, database_compare, color_map, reverse_cmap, output_path):
     """Genotype consistency analysis."""
-    main(database_gt, test_gt, database_compare, color_map, reverse_cmap, font_name, output_path)
+    main(database_gt, test_gt, database_compare, color_map, reverse_cmap, output_path)
 
 
 if __name__ == '__main__':

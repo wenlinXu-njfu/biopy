@@ -19,7 +19,7 @@ def main(fasta_files: Tuple[Union[str, TextIOWrapper]],
          quiet: bool = False,
          log_file: TextIOWrapper = None,
          output_file: TextIOWrapper = None):
-    click.echo('# Seq_id\tStart\tEnd\tStrand\tMotif\tSequence', output_file)
+    click.echo('Seq_id\tStart\tEnd\tStrand\tMotif\tSequence', output_file)
     for fasta_file in fasta_files:
         with Fasta(fasta_file) as fa:
             for seq_obj in fa.parse():

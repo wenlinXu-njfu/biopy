@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import click
 from pybioinformatic import Displayer
 
-displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.1')
 
 
 def apply_func(grouped_df: DataFrame,
@@ -43,7 +43,9 @@ def apply_func(grouped_df: DataFrame,
                 karyotype = 'ST'
             else:
                 karyotype = 'T'
-            if min_cent_len <= centromere_len <= max_cent_len:
+            if min_cent_len <= centromere_len <= max_cent_len and \
+                    filtered_df.iloc[1, 1] - filtered_df.iloc[0, 2] <= min_cent_len * 0.1 and \
+                    filtered_df.iloc[-1, 1] - filtered_df.iloc[-2, 2] <= min_cent_len * 0.1:
                 data = [centromere_id, chr_name, chr_len, centromere_start, centromere_end, centromere_len, fold_enrichment, q_p, karyotype]
                 data_list.append(data)
     columns = ['Centromere_id', 'Chromosome', 'Chromosome_length', 'Centromere_start', 'Centromere_end', 'Centromere_length', 'fold_enrichment', 'q:p', 'Karyotype']
