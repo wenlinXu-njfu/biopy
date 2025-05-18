@@ -22,7 +22,7 @@ from pybioinformatic import (
     TaskManager,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='1.0.1')
+displayer = Displayer(__file__.split('/')[-1], version='1.0.2')
 tkm = TaskManager(num_processing=1)
 
 
@@ -412,14 +412,15 @@ def main(config: TextIOWrapper):
                 f'{output_path}/07.lncRNA_classification/intronic.bed')
     intergenic = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tintergenic"}' ''' %
                   f'{output_path}/07.lncRNA_classification/intergenic.bed')
+    plot_pie_core = f"plot pie -i - -c '#4E79A7,#F28E2B,#E15759,#76B7B2' -o {output_path}/07.lncRNA_classification/pie.pdf"
     plot_pie = (
-        r'''cat <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intronic"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "sense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "antisense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intergenic"}') | plot pie -i - -o %s'''
+        r'''cat <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intronic"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "sense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "antisense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intergenic"}') | %s'''
     ) % (
         f'{output_path}/07.lncRNA_classification/intronic.bed',
         f'{output_path}/07.lncRNA_classification/sense.bed',
         f'{output_path}/07.lncRNA_classification/antisense.bed',
         f'{output_path}/07.lncRNA_classification/intergenic.bed',
-        f'{output_path}/07.lncRNA_classification/pie.pdf'
+        f'{plot_pie_core}'
     )
     cmd = (
         f"{plot_pie}\n"
