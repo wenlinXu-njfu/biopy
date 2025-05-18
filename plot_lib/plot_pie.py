@@ -27,6 +27,7 @@ def main(
     colors: str = None,
     output_file: TextIOWrapper = None
 ):
+    plt.rcParams['pdf.fonttype'] = 42
     count = Counter([line.strip() for line in data])
     total = sum(count.values())
     if colors is None:
