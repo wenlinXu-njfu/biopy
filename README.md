@@ -77,7 +77,7 @@ ORF_finder \
 
 ### lncRNA and target prediction.
 ```shell
-ssRNA-seq_pipeline config.yaml
+ssRNA-seq_pipeline biopy/test_data/lncRNA_analysis_pipeline/config.yaml
 ```
 
 #### config.yaml file content:
@@ -147,6 +147,8 @@ Make sure these commands can be found in your environment variable:
 - CPC2.py
 - CNCI.py
 - PLEK
+- bedtools
+- seqkit
 #### How it works
 ![image](test_data/lncRNA_analysis_pipeline/lncRNA_analysis_pipeline.png)
 

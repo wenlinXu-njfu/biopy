@@ -130,7 +130,7 @@ def main(genome_fasta_file: str,
         o.write('\n\n'.join(cmds))
     system(f'chmod 755 {output_path}/shell/All_step.sh')
     click.echo(
-        message='\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
+        message=f'\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
         err=True
     )
 
@@ -156,12 +156,14 @@ def main(genome_fasta_file: str,
               help='Output path, if not exist, automatically created.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
               is_flag=True, is_eager=True, expose_value=False, callback=displayer.version_info)
-def run(genome_fasta_file: str,
-        build_index: bool,
-        sample_info: str,
-        num_threads: int,
-        num_processing: int,
-        output_path: str):
+def run(
+    genome_fasta_file: str,
+    build_index: bool,
+    sample_info: str,
+    num_threads: int,
+    num_processing: int,
+    output_path: str
+):
     """Variation analysis pipeline of GATK."""
     main(
         genome_fasta_file=genome_fasta_file,

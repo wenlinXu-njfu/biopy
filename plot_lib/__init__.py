@@ -8,6 +8,7 @@ from plot_lib.plot_venn import run as plot_venn
 from plot_lib.plot_volcano import run as plot_volcano
 from plot_lib.draw_chr_distribution import run as draw_chr_distribution
 from plot_lib.draw_enrich_figure import run as draw_enrich_figure
+from plot_lib.draw_kdeplot import run as draw_kdeplot
 
 
-__version__ = '0.2.2'
+__version__ = '0.3.0'

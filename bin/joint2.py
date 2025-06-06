@@ -58,7 +58,7 @@ def main(master_table: Union[str, TextIOWrapper],
               type=click.Choice(['left', 'outer', 'inner']),
               default='left', show_default=True,
               help='How to handle the operation of these tables.')
-@click.option('-o', '--output_file', 'output_file',
+@click.option('-o', '--output-file', 'output_file',
               metavar='<file>', type=click.File('w'), default='joint.xls', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',

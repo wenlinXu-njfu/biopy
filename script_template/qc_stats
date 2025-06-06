@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+from os import listdir
+from os.path import isdir
+from json import loads
+from math import log10, sqrt
+from pandas import DataFrame, concat
+from matplotlib import pyplot as plt
+from seaborn import kdeplot
+from pybioinformatic import FuncDict, rotate_ax_tick_labels
+
+
+qc_path = '%s'
+out_path = '%s'
+
+filtering_result = FuncDict()
+duplication = FuncDict()
+insert_size = FuncDict()
+for sample_name in listdir(qc_path):
+    if isdir(f'{qc_path}/{sample_name}'):
+        with open(f'{qc_path}/{sample_name}/{sample_name}.fastp.json') as f:
+            d = loads(f.read())
+            filtering_result[sample_name] = d['filtering_result']
+            duplication[sample_name] = d['duplication']
+            insert_size[sample_name] = d['insert_size']
+
+filtering_result.sort_by_keys(reverse=True)
+duplication.sort_by_keys()
+insert_size.sort_by_keys()
+
+filtering_result_df = DataFrame.from_dict(filtering_result).T
+filtering_result_df.index.name = 'sample_name'
+filtering_result_df.sort_index(inplace=True)
+filtering_result_df.to_csv(f'{out_path}/filtering_result.xls', sep='\t')
+
+# set global default parameter
+plt.style.use(
+    {
+        'pdf.fonttype': 42,
+        'font.size': 8,
+        'font.family': 'Arial',
+        'axes.formatter.useoffset': False,
+        'axes.formatter.use_mathtext': False,
+        'axes.formatter.limits': (-1000, 1000)
+    }
+)
+
+fig = plt.figure(figsize=(8, 12), dpi=300)
+
+# draw a stacked bar chart of the filtering results
+def stacked_bar(ax, y: int, width: list, labels: list):
+    left = 0
+    colors = [
+        '#0173b2',
+        '#de8f05',
+        '#029e73',
+        '#d55e00',
+        '#cc78bc'
+    ]
+    barcontainers = []
+    for i in range(len(width)):
+        barcontainer = ax.barh(y=y, width=log10(width[i] + 1), left=left, color=colors[i], label=labels[i])
+        barcontainers.append(barcontainer)
+        left += log10(width[i] + 1)
+    return barcontainers
+
+
+bar = fig.add_subplot(211)
+y = 0
+total_reads = []
+for sample_name, data in filtering_result.items():
+    total_reads.append(sum(data.values()))
+    legend = stacked_bar(ax=bar, y=y, width=list(data.values()), labels=list(data.keys()))
+    y += 1
+bar.set_yticks(range(len(filtering_result)),  filtering_result.keys(), fontproperties={'size': 6})
+rotate_ax_tick_labels(axes=bar, axis='x', rotation=0, fontproperties={'size': 6})
+bar.set_xlabel(r'$log_{10}$' + '(number of reads)')
+bar.set_title('filtering result')
+bar.legend(legend, [i.get_label() for i in legend], prop={'size': 6}, loc='upper right')
+
+# draw duplication distribution diagram
+kde = fig.add_subplot(212)
+dfs = []
+for sample_name, data in duplication.items():
+    histogram = data['histogram']
+    sample_name = [sample_name for _ in range(len(histogram))]
+    data = {'sample_name': sample_name, 'count': histogram}
+    df = DataFrame(data)
+    dfs.append(df)
+df = concat(dfs)
+kdeplot(data=df, x='count', hue='sample_name', ax=kde, legend=True)
+rotate_ax_tick_labels(axes=kde, axis='both', rotation=0, fontproperties={'size': 6})
+kde.set_title('duplication')
+kde.get_legend().set_title('')
+ncols = int(sqrt(len(df['sample_name'].unique())))
+plt.legend(
+    kde.get_legend().legend_handles,
+    df['sample_name'].unique(),
+    ncols=ncols,
+    prop={'size': 6},
+    loc='upper right'
+)
+
+plt.subplots_adjust(hspace=0.3)
+plt.savefig(f'{out_path}/qc_stats.pdf', bbox_inches='tight')

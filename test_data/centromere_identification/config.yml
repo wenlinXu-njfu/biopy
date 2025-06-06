@@ -1,0 +1,18 @@
+input:
+  sample_info: "/your/path/to/sample.info.xls"  # Sample information file.
+
+output:
+  dir: "/your/path/to/out_dir"
+
+global_params:
+  num_threads: 10  # The number of threads for each sample.
+  num_processing: 5  # The number of processing. It means how many samples are analyzed in parallel at a time.
+
+macs2_params:
+  effective_genome_size: None  # Effective genome size. (default fasta file size)
+
+centromere_identification_params:
+  min_len: 200000  # Minimal centromere length.
+  max_len: 600000  # Maximum centromere length.
+  z_threshold: 10.0  # Discrete interval Z-value threshold.
+  homogenize: False  # True or False. Maintaining the consistency of the telomere length.

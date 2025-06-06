@@ -9,96 +9,69 @@ E-mail: wenlinxu.njfu@outlook.com
 from io import TextIOWrapper
 from collections import defaultdict
 from os import makedirs, system
-from os.path import abspath
+from os.path import abspath, dirname, join
+import sys
 from shutil import which
 from yaml import safe_load
 from schema import Schema, And, Use, SchemaError
 import click
 from pybioinformatic import (
+    check_cmds,
+    check_R_packages,
     parse_sample_info,
     RNASeqAnalyser,
     LncRNAPredictor,
     LncRNAClassification,
-    TaskManager,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='1.0.2')
-tkm = TaskManager(num_processing=1)
-
-
-def check_dependency():
-    software_list = ['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
-                     'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools', 'R']
-    flag = []
-    click.echo('\033[36mCheck dependency.\033[0m', err=True)
-    for software in software_list:
-        path = which(software)
-        if path:
-            click.echo(f'{software}: {path}', err=True)
-            flag.append(True)
-        else:
-            click.echo(f'{software}: command not found', err=True)
-            flag.append(False)
-    cmd1 = '''R CMD Rscript -e 'if(requireNamespace("DESeq2", quietly = TRUE)) {print("True")} else {print("False")}' '''
-    stdout1 = tkm.echo_and_exec_cmd(cmd=cmd1, show_cmd=False)
-    if 'True' in stdout1:
-        flag.append(True)
-    else:
-        flag.append(False)
-        click.echo('\033[31mR package DESeq2 has not been installed.\033[0m', err=True)
-    cmd2 = '''R CMD Rscript -e 'if(requireNamespace("clusterProfiler", quietly = TRUE)) {print("True")} else {print("False")}' '''
-    stdout2 = tkm.echo_and_exec_cmd(cmd=cmd2, show_cmd=False)
-    if 'True' in stdout2:
-        flag.append(True)
-    else:
-        flag.append(False)
-        click.echo('\033[31mR package clusterProfiler has not been installed.\033[0m', err=True)
-    if not all(flag):
-        exit()
+displayer = Displayer(__file__.split('/')[-1], version='1.1.0')
 
 
 def check_config(yaml_file: TextIOWrapper):
     click.echo('\033[36mCheck params.\033[0m', err=True)
-    config_schema = Schema({
-        "input": {
-            "sample_info": str,
-            "ref_genome": str,
-            "ref_genome_gff": str,
-            "enrich_anno_file": str
-        },
-        "output": {"dir": str},
-        "global_params": {
-            "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
-            "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
-        },
-        "featureCounts_params": {
-            "feature_type": click.Choice(['gene', 'mRNA', 'transcript', 'five_prime_UTR' 'CDS', 'three_prime_UTR', 'exon']),
-            "mate_feature": click.Choice(['ID', 'Name', 'gene_id', 'transcript_id'])
-        },
-        "CNCI_params": {
-            "CNCI_module": str
-        },
-        "pfamscan_params": {
-            "pfamscan_database": str
-        },
-        "lncRNA_target_prediction_params": {
-            "lncRNA_min_exp": float,
-            "mRNA_min_exp": float,
-            "r": And(Use(float), lambda x: 0 <= x <= 1, error="r must between 0 and 1."),
-            "FDR": And(Use(float), lambda x: 0 <= x <= 1, error="FDR must between 0 and 1."),
-            "q_value": And(Use(float), lambda x: 0 <= x <= 1, error="q_value must between 0 and 1."),
-            "distance": And(Use(int), lambda x: 0 < x, error="distance must be positive integer.")
-        },
-        "DESeq2_params": {
-            "padj": And(Use(float), lambda x: 0 <= x <= 1, error="padj must between 0 and 1."),
-            "log2FoldChange": And(Use(float), lambda x: 0 < x, error="log2FoldChange must be greater than 0.")
-        },
-        "clusterProfiler_params": {
-            "pvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="pvalueCutoff must between 0 and 1."),
-            "pAdjustMethod": click.Choice(["holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"]),
-            "qvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="qvalueCutoff must between 0 and 1.")
+    config_schema = Schema(
+        {
+            "input": {
+                "sample_info": str,
+                "ref_genome": str,
+                "ref_genome_gff": str,
+                "enrich_anno_file": str
+            },
+            "output": {"dir": str},
+            "global_params": {
+                "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
+                "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
+            },
+            "featureCounts_params": {
+                "feature_type": click.Choice(
+                    ['gene', 'mRNA', 'transcript', 'five_prime_UTR' 'CDS', 'three_prime_UTR', 'exon']),
+                "mate_feature": click.Choice(['ID', 'Name', 'gene_id', 'transcript_id'])
+            },
+            "CNCI_params": {
+                "CNCI_module": str
+            },
+            "pfamscan_params": {
+                "pfamscan_database": str
+            },
+            "lncRNA_target_prediction_params": {
+                "lncRNA_min_exp": float,
+                "mRNA_min_exp": float,
+                "r": And(Use(float), lambda x: 0 <= x <= 1, error="r must between 0 and 1."),
+                "FDR": And(Use(float), lambda x: 0 <= x <= 1, error="FDR must between 0 and 1."),
+                "q_value": And(Use(float), lambda x: 0 <= x <= 1, error="q_value must between 0 and 1."),
+                "distance": And(Use(int), lambda x: 0 < x, error="distance must be positive integer.")
+            },
+            "DESeq2_params": {
+                "padj": And(Use(float), lambda x: 0 <= x <= 1, error="padj must between 0 and 1."),
+                "log2FoldChange": And(Use(float), lambda x: 0 < x, error="log2FoldChange must be greater than 0.")
+            },
+            "clusterProfiler_params": {
+                "pvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="pvalueCutoff must between 0 and 1."),
+                "pAdjustMethod": click.Choice(["holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"]),
+                "qvalueCutoff": And(Use(float), lambda x: 0 <= x <= 1, error="qvalueCutoff must between 0 and 1.")
+            }
         }
-    })
+    )
 
     config = safe_load(yaml_file)
     try:
@@ -112,17 +85,23 @@ def check_config(yaml_file: TextIOWrapper):
 
 
 def main(config: TextIOWrapper):
-    check_dependency()
+    # check dependency and config
+    check_cmds(cmds_list=['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
+                     'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools', 'seqkit', 'R'])
+
+    check_R_packages(packages_list=['DESeq2', 'clusterProfiler'])
+
     config = check_config(config)
 
     # input
     sample_info = config['input']['sample_info']
+    sample_info_dict = parse_sample_info(sample_info=sample_info)
     genome = config['input']['ref_genome']
     gff = config['input']['ref_genome_gff']
     kegg_anno_file = config['input']['enrich_anno_file']
 
     # output
-    output_path = config['output']['dir']
+    output_path = abspath(config['output']['dir'])
 
     # global params
     num_threads = config['global_params']['num_threads']
@@ -170,12 +149,20 @@ def main(config: TextIOWrapper):
     Rscript = which('Rscript')
     stringtie = which('stringtie')
 
-    output_path = abspath(output_path)
-    sample_info_dict = parse_sample_info(sample_info=sample_info)
-    script_template_path = '/'.join(__file__.split('/')[:-2]) + '/script_template'
-    comparative_combination = defaultdict(lambda: defaultdict(list))  # {C1: {C: [sample1, sample2, ...], T: [sample3, sample4, ...}, ...}
+    # get script template path
+    if getattr(sys, 'frozen', False):
+        # For the situation after packaging, use sys._MEIPASS to obtain the temporary decompressed directory
+        base_path = sys._MEIPASS
+    else:
+        # The development environment uses the path of __file__
+        base_path = dirname(abspath(__file__))
+        base_path = join(base_path, '..')
+    script_template_path = join(base_path, 'script_template')
 
     # single sample QC, mapping and assembly
+    comparative_combination = defaultdict(
+        lambda: defaultdict(list)  # {C1: {C: [sample1, sample2, ...], T: [sample3, sample4, ...}, ...}
+    )
     for sample_name, l in sample_info_dict.items():
         cc_list = l[2].split(';')
         for i in cc_list:
@@ -200,6 +187,12 @@ def main(config: TextIOWrapper):
         f'done > {output_path}/shell/merge_normal.sh'
     )
 
+    # stat qc results
+    with open(f'{script_template_path}/qc_stats') as f,\
+            open(f'{output_path}/shell/qc_stats.py', 'w') as o:
+        qc_stats_script = f.read() % (f'{output_path}/01.QC', f'{output_path}/01.QC')
+        o.write(qc_stats_script)
+
     # stat mapping rate
     awk = r'''awk -F'/' '{print $NF}' '''
     mapping_rate_summary = (
@@ -210,6 +203,7 @@ def main(config: TextIOWrapper):
     step1_2 = (
         f'# QC, mapping and assembly\n'
         f'{exec_cmds} -f {output_path}/shell/merge_normal.sh -n {num_processing}\n'
+        f'{python} {output_path}/shell/qc_stats.py\n'
         f'{mapping_rate_summary}'
     )
 
@@ -319,9 +313,11 @@ def main(config: TextIOWrapper):
         f'grep "^>" {output_path}/05.lncRNA_prediction/lncRNA.fa | '
         f'sed "s/>//;s/ .*//" | '
         f'grep -Fwf - {output_path}/03.assembly/All.gtf > {output_path}/05.lncRNA_prediction/lncRNA.gtf'
-
     )
-    awk1 = r'''awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s''' % f'{output_path}/05.lncRNA_prediction/lncRNA.gtf'
+    awk1 = (
+        r'''awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s''' %
+        f'{output_path}/05.lncRNA_prediction/lncRNA.gtf'
+    )
     awk2 = r'''awk '{print $2"\t"$1}' '''
     lncRNA_exon_count = f'''{awk1} | cut -d' ' -f 2 | sed 's/"//g' | sort | uniq -c | {awk2}> {output_path}/05.lncRNA_prediction/lncRNA_exon_count.xls'''
 
@@ -412,21 +408,37 @@ def main(config: TextIOWrapper):
                 f'{output_path}/07.lncRNA_classification/intronic.bed')
     intergenic = (r'''cut -f 4 %s | cut -d' ' -f 4 | sed 's/"//g;s/;//' | awk '{print $0"\tintergenic"}' ''' %
                   f'{output_path}/07.lncRNA_classification/intergenic.bed')
-    plot_pie_core = f"plot pie -i - -c '#4E79A7,#F28E2B,#E15759,#76B7B2' -o {output_path}/07.lncRNA_classification/pie.pdf"
+    lncRNA_cls = fr"cat <({sense}) <({antisense}) <({intronic}) <({intergenic}) | sort -uV"
     plot_pie = (
-        r'''cat <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intronic"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "sense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "antisense"}') <(awk '{if(match($0, /transcript_id "[a-zA-Z0-9]*.*[a-zA-Z0-9]*"/)) print substr($0, RSTART, RLENGTH)}' %s | sort -uV | awk '{print "intergenic"}') | %s'''
-    ) % (
-        f'{output_path}/07.lncRNA_classification/intronic.bed',
-        f'{output_path}/07.lncRNA_classification/sense.bed',
-        f'{output_path}/07.lncRNA_classification/antisense.bed',
-        f'{output_path}/07.lncRNA_classification/intergenic.bed',
-        f'{plot_pie_core}'
+        f"plot pie "
+        f"-i <({lncRNA_cls} | cut -f 2) "
+        f"-c '#4E79A7,#F28E2B,#E15759,#76B7B2' "
+        f"-o {output_path}/07.lncRNA_classification/pie.pdf"
+    )
+    joint_cls_len = (
+        fr"{joint} "
+        fr"-i <({get_seq_len} {output_path}/05.lncRNA_prediction/lncRNA.fa | cut -f 1-2 | sed '1ilncRNA id\tlncRNA length') "
+        fr"-I <({lncRNA_cls} | sed '1ilncRNA id\tlncRNA type') "
+        fr"-o {output_path}/07.lncRNA_classification/lncRNA_len_cls.xls"
+    )
+    plot_len_distribution = (
+        f"{plot} draw_kdeplot "
+        f"-x 'lncRNA length' "
+        f"--hue 'lncRNA type' "
+        f"-o {output_path}/07.lncRNA_classification/kdeplot.pdf "
+        f"{output_path}/07.lncRNA_classification/lncRNA_len_cls.xls"
+    )
+    joint_co_loc = (
+        fr"{joint} "
+        fr"-i {output_path}/06.lncRNA_target_prediction/co_loc.xls "
+        fr"-I <({lncRNA_cls} | sed '1iLncRNA_id\tLncRNA_type') "
+        fr"-o {output_path}/07.lncRNA_classification/co_loc.xls"
     )
     cmd = (
         f"{plot_pie}\n"
-        fr"cat <({sense}) <({antisense}) <({intronic}) <({intergenic}) | sort -uV | sed '1iLncRNA_id\tLncRNA_type' | "
-        fr"{joint} -i {output_path}/06.lncRNA_target_prediction/co_loc.xls "
-        fr"-I - -o {output_path}/07.lncRNA_classification/co_loc.xls"
+        f"{joint_cls_len}\n"
+        f"{plot_len_distribution}\n"
+        f"{joint_co_loc}"
     )
     with open(f'{output_path}/shell/lncRNA_classification.sh', 'w') as o:
         click.echo(classify_script, o)
@@ -456,18 +468,27 @@ def main(config: TextIOWrapper):
                     control_samples=control_samples,
                     treat_samples=treat_samples
                 )
-                cmd += r''''BEGIN { split(cols, colarr, /,/); } NR==1 { for(i=1;i<=NF;i++) colname[$i]=i; n=0;for(j=1;j<=length(colarr);j++) if (colarr[j] in colname) indices[++n]=colname[colarr[j]]; } { for(k=1;k<=n;k++) printf "%s%s", $indices[k], (k==n?"\n":FS) }' '''
+                cmd += r''''BEGIN { split(cols, colarr, /,/); } NR==1 { for(i=1;i<=NF;i++) colname[$i]=i; n=0;'''
+                cmd += r'''for(j=1;j<=length(colarr);j++) if (colarr[j] in colname) indices[++n]=colname[colarr[j]]; } '''
+                cmd += r'''{ for(k=1;k<=n;k++) printf "%s%s", $indices[k], (k==n?"\n":FS) }' '''
                 cmd += '''{reads_count_path} > {out_file}\n'''.format(
                     reads_count_path=f'{output_path}/06.lncRNA_target_prediction/target_exp/reads.count.fc.xls',
                     out_file=f'{output_path}/08.mRNA_differential_expression_analysis/{cc_name}/reads.count.fc.xls'
                 )
                 cmd += (
-                    f'{Rscript} {output_path}/shell/DESeq2/mRNA/{cc_name}.R > {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/DESeq2.log 2>&1\n'
-                    f'{plot} volcano -i {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/volcano_data.txt -l 1.5 -p 0.05 -o {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/volcano.pdf\n\n'
+                    f'{Rscript} {output_path}/shell/DESeq2/mRNA/{cc_name}.R '
+                    f'> {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/DESeq2.log 2>&1\n'
+                    f'{plot} volcano '
+                    f'-i {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/volcano_data.txt '
+                    f'-l {log2FoldChange} '
+                    f'-p {padj} '
+                    f'-o {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/volcano.pdf\n\n'
                 )
                 cmd += (
-                    f"sed '1d' {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | cut -d',' -f 1 > {output_path}/10.DEmRNA_enrich/{cc_name}/DEmRNA.lst\n"
-                    f"{Rscript} {output_path}/shell/clusterProfiler/mRNA/{cc_name}.R > {output_path}/10.DEmRNA_enrich/{cc_name}/clusterProfiler.log 2>&1"
+                    f"sed '1d' {output_path}/08.mRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | "
+                    f"cut -d',' -f 1 > {output_path}/10.DEmRNA_enrich/{cc_name}/DEmRNA.lst\n"
+                    f"{Rscript} {output_path}/shell/clusterProfiler/mRNA/{cc_name}.R "
+                    f"> {output_path}/10.DEmRNA_enrich/{cc_name}/clusterProfiler.log 2>&1"
                 )
                 o1.write(cmd)
                 with open(f'{output_path}/shell/DESeq2/mRNA/{cc_name}.R', 'w') as o2:
@@ -508,22 +529,35 @@ def main(config: TextIOWrapper):
                 control_samples=control_samples,
                 treat_samples=treat_samples
             )
-            cmd += r''''BEGIN { split(cols, colarr, /,/); } NR==1 { for(i=1;i<=NF;i++) colname[$i]=i; n=0;for(j=1;j<=length(colarr);j++) if (colarr[j] in colname) indices[++n]=colname[colarr[j]]; } { for(k=1;k<=n;k++) printf "%s%s", $indices[k], (k==n?"\n":FS) }' '''
+            cmd += r''''BEGIN { split(cols, colarr, /,/); } NR==1 { for(i=1;i<=NF;i++) colname[$i]=i; n=0;'''
+            cmd += r'''for(j=1;j<=length(colarr);j++) if (colarr[j] in colname) indices[++n]=colname[colarr[j]]; } '''
+            cmd += r'''{ for(k=1;k<=n;k++) printf "%s%s", $indices[k], (k==n?"\n":FS) }' '''
             cmd += '''{reads_count_path} > {out_file}\n'''.format(
                 reads_count_path=f'{output_path}/06.lncRNA_target_prediction/lncRNA_exp/reads.count.fc.xls',
                 out_file=f'{output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/reads.count.fc.xls'
             )
             cmd += (
-                f'{Rscript} {output_path}/shell/DESeq2/lncRNA/{cc_name}.R > {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.log 2>&1\n'
-                f'{plot} volcano -i {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/volcano_data.txt -l 1.5 -p 0.05 -o {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/volcano.pdf\n\n'
+                f'{Rscript} {output_path}/shell/DESeq2/lncRNA/{cc_name}.R '
+                f'> {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.log 2>&1\n'
+                f'{plot} volcano '
+                f'-i {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/volcano_data.txt '
+                f'-l {log2FoldChange} '
+                f'-p {padj} '
+                f'-o {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/volcano.pdf\n\n'
             )
             cmd += (
-                f"sed '1d' {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | cut -d',' -f 1 | grep -Fw -f - {output_path}/06.lncRNA_target_prediction/co_loc.xls | cut -f 2 | sort -uV > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/target.lst\n"
-                f"{Rscript} {output_path}/shell/clusterProfiler/co_loc/{cc_name}.R > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/clusterProfiler.log 2>&1\n\n"
+                f"sed '1d' {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | "
+                f"cut -d',' -f 1 | grep -Fw -f - {output_path}/06.lncRNA_target_prediction/co_loc.xls | "
+                f"cut -f 2 | sort -uV > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/target.lst\n"
+                f"{Rscript} {output_path}/shell/clusterProfiler/co_loc/{cc_name}.R > "
+                f"{output_path}/11.DElncRNA_target_enrich/{cc_name}/co_loc/clusterProfiler.log 2>&1\n\n"
             )
             cmd += (
-                f"sed '1d' {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | cut -d',' -f 1 | grep -Fw -f - {output_path}/06.lncRNA_target_prediction/filter_co_exp.xls | cut -f 2 | sort -uV > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/target.lst\n"
-                f"{Rscript} {output_path}/shell/clusterProfiler/co_exp/{cc_name}.R > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/clusterProfiler.log 2>&1\n\n"
+                f"sed '1d' {output_path}/09.lncRNA_differential_expression_analysis/{cc_name}/DESeq2.csv | "
+                f"cut -d',' -f 1 | grep -Fw -f - {output_path}/06.lncRNA_target_prediction/filter_co_exp.xls | "
+                f"cut -f 2 | sort -uV > {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/target.lst\n"
+                f"{Rscript} {output_path}/shell/clusterProfiler/co_exp/{cc_name}.R "
+                f"> {output_path}/11.DElncRNA_target_enrich/{cc_name}/co_exp/clusterProfiler.log 2>&1\n\n"
             )
             o1.write(cmd)
             with open(f'{output_path}/shell/DESeq2/lncRNA/{cc_name}.R', 'w') as o2:
@@ -559,7 +593,8 @@ def main(config: TextIOWrapper):
 
     step8 = (
         f'# DEmRNA, DElncRNA and enrichment analysis\n'
-        f'for i in `ls {output_path}/shell/DE_enrich`; do echo sh {output_path}/shell/DE_enrich/$i; done | {exec_cmds} -f - -n {num_threads}'
+        f'for i in `ls {output_path}/shell/DE_enrich`; do echo sh {output_path}/shell/DE_enrich/$i; done | '
+        f'{exec_cmds} -f - -n {num_threads}'
     )
 
     # write all step commands
@@ -576,7 +611,10 @@ def main(config: TextIOWrapper):
         )
         o.write(cmd)
     system(f'chmod 755 {output_path}/shell/All_step.sh')
-    click.echo(f'\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m', err=True)
+    click.echo(
+        message='\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
+        err=True
+    )
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))

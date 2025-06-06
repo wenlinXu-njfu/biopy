@@ -44,10 +44,10 @@ def main(left_table: Union[str, TextIOWrapper],
               metavar='<int>', default=1, show_default=True,
               help='Right table column to join on the left table.')
 @click.option('-j', '--joint-method', 'joint_method',
-              metavar='<str>', type=click.Choice(['left', 'right', 'outer', 'inner', 'cross']),
+              type=click.Choice(['left', 'right', 'outer', 'inner', 'cross']),
               default='left', show_default=True,
               help='How to handle the operation of the two tables.')
-@click.option('-o', '--output_file', 'output_file',
+@click.option('-o', '--output-file', 'output_file',
               metavar='<file>', type=click.File('w'), default='joint.xls', show_default=True,
               help='Output file.')
 @click.option('-V', '--version', 'version', help='Show author and version information.',
