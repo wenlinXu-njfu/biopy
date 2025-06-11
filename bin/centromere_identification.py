@@ -12,9 +12,9 @@ from os import makedirs, system
 from os.path import abspath
 from shutil import which
 from yaml import safe_load
-from schema import Schema, And, Or, Use, SchemaError
+from schema import Schema, And, Use, SchemaError
 import click
-from pybioinformatic import check_cmds, parse_sample_info, Macs2PeakCalling, Displayer
+from pybioinformatic import check_cmds, parse_sample_info, build_ref_index, Macs2PeakCalling, Displayer
 
 displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
 
@@ -30,11 +30,9 @@ def check_config(yaml_file: TextIOWrapper):
                 "dir": str
             },
             "global_params": {
+                "build_index": bool,
                 "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
                 "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
-            },
-            "macs2_params": {
-                "effective_genome_size": Or(None, And(Use(int), lambda x: 0 < x, error="effective_genome_size must be positive integer."))
             },
             "centromere_identification_params": {
                 "min_len": And(Use(int), lambda x: 0 < x, error="min_len must be positive integer."),
@@ -69,11 +67,9 @@ def main(config_file: Union[TextIOWrapper, str]):
     output_path = abspath(config['output']['dir'])
 
     # global params
+    build_index = config['global_params']['build_index']
     num_threads = config['global_params']['num_threads']
     num_processing = config['global_params']['num_processing']
-
-    # macs2 params
-    effective_genome_size = config['global_params']['effective_genome_size']
 
     # centromere identification params
     min_len = config['centromere_identification_params']['min_len']
@@ -91,6 +87,16 @@ def main(config_file: Union[TextIOWrapper, str]):
     for sample_name, fq_list in sample_info_dict.items():
         with open(f'{output_path}/shell/samples/{sample_name}.sh', 'w') as o:
             ChIP_1, ChIP_2, ref_genome, Input_1, Input_2 = fq_list[:5]
+
+            if build_index:
+                cmd0 = build_ref_index(
+                    fasta_file=ref_genome,
+                    bowtie2_build='bowtie2-build',
+                    large=True
+                )
+            else:
+                cmd0 = ''
+
             cmd1 = Macs2PeakCalling(
                 ChIP_read1=ChIP_1,
                 ChIP_read2=ChIP_2,
@@ -103,7 +109,7 @@ def main(config_file: Union[TextIOWrapper, str]):
             ).pipeline()
             cmd2 = (
                 f'{macs2_helper} cent_identifier '
-                f'-l <({get_seq_len} -p {ref_genome}) '
+                f'-i {ref_genome} '
                 f'-p {output_path}/03.peaks/{sample_name}/{sample_name}_peaks.xls '
                 f'-min {min_len} '
                 f'-max {max_len} '
@@ -112,7 +118,7 @@ def main(config_file: Union[TextIOWrapper, str]):
             )
             if homogenize:
                 cmd2 += ' --homogenize'
-            pipeline = f'{cmd1}\n{cmd2}'
+            pipeline = f'{cmd0}\n{cmd1}\n{cmd2}'
             o.write(pipeline)
 
     system(

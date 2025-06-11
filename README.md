@@ -72,7 +72,7 @@ ORF_finder \
     -F \
     -log biopy/test_data/ORF_finder/ORF_finder.log \
     biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
-    motif_finder -m '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -Fq -
+    motif_finder -Fqm '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -
 ```
 
 ### lncRNA and target prediction.
