@@ -16,7 +16,7 @@ from schema import Schema, And, Use, SchemaError
 import click
 from pybioinformatic import check_cmds, parse_sample_info, build_ref_index, Macs2PeakCalling, Displayer
 
-displayer = Displayer(__file__.split('/')[-1], version='0.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='0.2.0')
 
 
 def check_config(yaml_file: TextIOWrapper):
@@ -88,15 +88,6 @@ def main(config_file: Union[TextIOWrapper, str]):
         with open(f'{output_path}/shell/samples/{sample_name}.sh', 'w') as o:
             ChIP_1, ChIP_2, ref_genome, Input_1, Input_2 = fq_list[:5]
 
-            if build_index:
-                cmd0 = build_ref_index(
-                    fasta_file=ref_genome,
-                    bowtie2_build='bowtie2-build',
-                    large=True
-                )
-            else:
-                cmd0 = ''
-
             cmd1 = Macs2PeakCalling(
                 ChIP_read1=ChIP_1,
                 ChIP_read2=ChIP_2,
@@ -106,7 +97,8 @@ def main(config_file: Union[TextIOWrapper, str]):
                 output_path=output_path,
                 num_threads=num_threads,
                 sample_name=sample_name
-            ).pipeline()
+            ).pipeline(macs2_callpeak_options={'--broad': ''})
+
             cmd2 = (
                 f'{macs2_helper} cent_identifier '
                 f'-i {ref_genome} '
@@ -118,8 +110,19 @@ def main(config_file: Union[TextIOWrapper, str]):
             )
             if homogenize:
                 cmd2 += ' --homogenize'
-            pipeline = f'{cmd0}\n{cmd1}\n{cmd2}'
-            o.write(pipeline)
+            pipeline = [cmd1, cmd2]
+
+            if build_index:
+                pipeline.insert(
+                    __index=0,
+                    __object=build_index(
+                        fasta_file=ref_genome,
+                        bowtie2_build='bowtie2-build',
+                        large=True
+                    )
+                )
+
+            o.write('\n'.join(pipeline))
 
     system(
         f'for i in `ls {output_path}/shell/samples`;'
