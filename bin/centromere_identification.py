@@ -34,6 +34,13 @@ def check_config(yaml_file: TextIOWrapper):
                 "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
                 "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
             },
+            "bowtie2_params": {
+                "build_index": bool,
+                "large_genome": bool
+            },
+            "macs2_callpeak_params": {
+                "broad": bool
+            },
             "centromere_identification_params": {
                 "min_len": And(Use(int), lambda x: 0 < x, error="min_len must be positive integer."),
                 "max_len": And(Use(int), lambda x: 0 < x, error="max_len must be positive integer."),
@@ -67,9 +74,15 @@ def main(config_file: Union[TextIOWrapper, str]):
     output_path = abspath(config['output']['dir'])
 
     # global params
-    build_index = config['global_params']['build_index']
     num_threads = config['global_params']['num_threads']
     num_processing = config['global_params']['num_processing']
+
+    # bowtie2 params
+    build_index = config['bowtie2_params']['build_index']
+    large_genome = config['bowtie2_params']['large_genome']
+
+    # macs2 callpeak params
+    broad = {'--broad': ''} if config['macs2_callpeak_params']['broad'] else {}
 
     # centromere identification params
     min_len = config['centromere_identification_params']['min_len']
@@ -79,7 +92,6 @@ def main(config_file: Union[TextIOWrapper, str]):
 
     # commands path
     exec_cmds = which('exec_cmds')
-    get_seq_len = which('get_seq_len')
     macs2_helper = which('macs2_helper')
 
     makedirs(f'{output_path}/shell/samples', exist_ok=True)
@@ -97,7 +109,7 @@ def main(config_file: Union[TextIOWrapper, str]):
                 output_path=output_path,
                 num_threads=num_threads,
                 sample_name=sample_name
-            ).pipeline(macs2_callpeak_options={'--broad': ''})
+            ).pipeline(macs2_callpeak_options=broad)
 
             cmd2 = (
                 f'{macs2_helper} cent_identifier '
@@ -115,10 +127,10 @@ def main(config_file: Union[TextIOWrapper, str]):
             if build_index:
                 pipeline.insert(
                     __index=0,
-                    __object=build_index(
+                    __object=build_ref_index(
                         fasta_file=ref_genome,
                         bowtie2_build='bowtie2-build',
-                        large=True
+                        large=large_genome
                     )
                 )
 

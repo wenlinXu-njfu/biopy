@@ -5,9 +5,15 @@ output:
   dir: "/your/path/to/out_dir"
 
 global_params:
-  build_index: False  # Build index of bowtie2 for reference sequence.
   num_threads: 10  # The number of threads for each sample.
   num_processing: 5  # The number of processing. It means how many samples are analyzed in parallel at a time.
+
+bowtie2_params:
+  build_index: False  # If True, build index of bowtie2 for reference sequence.
+  large_genome: False  # If build_index is True and genome size is greater than 4 billion nucleotides, set this param True.
+
+macs2_callpeak_params:
+  broad: False
 
 centromere_identification_params:
   min_len: 200000  # Minimal centromere length.
