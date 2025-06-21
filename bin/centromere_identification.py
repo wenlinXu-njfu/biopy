@@ -125,8 +125,8 @@ def main(config_file: Union[TextIOWrapper, str]):
 
             if build_index:
                 pipeline.insert(
-                    __index=0,
-                    __object=build_ref_index(
+                    0,
+                    build_ref_index(
                         fasta_file=ref_genome,
                         bowtie2_build='bowtie2-build',
                         large=large_genome
