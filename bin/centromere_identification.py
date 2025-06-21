@@ -30,7 +30,6 @@ def check_config(yaml_file: TextIOWrapper):
                 "dir": str
             },
             "global_params": {
-                "build_index": bool,
                 "num_threads": And(Use(int), lambda x: 0 < x, error="num_threads must be positive integer."),
                 "num_processing": And(Use(int), lambda x: 0 < x, error="num_processing must be positive integer.")
             },
