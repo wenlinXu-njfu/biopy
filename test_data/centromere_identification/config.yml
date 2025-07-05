@@ -13,10 +13,10 @@ bowtie2_params:
   large_genome: False  # If build_index is True and genome size is greater than 4 billion nucleotides, set this param True.
 
 macs2_callpeak_params:
-  broad: False
+  broad: True
 
 centromere_identification_params:
   min_len: 200000  # Minimal centromere length.
-  max_len: 600000  # Maximum centromere length.
-  z_threshold: 10.0  # Discrete interval Z-value threshold.
+  max_len: 550000  # Maximum centromere length.
+  z_threshold: 2.5  # Discrete interval Z-value threshold.
   homogenize: False  # True or False. Maintaining the consistency of the telomere length.
