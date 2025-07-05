@@ -616,7 +616,7 @@ def main(config: TextIOWrapper):
         o.write(cmd)
     system(f'chmod 755 {output_path}/shell/All_step.sh')
     click.echo(
-        message='\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
+        message=f'\033[32mCommands created successfully, please run "bash {output_path}/shell/All_step.sh".\033[0m',
         err=True
     )
 
