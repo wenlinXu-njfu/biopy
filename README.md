@@ -9,10 +9,10 @@ This might affect the invocation of some commands.**
 
 ## Dependence of python packages
 **python ≥ 3.8<br />
-biofile-kit == 0.0.1<br />
+biofile-kit == 0.0.2<br />
 biopython ≥ 1.79<br />
 fire ≥ 0.6.0<br />
-pybioinformatic == 1.2.3<br />
+pybioinformatic == 1.2.4<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
