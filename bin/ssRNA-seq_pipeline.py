@@ -24,7 +24,7 @@ from pybioinformatic import (
     LncRNAClassification,
     Displayer
 )
-displayer = Displayer(__file__.split('/')[-1], version='1.1.0')
+displayer = Displayer(__file__.split('/')[-1], version='1.1.1')
 
 
 def check_config(yaml_file: TextIOWrapper):
@@ -86,8 +86,12 @@ def check_config(yaml_file: TextIOWrapper):
 
 def main(config: TextIOWrapper):
     # check dependency and config
-    check_cmds(cmds_list=['fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
-                     'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools', 'seqkit', 'R'])
+    check_cmds(
+        cmds_list=[
+            'fastp', 'hisat2', 'gffread', 'stringtie', 'cuffcompare', 'featureCounts',
+            'CNCI.py', 'CPC2.py', 'PLEK', 'pfam_scan.pl', 'bedtools', 'seqkit', 'R'
+        ]
+    )
 
     check_R_packages(packages_list=['DESeq2', 'clusterProfiler'])
 
@@ -140,10 +144,11 @@ def main(config: TextIOWrapper):
     file_split = which('file_split')
     featureCounts = which('featureCounts')
     featureCounts_helper = which('featureCounts_helper')
-    get_seq_len = which('get_seq_len')
+    get_seq_len = which('fasta_tools') + ' get_seq_len'
     gffread = which('gffread')
     joint = which('joint')
-    ORF_finder = which('ORF_finder')
+    ORF_finder = which('fasta_tools') + ' ORF_finder'
+    pfamscan_helper = which('pfamscan_helper')
     plot = which('plot')
     python = which('python')
     Rscript = which('Rscript')
@@ -285,7 +290,6 @@ def main(config: TextIOWrapper):
         pep_fasta_file=None,
         PfamDatabase=None
     )
-    pfamscan_helper = which('pfamscan_helper')
     pfamscan_cmd = (
         f'{pfamscan_helper} batch '
         f'-i {output_path}/05.lncRNA_prediction/PfamScan/pfamscan_input '

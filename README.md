@@ -1,10 +1,19 @@
-# A tiny bioinformatics and visual tool.
+# <a id="top" href="#index">A bioinformatics integrated tool platform.</a>
+
+***
+## Note
+**Many modules ([Protein translation](#1), [Search protein motif](#2), etc) 
+have been migrated to the 
+[BioFileKit](https://github.com/wenlinXu-njfu/BioFileKit "go to BioFileKit").
+In the future, many modules will also be migrated to other projects.
+This might affect the invocation of some commands.**
+***
 
 ## Dependence of python packages
 **python ≥ 3.8<br />
 biopython ≥ 1.79<br />
 fire ≥ 0.6.0<br />
-pybioinformatic == 1.0.9<br />
+pybioinformatic == 1.2.3<br />
 requests ≥ 2.26.0<br />
 scipy ≥ 1.9.0<br />
 venn ≥ 0.1.3<br />**
@@ -45,8 +54,9 @@ ln -s /usr/lib/x86_64-linux-gnu/libffi.so.6 /usr/lib/x86_64-linux-gnu/libffi.so.
 # You can also install libffi7 with sudo grant.
 sudo apt-get install libffi7
 ```
+***
 
-## Example
+## Usage example
 ### Run commands concurrently.
 ```shell
 for i in `ls dir`;
@@ -54,7 +64,8 @@ do echo blastn -query dir/$i -db genome.fa -outfmt 6 -out "$i.blastn.xls";
 done | exec_cmds -f - -n 10
 ```
 
-### Protein translation
+### <a id="1" href="#index">Protein translation</a>
+#### Before v3.0.0
 ```shell
 ORF_finder \
     -l 30 \
@@ -64,7 +75,18 @@ ORF_finder \
     -o biopy/test_data/ORF_finder/ \
     biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
 ```
-### Search protein motif
+#### After v3.0.0
+```shell
+fasta_tools ORF_finder \
+    -l 30 \
+    -n 10 \
+    -Fc \
+    -log biopy/test_data/ORF_finder/ORF_finder.log \
+    -o biopy/test_data/ORF_finder/ \
+    biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz
+```
+### <a id="2" href="#index">Search protein motif</a>
+#### Before v3.0.0
 ```shell
 ORF_finder \
     -l 1 \
@@ -72,7 +94,17 @@ ORF_finder \
     -F \
     -log biopy/test_data/ORF_finder/ORF_finder.log \
     biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
-    motif_finder -Fqm '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -
+motif_finder -Fqm '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -
+```
+#### After v3.0.0
+```shell
+fasta_tools ORF_finder \
+    -l 1 \
+    -n 10 \
+    -F \
+    -log biopy/test_data/ORF_finder/ORF_finder.log \
+    biopy/test_data/ORF_finder/Ptrichocarpa_533_v4.1.cds.fa.gz | \
+fasta_tools motif_finder -Fqm '(?:W[A-Z]{18,20}){2,}[WFIL][A-Z]{18,20}' -
 ```
 
 ### lncRNA and target prediction.
@@ -193,3 +225,4 @@ plot chr_distribution \
     -o biopy/test_data/chr_distribution/snp.distribution.png
 ```
 ![image](test_data/chr_distribution/snp.distribution.png)
+# [Back to top](#top)
