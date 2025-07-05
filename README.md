@@ -1,16 +1,15 @@
 # <a id="top" href="#index">A bioinformatics integrated tool platform.</a>
 
-***
 ## Note
 **Many modules ([Protein translation](#1), [Search protein motif](#2), etc) 
 have been migrated to the 
 [BioFileKit](https://github.com/wenlinXu-njfu/BioFileKit "go to BioFileKit").
 In the future, many modules will also be migrated to other projects.
 This might affect the invocation of some commands.**
-***
 
 ## Dependence of python packages
 **python ≥ 3.8<br />
+biofile-kit == 0.0.1<br />
 biopython ≥ 1.79<br />
 fire ≥ 0.6.0<br />
 pybioinformatic == 1.2.3<br />
@@ -54,7 +53,7 @@ ln -s /usr/lib/x86_64-linux-gnu/libffi.so.6 /usr/lib/x86_64-linux-gnu/libffi.so.
 # You can also install libffi7 with sudo grant.
 sudo apt-get install libffi7
 ```
-***
+
 
 ## Usage example
 ### Run commands concurrently.
